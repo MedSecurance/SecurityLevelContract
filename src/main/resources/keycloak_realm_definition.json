@@ -1,0 +1,94 @@
+{
+  "realm": "medsecurance",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "signer-provider",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "fTD8XMhlUbhadObG28Ey9S1SI9dX8ICz",
+      "redirectUris": [
+        "http://localhost:8080/login/oauth2/code/keycloak",
+        "https://oauth.pstmn.io/v1/callback"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "baseUrl": "http://localhost:8086",
+      "adminUrl": "http://localhost:8086",
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "authorizationServicesEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "post.logout.redirect.uri": "/logout",
+        "oauth2.device.authorization.grant.enabled": "false"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "role_list",
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone"
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Default role for users"
+      },
+      {
+        "name": "admin",
+        "description": "Administrator role"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "provider",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Provider",
+      "lastName": "User",
+      "email": "testuser@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "provider",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ]
+    },
+    {
+      "username": "consumer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Test",
+      "lastName": "User",
+      "email": "testuser2@example.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "consumer",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ]
+    }
+  ]
+}

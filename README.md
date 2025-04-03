@@ -1,27 +1,12 @@
+# How to deploy
+Deploy the service starting the docker compose:
+```
+docker compose -f docker-compose.yml -p signinginterface up -d
+```
+
 # How to use
-This context contains two folders, to show different aspects of the signature.
+Connect to the desired interface:
+- for the provider's one: `localhost:8080` with the credentials `provider`/`provider`
+- for the consumer's one: `localhost:8081` with the credentials `consumer`/`consumer`
 
-## RequirementsSelectorContainer
-This folder contains the content required to serve a page (through Docker container) allowing the selection of requirements.
-
-The web interface can be started by building the docker container and then executing it:
-
-```
-docker build -t contractpreparer .
-docker run -p 4200:80 contractpreparer
-```
-
-There is alternatively an existing docker image under: `danielnaro/contractpreparer`.
-
-This container requires the ontology server (`danielnaro/ontologyserver`) to be working, to populate the content of the page.
-
-## MultipleXMLSignatures
-Java projects which sign an XML file twice. The signatures are XADES compliant.
-
-To sign a document named `to_sign.xml`, build and start the container (the file to sign must be mounted in the /data folder of the container):
-```
-docker build -t testsigning .
-docker run -v MultipleXMLSignatures\DssCookbookTest\src\main\resources\forDockerData:/data testsigning
-```
-
-There is alternatively an existing docker image under: `danielnaro/testsigning`.
+Use either Generate buttons, to generate content to be signed. Then sign the content using the corresponding button. If the content has to be signed by both parties, upload the signed content from one to the other. Finally, the signature can be checked using the corresponding button.

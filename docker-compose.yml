@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  localhost:
+    image: alpine:latest
+    command: sleep infinity
+    ports:
+      - "5432:5432" # keycloak database
+      - "8086:8086" # Keycloak port
+      - "1234:1234" # oauth-sample port
+      - "8888:8888" # CA server 1
+      - "8089:8089" # CA server 2
+      - "8080:8080" # signer interface for consumer
+      - "8081:8081" # signer interface for provider
+      - "3030:3030" # signer interface for provider
+  ontology:
+    image: danielnaro/ontologyknowledgerepository:latest
+    network_mode: "service:localhost"
+
+  postgres:
+    image: postgres:15
+    container_name: keycloak_postgres_signing
+    environment:
+      POSTGRES_DB: keycloak-db
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    network_mode: "service:localhost"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0
+    container_name: keycloak_signing
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL_HOST: localhost
+      KC_DB_URL_DATABASE: keycloak-db
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+    command:
+      - start-dev --import-realm --http-port=8086
+    volumes:
+      - ./realm:/opt/keycloak/data/import
+    depends_on:
+      - postgres
+    network_mode: "service:localhost"
+
+  ca_servers:
+    build:
+      context: docker_CA
+      dockerfile: Dockerfile
+    volumes:
+      - ./realm:/opt/keycloak/data/import
+      - ./docker_CA/signing_keys/provider:/provider_key
+      - ./docker_CA/signing_keys/consumer:/consumer_key
+      - ./docker_CA/signing_keys/trust_anchors:/trust_anchors
+      - ./docker_CA/root_cert:/root_cert/
+      - ./docker_CA/debug:/tmp
+    network_mode: "service:localhost"
+
+  signer_consumer:
+    build:
+      context: .
+      dockerfile: docker_signer/Dockerfile
+    environment:
+      SERVER_PORT: 8081
+      REALM_NAME: medsecurance_consumer
+      CLIENT_NAME: signer-consumer
+    volumes:
+      - ./docker_CA/signing_keys/consumer:/key
+      - ./docker_CA/signing_keys/trust_anchors:/trust_anchors
+      - ./docker_CA/root_cert:/root_cert/
+      - ./docker_CA/debug:/tmp
+    depends_on:
+      - keycloak
+    network_mode: "service:localhost"
+
+  signer_provider:
+    build:
+      context: .
+      dockerfile: docker_signer/Dockerfile
+    environment:
+      SERVER_PORT: 8080
+      REALM_NAME: medsecurance_provider
+      CLIENT_NAME: signer-provider
+    volumes:
+      - ./docker_CA/signing_keys/provider:/key
+      - ./docker_CA/signing_keys/trust_anchors:/trust_anchors
+      - ./docker_CA/root_cert:/root_cert/
+      - ./docker_CA/debug:/tmp
+    depends_on:
+      - keycloak
+    network_mode: "service:localhost"
+
+
+

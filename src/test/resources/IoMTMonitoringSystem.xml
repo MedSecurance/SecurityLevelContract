@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xmi:XMI xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:IoMTAssets="http://iomtassets" xmlns:IoMTComponentCategories="http://IoMTComponentCategories" xmlns:IoMTProfile.Application="http:///IoMTProfile/Application.ecore" xmlns:IoMTProfile.External="http:///IoMTProfile/External.ecore" xmlns:IoMTProfile.LAN="http:///IoMTProfile/LAN.ecore" xmlns:IoMTProfile.WAN="http:///IoMTProfile/WAN.ecore" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xsi:schemaLocation="http:///IoMTProfile/Application.ecore http://iomtprofile#//Application http:///IoMTProfile/External.ecore http://iomtprofile#//External http:///IoMTProfile/LAN.ecore http://iomtprofile#//LAN http:///IoMTProfile/WAN.ecore http://iomtprofile#//WAN">
+  <uml:Model xmi:id="70a46e79-3589-4a35-8ca5-1781a0a347e7" name="IoMTModel">
+    <ownedComment xmi:id="c2431eb0-4471-410c-8efc-0e1d62c5ab02">
+      <body>Example of an IoMT (IoT of Medical Things)
+using the IoMT profiles below:
+
+- IoMTProfile
+- IoMTComponentCategories
+- IoMTAssets</body>
+    </ownedComment>
+    <packagedElement xmi:type="uml:Class" xmi:id="846eb6f3-651e-4114-83e7-7142ca89fab7" name="HeartMonitoring">
+      <ownedRule xmi:id="19d6d1c6-7031-4e1f-8f3d-299219f3259e" name="hasSensorAndService">
+        <specification xmi:type="uml:OpaqueExpression" xmi:id="a7bd11fa-aecf-4c55-8b9e-dc681d79adbd" name="OpaqueExpression1">
+          <language>OCL</language>
+          <body>self.getAppliedStereotypes()->select(as | as.name ='Sensor' or as.name = 'Service')->asSequence()->size() = 2</body>
+        </specification>
+      </ownedRule>
+      <ownedRule xmi:id="19a0feab-504a-4c1d-a45a-d88f6f959122" name="hasPatientMonitoringService">
+        <specification xmi:type="uml:OpaqueExpression" xmi:id="cf263aa3-1fd1-45c5-979f-77ba6840354a" name="OpaqueExpression1">
+          <language>OCL</language>
+          <body>getValue(getAppliedStereotypes()->select(as | as.name = 'Service')->asSequence()->first(),'kind').toString() = 'RemotePatientMonitoring'</body>
+        </specification>
+      </ownedRule>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="8293c0fe-03a8-416c-9290-4540c3b37f8e" name="SmartWatch">
+      <ownedRule xmi:id="27da89ca-5522-43dc-8b78-fc8195e54380" name="hasAccessPermission">
+        <specification xmi:type="uml:OpaqueExpression" xmi:id="ffcc13bd-1090-4388-9730-7d4551303756" name="OpaqueExpression1">
+          <language>OCL</language>
+          <body>getStereotypeApplications()->select(e | e.eClass().name = 'IoMTcomponent')->collect( component | 
+component.eGet(component.eClass().getEStructuralFeature('supportedFeatures')))->asSequence()->includes('accessPermission')</body>
+        </specification>
+      </ownedRule>
+      <ownedRule xmi:id="7e2573f9-a39b-483a-a83b-af30463d8c86" name="hasMultipleComponents">
+        <specification xmi:type="uml:OpaqueExpression" xmi:id="47eb79fe-3c4e-4806-bb02-9800e43c5173" name="OpaqueExpression1">
+          <language>OCL</language>
+          <body>getStereotypeApplications()->select(e | e.eClass().name = 'IoMTcomponent')->collect( component | 
+component.eGet(component.eClass().getEStructuralFeature('supportedFeatures')))->asSequence()->includesAll(Sequence{'failureLogger','accessPermission','dataAuthenticator'})</body>
+        </specification>
+      </ownedRule>
+      <ownedRule xmi:id="c629b4dd-0cc3-4b39-87e2-17c8b1a03fb8" name="appliedComponents">
+        <specification xmi:type="uml:OpaqueExpression" xmi:id="4cea9dda-783c-4685-ad9b-53bb564bc65a" name="OpaqueExpression1">
+          <language>OCL</language>
+          <body>getStereotypeApplications()->select(e | e.eClass().name = 'IoMTcomponent')->collect( component | 
+component.eGet(component.eClass().getEStructuralFeature('supportedFeatures')))</body>
+        </specification>
+      </ownedRule>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="15414875-46a7-4922-a761-719aafdd318d" name="HealthMesurementTransmission">
+      <ownedRule xmi:id="1e543627-59e8-4587-a4ba-2e253ee7be1c" name="checkCommunicationType">
+        <specification xmi:type="uml:OpaqueExpression" xmi:id="6210e4f0-e8d4-45c7-a1ab-a13ef0228ca9" name="OpaqueExpression1">
+          <language>OCL</language>
+          <body></body>
+        </specification>
+      </ownedRule>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="6b44f4bf-a903-4667-b71b-d21100bf8a9f" name="Communication"/>
+    <packagedElement xmi:type="uml:Class" xmi:id="a6d162dc-f88f-4a03-aa2b-89211b97095e" name="HealthCareProvider"/>
+    <packagedElement xmi:type="uml:Class" xmi:id="7d6c026d-0ee2-42b8-bcd6-d120f2041b53" name="ThirdPartyServices"/>
+    <packagedElement xmi:type="uml:Class" xmi:id="3e4fde5e-6b11-4839-8e3e-67e2f90f6dd9" name="CloudCentralDataRepository"/>
+    <packagedElement xmi:type="uml:Class" xmi:id="1f1769c5-a819-4cc7-86aa-bc2f290da992" name="DataProcessingAnalysis"/>
+    <packagedElement xmi:type="uml:Association" xmi:id="aafac435-7576-45b2-a303-115b7840c22f" memberEnd="2586b89f-26d8-47a6-8cd6-a5e85897d236 c20d6ed1-e8af-45f2-af4a-a799b363c54a">
+      <eAnnotations xmi:id="1db9e42f-44ea-453d-b123-09118057f41b" source="org.eclipse.papyrus">
+        <details xmi:id="8b35e53c-b4fb-4997-a2b6-9a3bf6117667" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:id="2586b89f-26d8-47a6-8cd6-a5e85897d236" name="smartwatch" type="8293c0fe-03a8-416c-9290-4540c3b37f8e" association="aafac435-7576-45b2-a303-115b7840c22f"/>
+      <ownedEnd xmi:id="c20d6ed1-e8af-45f2-af4a-a799b363c54a" name="heartmonitoring" type="846eb6f3-651e-4114-83e7-7142ca89fab7" association="aafac435-7576-45b2-a303-115b7840c22f"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="78d440cc-2f22-471e-a797-ad6770f0f5e1" memberEnd="06918870-f823-45db-97b2-84d9a7956592 879c7bfb-ae7a-4b55-bbfc-a8192c652366">
+      <eAnnotations xmi:id="c75efc78-7d55-4880-8a69-7446d6fe058d" source="org.eclipse.papyrus">
+        <details xmi:id="63712cfc-7b06-4535-b795-d0de04847e58" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:id="06918870-f823-45db-97b2-84d9a7956592" name="healthmesurementtransmission" type="15414875-46a7-4922-a761-719aafdd318d" association="78d440cc-2f22-471e-a797-ad6770f0f5e1"/>
+      <ownedEnd xmi:id="879c7bfb-ae7a-4b55-bbfc-a8192c652366" name="smartwatch" type="8293c0fe-03a8-416c-9290-4540c3b37f8e" association="78d440cc-2f22-471e-a797-ad6770f0f5e1"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="89284f8f-1530-4c47-a3b4-19776c5a7bfe" memberEnd="ad32cba8-fc64-4ace-bc01-803b375ed087 489a3db0-5209-4558-b9aa-6524e4baef3a">
+      <eAnnotations xmi:id="9714584b-8d8b-48c3-bfe5-95ad2663da63" source="org.eclipse.papyrus">
+        <details xmi:id="a94c8086-c18e-4c4d-973b-f2e3a355c3d1" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:id="ad32cba8-fc64-4ace-bc01-803b375ed087" name="communication" type="6b44f4bf-a903-4667-b71b-d21100bf8a9f" association="89284f8f-1530-4c47-a3b4-19776c5a7bfe"/>
+      <ownedEnd xmi:id="489a3db0-5209-4558-b9aa-6524e4baef3a" name="smartwatch" type="8293c0fe-03a8-416c-9290-4540c3b37f8e" association="89284f8f-1530-4c47-a3b4-19776c5a7bfe"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="38e0927a-3d1b-4c92-8e79-a21ec5d210e8" memberEnd="380b8ec3-63d3-4c9b-9325-1e83f00fc02e e7917235-daf1-41f1-b321-4323f904d26c">
+      <eAnnotations xmi:id="336cb4c2-c709-4870-be32-e7e9bc05803f" source="org.eclipse.papyrus">
+        <details xmi:id="395ddf18-c47c-444e-8c79-ceda537f9866" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:id="380b8ec3-63d3-4c9b-9325-1e83f00fc02e" name="communication" type="6b44f4bf-a903-4667-b71b-d21100bf8a9f" association="38e0927a-3d1b-4c92-8e79-a21ec5d210e8"/>
+      <ownedEnd xmi:id="e7917235-daf1-41f1-b321-4323f904d26c" name="healthmesurementtransmission" type="15414875-46a7-4922-a761-719aafdd318d" association="38e0927a-3d1b-4c92-8e79-a21ec5d210e8"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="5877c1db-451e-4e03-8f28-a3c525973d8d" memberEnd="add4f10e-8975-429a-941e-3391077a41d6 3ebf8651-0e38-4046-a73e-bc127fac7183">
+      <eAnnotations xmi:id="04b317a7-e100-4356-ab9d-46a9fbc1fe36" source="org.eclipse.papyrus">
+        <details xmi:id="beeb2509-19aa-40bf-af6c-2f86c4735b86" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:id="add4f10e-8975-429a-941e-3391077a41d6" name="cloudcentraldatarepository" type="3e4fde5e-6b11-4839-8e3e-67e2f90f6dd9" association="5877c1db-451e-4e03-8f28-a3c525973d8d"/>
+      <ownedEnd xmi:id="3ebf8651-0e38-4046-a73e-bc127fac7183" name="communication" type="6b44f4bf-a903-4667-b71b-d21100bf8a9f" association="5877c1db-451e-4e03-8f28-a3c525973d8d"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="4292a057-5328-4bbc-9061-a72668c57ac5" memberEnd="ab81b4d1-ee57-406c-8a88-d5321201880d d7a839a0-6e1f-4346-89f4-9f240e934db5">
+      <eAnnotations xmi:id="0a9659ed-739b-4194-866a-d49b7f59209c" source="org.eclipse.papyrus">
+        <details xmi:id="bb3626b2-fb12-48f4-b7d0-65e001f63cf9" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:id="ab81b4d1-ee57-406c-8a88-d5321201880d" name="thirdpartyservices" type="7d6c026d-0ee2-42b8-bcd6-d120f2041b53" association="4292a057-5328-4bbc-9061-a72668c57ac5"/>
+      <ownedEnd xmi:id="d7a839a0-6e1f-4346-89f4-9f240e934db5" name="communication" type="6b44f4bf-a903-4667-b71b-d21100bf8a9f" association="4292a057-5328-4bbc-9061-a72668c57ac5"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="d9730e4c-0670-4822-ae22-b461c5cbf164" memberEnd="a1831482-9178-4498-922d-631975d77872 f8bc6ada-4c8a-491b-8b38-09ef39512cda">
+      <eAnnotations xmi:id="edbb7966-dc8e-463c-b855-f40002c99a35" source="org.eclipse.papyrus">
+        <details xmi:id="f516a3ce-8971-4876-9066-93ecd6d09372" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:id="a1831482-9178-4498-922d-631975d77872" name="communication" type="6b44f4bf-a903-4667-b71b-d21100bf8a9f" association="d9730e4c-0670-4822-ae22-b461c5cbf164"/>
+      <ownedEnd xmi:id="f8bc6ada-4c8a-491b-8b38-09ef39512cda" name="dataprocessinganalysis" type="1f1769c5-a819-4cc7-86aa-bc2f290da992" association="d9730e4c-0670-4822-ae22-b461c5cbf164"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="0ffe22e8-0bca-42dd-b180-bf4ef56957b9" name="HealthCareProviderInterface"/>
+    <packagedElement xmi:type="uml:Association" xmi:id="fd0d00cd-65c6-4e82-bb3b-a29c078b959d" memberEnd="6645f1ce-9589-44ce-818c-ac6fef1aa6ca 8fe4a616-568c-4d4e-a4c8-c2caa50b329c">
+      <eAnnotations xmi:id="b02f564f-acd6-4d80-87d0-b105f4f9330e" source="org.eclipse.papyrus">
+        <details xmi:id="63f069b3-5c4f-4212-afe7-13a8ba54acc2" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:id="6645f1ce-9589-44ce-818c-ac6fef1aa6ca" name="healthcareproviderinterface" type="0ffe22e8-0bca-42dd-b180-bf4ef56957b9" association="fd0d00cd-65c6-4e82-bb3b-a29c078b959d"/>
+      <ownedEnd xmi:id="8fe4a616-568c-4d4e-a4c8-c2caa50b329c" name="healthcareprovider" type="a6d162dc-f88f-4a03-aa2b-89211b97095e" association="fd0d00cd-65c6-4e82-bb3b-a29c078b959d"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="490576a9-05e8-4ed1-bee7-3df0768b679b" memberEnd="cee2bc34-78c4-41e7-b0cb-3303d5c3add7 b7791d2f-6aea-4453-b0ed-00dfc8ee4f44">
+      <eAnnotations xmi:id="3e26a80a-260e-45f4-8f3a-8349e651965c" source="org.eclipse.papyrus">
+        <details xmi:id="3f8eaf66-c0a6-4d9f-8177-853ad793f3d8" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:id="cee2bc34-78c4-41e7-b0cb-3303d5c3add7" name="dataprocessinganalysis" type="1f1769c5-a819-4cc7-86aa-bc2f290da992" association="490576a9-05e8-4ed1-bee7-3df0768b679b"/>
+      <ownedEnd xmi:id="b7791d2f-6aea-4453-b0ed-00dfc8ee4f44" name="healthcareprovider" type="0ffe22e8-0bca-42dd-b180-bf4ef56957b9" association="490576a9-05e8-4ed1-bee7-3df0768b679b"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="b754f9da-d366-4fde-b62d-0cdd1cd9168e" name="LocalDataStore"/>
+    <packagedElement xmi:type="uml:Class" xmi:id="31bb67e4-6581-4dbc-b26e-7c387c06682c" name="Configuration"/>
+    <packagedElement xmi:type="uml:Class" xmi:id="b6c5099c-eb7f-4bc8-b5bb-4bfdecb5d371" name="MedicalAppLocalDataStore"/>
+    <packagedElement xmi:type="uml:Class" xmi:id="ce8b8727-6169-4223-ad94-c5e74ac1f466" name="SimpleProxy"/>
+    <packagedElement xmi:type="uml:Class" xmi:id="c9a07ed2-6cbf-4d30-95ae-c3cd6f36eb71" name="PatientType1"/>
+    <packagedElement xmi:type="uml:Association" xmi:id="8c544c04-1b4c-42bb-94af-405ddc746fd1" memberEnd="adc6a0b7-cd9f-47ce-bf7b-a8419e47444d a7a9ecc8-aae2-4fc6-8e61-2e6f854ae94d">
+      <eAnnotations xmi:id="50b38334-602c-4e00-a58e-e9af78adc66b" source="org.eclipse.papyrus">
+        <details xmi:id="d633f38b-10f7-4ad9-93b0-73d6514bc8c0" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:id="adc6a0b7-cd9f-47ce-bf7b-a8419e47444d" name="heartmonitoring" type="846eb6f3-651e-4114-83e7-7142ca89fab7" association="8c544c04-1b4c-42bb-94af-405ddc746fd1"/>
+      <ownedEnd xmi:id="a7a9ecc8-aae2-4fc6-8e61-2e6f854ae94d" name="patient" type="c9a07ed2-6cbf-4d30-95ae-c3cd6f36eb71" association="8c544c04-1b4c-42bb-94af-405ddc746fd1"/>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Class" xmi:id="0a6b603e-9154-4555-bb2b-260141e0f4eb" name="UserPhone">
+      <ownedRule xmi:id="5c4fc592-0031-4708-b39f-941f028e86bc" name="hasAccessPermission">
+        <specification xmi:type="uml:OpaqueExpression" xmi:id="6fcfdb29-6618-46e0-9927-e57b3ddff546" name="OpaqueExpression1">
+          <language>OCL</language>
+          <body>getStereotypeApplications()->select(e | e.eClass().name = 'IoMTcomponent')->collect( component | 
+component.eGet(component.eClass().getEStructuralFeature('supportedFeatures')))->asSequence()->includes('accessPermission')</body>
+        </specification>
+      </ownedRule>
+      <ownedRule xmi:id="2ee3f6ff-a9fe-4d6e-b8ed-b25d79b41585" name="hasMultipleComponents">
+        <specification xmi:type="uml:OpaqueExpression" xmi:id="97b684cc-df67-4766-8789-7868a33fad46" name="OpaqueExpression1">
+          <language>OCL</language>
+          <body>getStereotypeApplications()->select(e | e.eClass().name = 'IoMTcomponent')->collect( component | 
+component.eGet(component.eClass().getEStructuralFeature('supportedFeatures')))->asSequence()->includesAll(Sequence{'factory','accessPermission','dataAuthenticator'})</body>
+        </specification>
+      </ownedRule>
+      <ownedRule xmi:id="8376643b-a539-4492-903d-08852c04365e" name="appliedComponents">
+        <specification xmi:type="uml:OpaqueExpression" xmi:id="66151f12-5b55-4259-b285-9f791d5c1226" name="OpaqueExpression1">
+          <language>OCL</language>
+          <body>getValue(getAppliedStereotypes()->select(as | as.name = 'IoMTcomponent')->asSequence()->first(),'supportedFeatures')</body>
+        </specification>
+      </ownedRule>
+    </packagedElement>
+    <packagedElement xmi:type="uml:Association" xmi:id="cd1d128c-eb5b-4146-b691-4aaba37707ea" memberEnd="1a70982b-aed3-44ab-b28f-d3ff7ba87139 fdafb5ed-574d-40dc-a5a5-ff469475c27a">
+      <eAnnotations xmi:id="e72e1428-db69-40bf-bb34-c19d984fcc92" source="org.eclipse.papyrus">
+        <details xmi:id="45fe7ec5-7d73-4a68-b366-e59d1457dfef" key="nature" value="UML_Nature"/>
+      </eAnnotations>
+      <ownedEnd xmi:id="1a70982b-aed3-44ab-b28f-d3ff7ba87139" name="smartwatch" type="8293c0fe-03a8-416c-9290-4540c3b37f8e" association="cd1d128c-eb5b-4146-b691-4aaba37707ea"/>
+      <ownedEnd xmi:id="fdafb5ed-574d-40dc-a5a5-ff469475c27a" name="userphone" type="0a6b603e-9154-4555-bb2b-260141e0f4eb" association="cd1d128c-eb5b-4146-b691-4aaba37707ea"/>
+    </packagedElement>
+    <profileApplication xmi:id="c56555d9-4e9a-45d2-94f7-74ee7d7152f6">
+      <eAnnotations xmi:id="2d1a83b9-6d48-49fe-a8ff-d8246edfae4c" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="http://www.eclipse.org/papyrus/robotics/assertions/1#/"/>
+      </eAnnotations>
+      <appliedProfile href="pathmap://Assertions_PROFILE/assertions.profile.uml#_IGRaABwAEe-2GI5f1LdWww"/>
+    </profileApplication>
+    <profileApplication xmi:id="06aaaebc-a286-4ec4-94ae-0affe06a5225">
+      <eAnnotations xmi:id="64bfd72a-97bc-45d6-b518-17049aded2af" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="http://iomtassets#/"/>
+      </eAnnotations>
+      <appliedProfile href="pathmap://IoMTAssets_PROFILE/IoMTAssets.profile.uml#_JDM8UBwAEe-2GI5f1LdWww"/>
+    </profileApplication>
+    <profileApplication xmi:id="ae24b830-d0fe-4cd6-806d-deeca833b130">
+      <eAnnotations xmi:id="22c06445-489b-48f5-ab6a-b103ab2c62e9" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="http://IoMTComponentCategories#/"/>
+      </eAnnotations>
+      <appliedProfile href="pathmap://IoMTComponentCategories_PROFILE/IoMTComponentCategories.profile.uml#_KrJKgBwAEe-2GI5f1LdWww"/>
+    </profileApplication>
+    <profileApplication xmi:id="91a49cc7-ad8b-468c-8df3-fff0bf345b69">
+      <eAnnotations xmi:id="450a56c7-b052-4cf5-b040-abb84ed6c438" source="http://www.eclipse.org/uml2/2.0.0/UML">
+        <references xmi:type="ecore:EPackage" href="http://iomtprofile#/"/>
+      </eAnnotations>
+      <appliedProfile href="pathmap://IoMT_PROFILE/IoMT.profile.uml#_rAxLQCooEe-2GI5f1LdWww"/>
+    </profileApplication>
+  </uml:Model>
+  <IoMTComponentCategories:IoMTpkg xmi:id="5103a04c-b1d6-4454-a17b-e1813edd4ead" base_Package="70a46e79-3589-4a35-8ca5-1781a0a347e7"/>
+  <IoMTProfile.LAN:Sensor xmi:id="1ae38e17-dc33-461d-a722-dbeaf6f20c30" base_Class="846eb6f3-651e-4114-83e7-7142ca89fab7" name="HeartMonitoringSensor" uid="Sensor_12345" person="cd008196-f185-42f0-ae80-f822af9cd1d2" device="5fac76b2-70a0-466e-b1dd-8c5e11690512"/>
+  <IoMTProfile.LAN:IoMTDevice xmi:id="5fac76b2-70a0-466e-b1dd-8c5e11690512" base_Class="8293c0fe-03a8-416c-9290-4540c3b37f8e" name="Smart Watch device" uid="device_uid" configuration="0b8a732c-2a54-4c31-aa75-e456287c006a" services="1ae38e17-dc33-461d-a722-dbeaf6f20c30" gateway="a17b2e3e-d236-461a-ab54-5596badb2192"/>
+  <IoMTAssets:Information xmi:id="344e5ef6-3d20-401f-95d9-57202373b646" key="smartwatch_info" missionName="User smart watch" description="Data about patient" base_Class="8293c0fe-03a8-416c-9290-4540c3b37f8e" location="Patient Location" record="Record data about patient"/>
+  <IoMTComponentCategories:IoMTcomponent xmi:id="949a02ff-ed0c-41ae-b944-5b4649744b3a" base_Class="8293c0fe-03a8-416c-9290-4540c3b37f8e">
+    <supportedFeatures>asymetricCryptography</supportedFeatures>
+    <supportedFeatures>dataAuthenticator</supportedFeatures>
+    <supportedFeatures>failureLogger</supportedFeatures>
+    <supportedFeatures>backupData</supportedFeatures>
+    <supportedFeatures>accessPermission</supportedFeatures>
+  </IoMTComponentCategories:IoMTcomponent>
+  <IoMTProfile.LAN:Gateway xmi:id="a17b2e3e-d236-461a-ab54-5596badb2192" base_Class="15414875-46a7-4922-a761-719aafdd318d" name="Gateway for data exchange" uid="gateway_uuid" devices="5fac76b2-70a0-466e-b1dd-8c5e11690512" InternalInterface="BlueTooth" ExternalInterface="BlueTooth" proxy="3b85746b-4ae8-45f7-a510-30ed5d4b7bcc"/>
+  <IoMTAssets:Information xmi:id="713bf10f-68b0-425c-addf-7797e255e292" key="gatewayinfo_key" missionName="Gateway mission" description="Transmits and convert data" base_Class="15414875-46a7-4922-a761-719aafdd318d" location="Remote" record="Data record" kind="RealTimePatientData"/>
+  <IoMTComponentCategories:IoMTcomponent xmi:id="c2cf8eb1-280a-4ef2-af37-cb9b2ce278cf" base_Class="15414875-46a7-4922-a761-719aafdd318d">
+    <supportedFeatures>configurationChange</supportedFeatures>
+    <supportedFeatures>dataConverter</supportedFeatures>
+  </IoMTComponentCategories:IoMTcomponent>
+  <IoMTProfile.WAN:Proxy xmi:id="3b85746b-4ae8-45f7-a510-30ed5d4b7bcc" base_Class="6b44f4bf-a903-4667-b71b-d21100bf8a9f" name="Proxy communication" uid="proxy_uid" gateways="a17b2e3e-d236-461a-ab54-5596badb2192" datastores="fe4f7fac-28b7-45dc-abf5-93afb09000d2 a96ea58f-3eff-4d66-a3a4-b625f7ffb0f3 98a193fd-e834-46e3-b84f-b6ca1c07dbf6" applications="45f1633f-b834-4bf9-aaad-b0b94ea72705 f546f544-a687-4581-8d50-87eb236841f9"/>
+  <IoMTProfile.WAN:DataStore xmi:id="fe4f7fac-28b7-45dc-abf5-93afb09000d2" base_Class="3e4fde5e-6b11-4839-8e3e-67e2f90f6dd9" name="CloudDataStore" uid="clouddatastore_uid" proxy="3b85746b-4ae8-45f7-a510-30ed5d4b7bcc"/>
+  <IoMTComponentCategories:IoMTcomponent xmi:id="fd94433f-2751-4c2d-b66c-3d8d5e65098d" base_Class="3e4fde5e-6b11-4839-8e3e-67e2f90f6dd9">
+    <supportedFeatures>accessPermission</supportedFeatures>
+    <supportedFeatures>collector</supportedFeatures>
+    <supportedFeatures>asymetricCryptography</supportedFeatures>
+  </IoMTComponentCategories:IoMTcomponent>
+  <IoMTAssets:Information xmi:id="50ad22c1-a880-4711-ad62-8130e683b43a" key="cloud_information_uid" missionName="Cloud Information" description="Cloud Information Description" base_Class="3e4fde5e-6b11-4839-8e3e-67e2f90f6dd9" location="cloudaddress" record="Cloud personal data record"/>
+  <IoMTProfile.WAN:DataStore xmi:id="a96ea58f-3eff-4d66-a3a4-b625f7ffb0f3" base_Class="7d6c026d-0ee2-42b8-bcd6-d120f2041b53" name="Third Party Application" uid="thirdpartyapp_uid" proxy="3b85746b-4ae8-45f7-a510-30ed5d4b7bcc"/>
+  <IoMTProfile.Application:MedicalApp xmi:id="45f1633f-b834-4bf9-aaad-b0b94ea72705" base_Class="7d6c026d-0ee2-42b8-bcd6-d120f2041b53" name="Third Party Medical App Service" uid="thirdpartymedicalapp_uid" datastore="2c5c598b-338f-4186-b632-f9972b10f112" proxy="3b85746b-4ae8-45f7-a510-30ed5d4b7bcc"/>
+  <IoMTProfile.External:Person xmi:id="8f990f90-fcb7-498c-b201-9e32b57b233a" base_Class="a6d162dc-f88f-4a03-aa2b-89211b97095e" application="0695bba8-4694-4b16-97a0-f440873a861f"/>
+  <IoMTProfile.WAN:DataStore xmi:id="98a193fd-e834-46e3-b84f-b6ca1c07dbf6" base_Class="1f1769c5-a819-4cc7-86aa-bc2f290da992" name="Medical App Store" uid="medicalappstore_uid" proxy="3b85746b-4ae8-45f7-a510-30ed5d4b7bcc" applications="0695bba8-4694-4b16-97a0-f440873a861f"/>
+  <IoMTProfile.Application:MedicalApp xmi:id="8c264225-5696-437b-9ae3-887da3a58ce6" base_Class="1f1769c5-a819-4cc7-86aa-bc2f290da992" name="Medical Web Application" uid="medicalapp_uid" datastore="7eff0884-3b48-4822-b5f0-d13f359f5260" proxy="cd06e08e-e796-4a18-be2b-d691050b8340"/>
+  <IoMTProfile.Application:MedicalApp xmi:id="0695bba8-4694-4b16-97a0-f440873a861f" base_Class="0ffe22e8-0bca-42dd-b180-bf4ef56957b9" name="HealthCareProviderInterfaceApp" uid="healthcareproviderinterface_uid" datastore="98a193fd-e834-46e3-b84f-b6ca1c07dbf6" person="8f990f90-fcb7-498c-b201-9e32b57b233a" proxy="cd06e08e-e796-4a18-be2b-d691050b8340"/>
+  <IoMTComponentCategories:IoMTcomponent xmi:id="93304203-c7e7-47c0-ab12-a13b63b8784a" base_Class="0ffe22e8-0bca-42dd-b180-bf4ef56957b9">
+    <supportedFeatures>failureLogger</supportedFeatures>
+    <supportedFeatures>dataAuthenticator</supportedFeatures>
+    <supportedFeatures>remoteAccess</supportedFeatures>
+  </IoMTComponentCategories:IoMTcomponent>
+  <IoMTProfile.WAN:DataStore xmi:id="7eff0884-3b48-4822-b5f0-d13f359f5260" base_Class="b754f9da-d366-4fde-b62d-0cdd1cd9168e" name="LocalDataSotre" uid="localdatastore_uid" proxy="cd06e08e-e796-4a18-be2b-d691050b8340" applications="8c264225-5696-437b-9ae3-887da3a58ce6 f546f544-a687-4581-8d50-87eb236841f9"/>
+  <IoMTProfile.LAN:IoMTConfiguration xmi:id="0b8a732c-2a54-4c31-aa75-e456287c006a" base_Class="31bb67e4-6581-4dbc-b26e-7c387c06682c" device="5fac76b2-70a0-466e-b1dd-8c5e11690512"/>
+  <IoMTProfile.WAN:DataStore xmi:id="2c5c598b-338f-4186-b632-f9972b10f112" base_Class="b6c5099c-eb7f-4bc8-b5bb-4bfdecb5d371" name="ThirdPartyMedicalAllDataSotre" uid="thirdpartymedicalappstore_uid" proxy="cd06e08e-e796-4a18-be2b-d691050b8340" applications="45f1633f-b834-4bf9-aaad-b0b94ea72705"/>
+  <IoMTProfile.WAN:Proxy xmi:id="cd06e08e-e796-4a18-be2b-d691050b8340" base_Class="ce8b8727-6169-4223-ad94-c5e74ac1f466" name="Generic simple proxy " uid="simpleproxy_uid" datastores="7eff0884-3b48-4822-b5f0-d13f359f5260 2c5c598b-338f-4186-b632-f9972b10f112" applications="8c264225-5696-437b-9ae3-887da3a58ce6 0695bba8-4694-4b16-97a0-f440873a861f"/>
+  <IoMTProfile.External:Person xmi:id="cd008196-f185-42f0-ae80-f822af9cd1d2" base_Class="c9a07ed2-6cbf-4d30-95ae-c3cd6f36eb71" application="f546f544-a687-4581-8d50-87eb236841f9" iomtservice="1ae38e17-dc33-461d-a722-dbeaf6f20c30"/>
+  <IoMTAssets:Service xmi:id="6533a4a6-7be2-4f62-8b7b-d2dcfd34eb3b" key="heartmonitorservice_uid" missionName="Heart Monitor Service Asset" description="Heart Monitor Service Asset" base_Class="846eb6f3-651e-4114-83e7-7142ca89fab7"/>
+  <IoMTProfile.Application:PatientApp xmi:id="f546f544-a687-4581-8d50-87eb236841f9" base_Class="0a6b603e-9154-4555-bb2b-260141e0f4eb" name="Patient Heart Monitoring" uid="patientapp_uid" datastore="7eff0884-3b48-4822-b5f0-d13f359f5260" person="cd008196-f185-42f0-ae80-f822af9cd1d2" proxy="3b85746b-4ae8-45f7-a510-30ed5d4b7bcc"/>
+  <IoMTComponentCategories:IoMTcomponent xmi:id="d1aeded9-c962-4b96-9cdc-cdf0829b652d" base_Class="0a6b603e-9154-4555-bb2b-260141e0f4eb">
+    <supportedFeatures>accessPermission</supportedFeatures>
+    <supportedFeatures>factory</supportedFeatures>
+    <supportedFeatures>minimalFunctionMode</supportedFeatures>
+    <supportedFeatures>dataAuthenticator</supportedFeatures>
+  </IoMTComponentCategories:IoMTcomponent>
+</xmi:XMI>

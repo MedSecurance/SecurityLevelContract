@@ -1,3 +1,0 @@
-V	250705110839Z		01	unknown	/C=ES/ST=Catalunya/L=Barcelona/O=UPC/OU=DMAG/CN=consumer
-V	250705110850Z		02	unknown	/C=ES/ST=Catalunya/L=Barcelona/O=UPC/OU=DMAG/CN=provider
-V	250705110850Z		03	unknown	/C=ES/ST=Catalunya/L=Barcelona/O=UPC/OU=DMAG/CN=localhost

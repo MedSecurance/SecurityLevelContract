@@ -60,8 +60,8 @@ services:
 
   signer_consumer:
     build:
-      context: .
-      dockerfile: docker_signer/Dockerfile
+      context: docker_signer
+      dockerfile: Dockerfile
     environment:
       SERVER_PORT: 8081
       REALM_NAME: medsecurance_consumer
@@ -77,8 +77,8 @@ services:
 
   signer_provider:
     build:
-      context: .
-      dockerfile: docker_signer/Dockerfile
+      context: docker_signer
+      dockerfile: Dockerfile
     environment:
       SERVER_PORT: 8080
       REALM_NAME: medsecurance_provider

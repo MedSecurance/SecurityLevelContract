@@ -116,6 +116,44 @@ public class XMLGenerationController {
         return fromRisksToXML(seed, riskNames, model);
     }
 
+    @PostMapping("/generateRisksWithModel")
+    public ResponseEntity<byte[]> generateXmlWithModelAndEvidences(
+            @RequestParam("ceafile") MultipartFile model,
+            @RequestParam("softwareUpdatesLog", required=false) MultipartFile softwareUpdatesLog,
+            @RequestParam("softwareVersionNumbersLog", required=false) MultipartFile softwareVersionNumbersLog,
+            @RequestParam("validationReport", required=false) MultipartFile validationReport,
+            @RequestParam("trendReport", required=false) MultipartFile trendReport,
+            @RequestParam("technicalDescription", required=false) MultipartFile technicalDescription,
+            @RequestParam("documentationIntegratedToDevice", required=false) MultipartFile documentationIntegratedToDevice,
+            @RequestParam("riskManagementPlan", required=false) MultipartFile riskManagementPlan,
+            @RequestParam("instructionsOfUse", required=false) MultipartFile instructionsOfUse,
+            @RequestParam("instructionsForUse", required=false) MultipartFile instructionsForUse,
+            @RequestParam("connectivityTroubleshootingInformationDocument", required=false) MultipartFile connectivityTroubleshootingInformationDocument,
+            @RequestParam("disclaimerAndWarningDocument", required=false) MultipartFile disclaimerAndWarningDocument,
+            @RequestParam("regionalAccommodationRequirement", required=false) MultipartFile regionalAccommodationRequirement,
+            @RequestParam("documentOnUsageOfAIAndMLInDevice", required=false) MultipartFile documentOnUsageOfAIAndMLInDevice,
+            @RequestParam("documentsOnComplianceWithJurisdictionalRegulatoryRequirements", required=false) MultipartFile documentsOnComplianceWithJurisdictionalRegulatoryRequirements,
+            @RequestParam("regulatoryDocumentation", required=false) MultipartFile regulatoryDocumentation,
+            @RequestParam("riskManagementFile", required=false) MultipartFile riskManagementFile,
+            @RequestParam("deviceRecord", required=false) MultipartFile deviceRecord,
+            @RequestParam("healthSoftwareProductIdentifierDocument", required=false) MultipartFile healthSoftwareProductIdentifierDocument,
+            @RequestParam("documentOnManufacturerContractInformation", required=false) MultipartFile documentOnManufacturerContractInformation,
+            @RequestParam("technicalUseSpecification", required=false) MultipartFile technicalUseSpecification,
+            @RequestParam("trendReportings", required=false) MultipartFile trendReportings,
+            @RequestParam("documentOnSpecialSkillsRequiredFromUser", required=false) MultipartFile documentOnSpecialSkillsRequiredFromUser,
+            @RequestParam("instructionForUse", required=false) MultipartFile instructionForUse,
+            @RequestParam("medicalItNetworkRiskManagementFile", required=false) MultipartFile medicalItNetworkRiskManagementFile,
+            @RequestParam("assuranceCaseReport", required=false) MultipartFile assuranceCaseReport,
+            @RequestParam("riskManagementPlan", required=false) MultipartFile riskManagementPlan,
+    ) throws Exception {
+        Random random = new Random(System.currentTimeMillis());
+        int seed = random.nextInt();
+
+        List<String> riskNames = generateSubSelectionRisks(seed, XMLGenerationController.riskNames);
+
+        return fromRisksToXML(seed, riskNames, model);
+    }
+
     private static Node extractRootAndAdaptIt(byte[] xmlDocumentBytes, Document documentToAdaptTo) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 

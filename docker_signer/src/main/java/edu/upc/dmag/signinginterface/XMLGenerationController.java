@@ -119,32 +119,31 @@ public class XMLGenerationController {
     @PostMapping("/generateRisksWithModel")
     public ResponseEntity<byte[]> generateXmlWithModelAndEvidences(
             @RequestParam("ceafile") MultipartFile model,
-            @RequestParam("softwareUpdatesLog", required=false) MultipartFile softwareUpdatesLog,
-            @RequestParam("softwareVersionNumbersLog", required=false) MultipartFile softwareVersionNumbersLog,
-            @RequestParam("validationReport", required=false) MultipartFile validationReport,
-            @RequestParam("trendReport", required=false) MultipartFile trendReport,
-            @RequestParam("technicalDescription", required=false) MultipartFile technicalDescription,
-            @RequestParam("documentationIntegratedToDevice", required=false) MultipartFile documentationIntegratedToDevice,
-            @RequestParam("riskManagementPlan", required=false) MultipartFile riskManagementPlan,
-            @RequestParam("instructionsOfUse", required=false) MultipartFile instructionsOfUse,
-            @RequestParam("instructionsForUse", required=false) MultipartFile instructionsForUse,
-            @RequestParam("connectivityTroubleshootingInformationDocument", required=false) MultipartFile connectivityTroubleshootingInformationDocument,
-            @RequestParam("disclaimerAndWarningDocument", required=false) MultipartFile disclaimerAndWarningDocument,
-            @RequestParam("regionalAccommodationRequirement", required=false) MultipartFile regionalAccommodationRequirement,
-            @RequestParam("documentOnUsageOfAIAndMLInDevice", required=false) MultipartFile documentOnUsageOfAIAndMLInDevice,
-            @RequestParam("documentsOnComplianceWithJurisdictionalRegulatoryRequirements", required=false) MultipartFile documentsOnComplianceWithJurisdictionalRegulatoryRequirements,
-            @RequestParam("regulatoryDocumentation", required=false) MultipartFile regulatoryDocumentation,
-            @RequestParam("riskManagementFile", required=false) MultipartFile riskManagementFile,
-            @RequestParam("deviceRecord", required=false) MultipartFile deviceRecord,
-            @RequestParam("healthSoftwareProductIdentifierDocument", required=false) MultipartFile healthSoftwareProductIdentifierDocument,
-            @RequestParam("documentOnManufacturerContractInformation", required=false) MultipartFile documentOnManufacturerContractInformation,
-            @RequestParam("technicalUseSpecification", required=false) MultipartFile technicalUseSpecification,
-            @RequestParam("trendReportings", required=false) MultipartFile trendReportings,
-            @RequestParam("documentOnSpecialSkillsRequiredFromUser", required=false) MultipartFile documentOnSpecialSkillsRequiredFromUser,
-            @RequestParam("instructionForUse", required=false) MultipartFile instructionForUse,
-            @RequestParam("medicalItNetworkRiskManagementFile", required=false) MultipartFile medicalItNetworkRiskManagementFile,
-            @RequestParam("assuranceCaseReport", required=false) MultipartFile assuranceCaseReport,
-            @RequestParam("riskManagementPlan", required=false) MultipartFile riskManagementPlan,
+            @RequestParam(value="softwareUpdatesLog", required=false) MultipartFile softwareUpdatesLog,
+            @RequestParam(value="softwareVersionNumbersLog", required=false) MultipartFile softwareVersionNumbersLog,
+            @RequestParam(value="validationReport", required=false) MultipartFile validationReport,
+            @RequestParam(value="trendReport", required=false) MultipartFile trendReport,
+            @RequestParam(value="technicalDescription", required=false) MultipartFile technicalDescription,
+            @RequestParam(value="documentationIntegratedToDevice", required=false) MultipartFile documentationIntegratedToDevice,
+            @RequestParam(value="riskManagementPlan", required=false) MultipartFile riskManagementPlan,
+            @RequestParam(value="instructionsOfUse", required=false) MultipartFile instructionsOfUse,
+            @RequestParam(value="instructionsForUse", required=false) MultipartFile instructionsForUse,
+            @RequestParam(value="connectivityTroubleshootingInformationDocument", required=false) MultipartFile connectivityTroubleshootingInformationDocument,
+            @RequestParam(value="disclaimerAndWarningDocument", required=false) MultipartFile disclaimerAndWarningDocument,
+            @RequestParam(value="regionalAccommodationRequirement", required=false) MultipartFile regionalAccommodationRequirement,
+            @RequestParam(value="documentOnUsageOfAIAndMLInDevice", required=false) MultipartFile documentOnUsageOfAIAndMLInDevice,
+            @RequestParam(value="documentsOnComplianceWithJurisdictionalRegulatoryRequirements", required=false) MultipartFile documentsOnComplianceWithJurisdictionalRegulatoryRequirements,
+            @RequestParam(value="regulatoryDocumentation", required=false) MultipartFile regulatoryDocumentation,
+            @RequestParam(value="riskManagementFile", required=false) MultipartFile riskManagementFile,
+            @RequestParam(value="deviceRecord", required=false) MultipartFile deviceRecord,
+            @RequestParam(value="healthSoftwareProductIdentifierDocument", required=false) MultipartFile healthSoftwareProductIdentifierDocument,
+            @RequestParam(value="documentOnManufacturerContractInformation", required=false) MultipartFile documentOnManufacturerContractInformation,
+            @RequestParam(value="technicalUseSpecification", required=false) MultipartFile technicalUseSpecification,
+            @RequestParam(value="trendReportings", required=false) MultipartFile trendReportings,
+            @RequestParam(value="documentOnSpecialSkillsRequiredFromUser", required=false) MultipartFile documentOnSpecialSkillsRequiredFromUser,
+            @RequestParam(value="instructionForUse", required=false) MultipartFile instructionForUse,
+            @RequestParam(value="medicalItNetworkRiskManagementFile", required=false) MultipartFile medicalItNetworkRiskManagementFile,
+            @RequestParam(value="assuranceCaseReport", required=false) MultipartFile assuranceCaseReport
     ) throws Exception {
         Random random = new Random(System.currentTimeMillis());
         int seed = random.nextInt();
@@ -249,4 +248,3 @@ public class XMLGenerationController {
         return stringWriter.toString();
     }
 }
-

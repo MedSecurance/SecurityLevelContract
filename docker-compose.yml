@@ -12,7 +12,9 @@ services:
       - "8089:8089" # CA server 2
       - "8080:8080" # signer interface for consumer
       - "8081:8081" # signer interface for provider
+      - "8082:8082"
       - "3030:3030" # signer interface for provider
+      - "80:80" #requirements selector
   ontology:
     image: danielnaro/ontologyknowledgerepository:latest
     network_mode: "service:localhost"
@@ -64,6 +66,7 @@ services:
       dockerfile: Dockerfile
     environment:
       SERVER_PORT: 8081
+      SERVER_DOMAIN: consumer
       REALM_NAME: medsecurance_consumer
       CLIENT_NAME: signer-consumer
     volumes:
@@ -81,6 +84,7 @@ services:
       dockerfile: Dockerfile
     environment:
       SERVER_PORT: 8080
+      SERVER_DOMAIN: provider
       REALM_NAME: medsecurance_provider
       CLIENT_NAME: signer-provider
     volumes:
@@ -92,5 +96,14 @@ services:
       - keycloak
     network_mode: "service:localhost"
 
+  requirements_selector:
+    image: danielnaro/requirements_selector:latest
+    network_mode: "service:localhost"
+
+  nginx:
+    build:
+      context: NginxContainer
+      dockerfile: Dockerfile
+    network_mode: "service:localhost"
 
 

@@ -7,6 +7,12 @@
 </head>
 <body>
 
+
+
+<div th:if="${hasSignatures != null}">
+    <h1 th:if="${!hasSignatures}">There are no signatures!</h1>
+</div>
+
 <div th:if="${signatureValid != null}">
     <h1 th:if="${signatureValid}">Is valid!</h1>
     <h1 th:unless="${signatureValid}">Is not valid!</h1>
@@ -18,11 +24,45 @@
 </form>
 
 <h1>Generate document to sign with CEA model</h1>
-<form action="/generateRisksWithModel" method="post" enctype="multipart/form-data">
-    <label for="file">Choose CEA model to upload:</label>
 
-    <input type="file" id="ceafile" name="ceafile" accept="*/*">
-    <br><br>
+<form action="/generateRisksWithModel" method="post" enctype="multipart/form-data">
+    <!-- Modelling -->
+    <label for="file">Choose CEA model to upload:</label> <input type="file" id="ceafile" name="ceafile" accept="*/*"><br><br>
+    <!-- Communication recommender-->
+    <label for="file">Communication recommender model:</label> <input type="file" id="CR_model" name="CR_model" accept="*/*"><br><br>
+    <label for="file">Communication recommender result:</label> <input type="file" id="CR_result" name="CR_result" accept="*/*"><br><br>
+    <!-- TVRA -->
+    <label for="file">TVRA Model:</label> <input type="file" id="TVRA_model" name="TVRA_model" accept="*/*"><br><br>
+    <label for="file">TVRA Attack Paths:</label> <input type="file" id="TVRA_Attack+Paths" name="TVRA_Attack+Paths" accept="*/*"><br><br>
+    <label for="file">TVRA Recommendations:</label> <input type="file" id="TVRA_Recommendations" name="TVRA_Recommendations" accept="*/*"><br><br>
+    <label for="file">TVRA Threats:</label> <input type="file" id="TVRA_Threats" name="TVRA_Threats" accept="*/*"><br><br>
+    <label for="file">TVRA Report:</label> <input type="file" id="TVRA_Report" name="TVRA_Report" accept="*/*"><br><br>
+    <!-- For assurance -->
+    <label for="file">Software updates log:</label> <input type="file" id="Documentation_software+updates+log" name="Documentation_software+updates+log"  accept="*/*"><br><br>
+    <label for="file">Software version numbers log:</label> <input type="file" id="Documentation_software+version+numbers+log" name="Documentation_software+version+numbers+log"  accept="*/*"><br><br>
+    <label for="file">Validation report:</label> <input type="file" id="Documentation_validation+report" name="Documentation_validation+report"  accept="*/*"><br><br>
+    <label for="file">Trend Report:</label> <input type="file" id="Documentation_Trend+Report" name="Documentation_Trend+Report"  accept="*/*"><br><br>
+    <label for="file">Technical description:</label> <input type="file" id="Documentation_technical+description" name="Documentation_technical+description"  accept="*/*"><br><br>
+    <label for="file">Documentation integrated to device:</label> <input type="file" id="Documentation_documentation+integrated+to+device" name="Documentation_documentation+integrated+to+device"  accept="*/*"><br><br>
+    <label for="file">Risk management plan:</label> <input type="file" id="Documentation_risk+management+plan" name="Documentation_risk+management+plan"  accept="*/*"><br><br>
+    <label for="file">Instructions of use:</label> <input type="file" id="Documentation_instructions+of+use" name="Documentation_instructions+of+use"  accept="*/*"><br><br>
+    <label for="file">Connectivity troubleshooting information document:</label> <input type="file" id="Documentation_connectivity+troubleshooting+information+document" name="Documentation_connectivity+troubleshooting+information+document"  accept="*/*"><br><br>
+    <label for="file">Disclaimer and warning document:</label> <input type="file" id="Documentation_disclaimer+and+warning+document" name="Documentation_disclaimer+and+warning+document"  accept="*/*"><br><br>
+    <label for="file">Regional accommodation requirement:</label> <input type="file" id="Documentation_regional+accommodation+requirement" name="Documentation_regional+accommodation+requirement"  accept="*/*"><br><br>
+    <label for="file">Document on usage of AI and ML in device:</label> <input type="file" id="Documentation_document+on+usage+of+AI+and+ML+in+device" name="Documentation_document+on+usage+of+AI+and+ML+in+device"  accept="*/*"><br><br>
+    <label for="file">Documents on compliance with jurisdictional regulatory requirements:</label> <input type="file" id="Documentation_documents+on+compliance+with+jurisdictional+regulatory+requirements" name="Documentation_documents+on+compliance+with+jurisdictional+regulatory+requirements"  accept="*/*"><br><br>
+    <label for="file">Regulatory documentation:</label> <input type="file" id="Documentation_regulatory+documentation" name="Documentation_regulatory+documentation"  accept="*/*"><br><br>
+    <label for="file">Risk management file:</label> <input type="file" id="Documentation_risk+management+file" name="Documentation_risk+management+file"  accept="*/*"><br><br>
+    <label for="file">Device record:</label> <input type="file" id="Documentation_device+record" name="Documentation_device+record"  accept="*/*"><br><br>
+    <label for="file">Health software product identifier document:</label> <input type="file" id="Documentation_health+software+product+identifier+document" name="Documentation_health+software+product+identifier+document"  accept="*/*"><br><br>
+    <label for="file">Document on manufacturer contract information:</label> <input type="file" id="Documentation_document+on+manufacturer+contract+information" name="Documentation_document+on+manufacturer+contract+information"  accept="*/*"><br><br>
+    <label for="file">Technical Use Specification:</label> <input type="file" id="Documentation_Technical+Use+Specification" name="Documentation_Technical+Use+Specification"  accept="*/*"><br><br>
+    <label for="file">Trend Reportings:</label> <input type="file" id="Documentation_Trend+Reportings" name="Documentation_Trend+Reportings"  accept="*/*"><br><br>
+    <label for="file">Document on special skills required from user:</label> <input type="file" id="Documentation_document+on+special+skills+required+from+user" name="Documentation_document+on+special+skills+required+from+user"  accept="*/*"><br><br>
+    <label for="file">General documentation:</label> <input type="file" id="GeneralContent_documentation" name="GeneralContent_documentation"  accept="*/*"><br><br>
+    <label for="file">Medical it-network risk management file:</label> <input type="file" id="Documentation_medical+it-network+risk+management+file" name="Documentation_medical+it-network+risk+management+file"  accept="*/*"><br><br>
+    <label for="file">security case:</label> <input type="file" id="GeneralContent_security+case" name="GeneralContent_security+case"  accept="*/*"><br><br>
+    <label for="file">Assurance case report:</label> <input type="file" id="Documentation_assuranceCaseReport" name="Documentation_assuranceCaseReport"  accept="*/*"><br><br>
     <input type="submit" value="Upload">
 </form>
 
@@ -43,26 +83,46 @@
 
         return true; // Allow the form to submit
     }
+
+    async function checkAuthAndUpload() {
+        const authCheck = await fetch('/heartbeat', { method: 'GET' });
+
+        if (authCheck.status === 200) {
+            document.getElementById('form_validation').submit();
+        } else {
+            window.location.href = '/';
+        }
+    }
+
+    async function checkAuthAndSign() {
+        const authCheck = await fetch('/heartbeat', { method: 'GET' });
+
+        if (authCheck.status === 200) {
+            document.getElementById('form_signature').submit();
+        } else {
+            window.location.href = '/';
+        }
+    }
 </script>
 
 <h1>Upload to sign Interface</h1>
 
-<form action="/file/upload" method="post" enctype="multipart/form-data">
+<form id="form_signature" action="/file/upload" method="post" enctype="multipart/form-data">
     <label for="file">Choose file to upload:</label>
 
     <input type="file" id="file" name="file" accept="*/*">
     <br><br>
-    <input type="submit" value="Upload">
+    <button type="button" onclick="checkAuthAndSign()">Upload</button>
 </form>
 
 <h1>Signature verification Interface</h1>
 
-<form action="/filevalidation/upload" method="post" enctype="multipart/form-data">
+<form id="form_validation" action="/filevalidation/upload" method="post" enctype="multipart/form-data">
     <label for="file">Choose file to upload:</label>
 
     <input type="file" id="filetoverify" name="filetoverify" accept="*/*">
     <br><br>
-    <input type="submit" value="Upload">
+    <button type="button" onclick="checkAuthAndUpload()">Upload</button>
 </form>
 
 

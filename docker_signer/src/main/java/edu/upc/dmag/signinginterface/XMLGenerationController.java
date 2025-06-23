@@ -1,9 +1,7 @@
 package edu.upc.dmag.signinginterface;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,6 +17,7 @@ import org.w3c.dom.*;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.stream.Collectors;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -107,50 +106,154 @@ public class XMLGenerationController {
     }
 
     @PostMapping("/generateRisksWithModel")
-    public ResponseEntity<byte[]> generateXmlWithModel(@RequestParam("ceafile") MultipartFile model) throws Exception {
-        Random random = new Random(System.currentTimeMillis());
-        int seed = random.nextInt();
-
-        List<String> riskNames = generateSubSelectionRisks(seed, XMLGenerationController.riskNames);
-
-        return fromRisksToXML(seed, riskNames, model);
-    }
-
-    @PostMapping("/generateRisksWithModel")
-    public ResponseEntity<byte[]> generateXmlWithModelAndEvidences(
+    public ResponseEntity<byte[]> generateXmlWithModel(
+            //For modelling
             @RequestParam("ceafile") MultipartFile model,
-            @RequestParam(value="softwareUpdatesLog", required=false) MultipartFile softwareUpdatesLog,
-            @RequestParam(value="softwareVersionNumbersLog", required=false) MultipartFile softwareVersionNumbersLog,
-            @RequestParam(value="validationReport", required=false) MultipartFile validationReport,
-            @RequestParam(value="trendReport", required=false) MultipartFile trendReport,
-            @RequestParam(value="technicalDescription", required=false) MultipartFile technicalDescription,
-            @RequestParam(value="documentationIntegratedToDevice", required=false) MultipartFile documentationIntegratedToDevice,
-            @RequestParam(value="riskManagementPlan", required=false) MultipartFile riskManagementPlan,
-            @RequestParam(value="instructionsOfUse", required=false) MultipartFile instructionsOfUse,
-            @RequestParam(value="instructionsForUse", required=false) MultipartFile instructionsForUse,
-            @RequestParam(value="connectivityTroubleshootingInformationDocument", required=false) MultipartFile connectivityTroubleshootingInformationDocument,
-            @RequestParam(value="disclaimerAndWarningDocument", required=false) MultipartFile disclaimerAndWarningDocument,
-            @RequestParam(value="regionalAccommodationRequirement", required=false) MultipartFile regionalAccommodationRequirement,
-            @RequestParam(value="documentOnUsageOfAIAndMLInDevice", required=false) MultipartFile documentOnUsageOfAIAndMLInDevice,
-            @RequestParam(value="documentsOnComplianceWithJurisdictionalRegulatoryRequirements", required=false) MultipartFile documentsOnComplianceWithJurisdictionalRegulatoryRequirements,
-            @RequestParam(value="regulatoryDocumentation", required=false) MultipartFile regulatoryDocumentation,
-            @RequestParam(value="riskManagementFile", required=false) MultipartFile riskManagementFile,
-            @RequestParam(value="deviceRecord", required=false) MultipartFile deviceRecord,
-            @RequestParam(value="healthSoftwareProductIdentifierDocument", required=false) MultipartFile healthSoftwareProductIdentifierDocument,
-            @RequestParam(value="documentOnManufacturerContractInformation", required=false) MultipartFile documentOnManufacturerContractInformation,
-            @RequestParam(value="technicalUseSpecification", required=false) MultipartFile technicalUseSpecification,
-            @RequestParam(value="trendReportings", required=false) MultipartFile trendReportings,
-            @RequestParam(value="documentOnSpecialSkillsRequiredFromUser", required=false) MultipartFile documentOnSpecialSkillsRequiredFromUser,
-            @RequestParam(value="instructionForUse", required=false) MultipartFile instructionForUse,
-            @RequestParam(value="medicalItNetworkRiskManagementFile", required=false) MultipartFile medicalItNetworkRiskManagementFile,
-            @RequestParam(value="assuranceCaseReport", required=false) MultipartFile assuranceCaseReport
+            //For TVRA
+            @RequestParam(value = "TVRA_Model", required = false) MultipartFile TVRA_model,
+            @RequestParam(value = "TVRA_Attack+Paths", required = false) MultipartFile TVRA_AttackPaths,
+            @RequestParam(value = "TVRA_Recommendations", required = false) MultipartFile TVRA_Recommendations,
+            @RequestParam(value = "TVRA_Threats", required = false) MultipartFile TVRA_Threats,
+            @RequestParam(value = "TVRA_Report", required = false) MultipartFile TVRA_Report,
+            //For IoMT recommendation
+            @RequestParam(value = "CR_model", required = false) MultipartFile CR_model,
+            @RequestParam(value = "CR_result", required = false) MultipartFile CR_result,
+            //For assurance
+            @RequestParam(value = "Documentation_software+updates+log", required = false) MultipartFile Documentation_softwareUpdatesLog,
+            @RequestParam(value = "Documentation_software+version+numbers+log", required = false) MultipartFile Documentation_softwareVersionNumbersLog,
+            @RequestParam(value = "Documentation_validation+report", required = false) MultipartFile Documentation_validationReport,
+            @RequestParam(value = "Documentation_Trend+Report", required = false) MultipartFile documentation_TrendReport,
+            @RequestParam(value = "Documentation_technical+description", required = false) MultipartFile Documentation_technicalDescription,
+            @RequestParam(value = "Documentation_documentation+integrated+to+device", required = false) MultipartFile Documentation_documentationIntegratedToDevice,
+            @RequestParam(value = "Documentation_risk+management+plan", required = false) MultipartFile Documentation_riskManagementPlan,
+            @RequestParam(value = "Documentation_instructions+of+use", required = false) MultipartFile Documentation_instructionsOfUse,
+            @RequestParam(value = "Documentation_connectivity+troubleshooting+information+document", required = false) MultipartFile Documentation_connectivityTroubleshootingInformationDocument,
+            @RequestParam(value = "Documentation_disclaimer+and+warning+document", required = false) MultipartFile Documentation_disclaimerAndWarningDocument,
+            @RequestParam(value = "Documentation_regional+accommodation+requirement", required = false) MultipartFile Documentation_regionalAccommodationRequirement,
+            @RequestParam(value = "Documentation_document+on+usage+of+AI+and+ML+in+device", required = false) MultipartFile Documentation_documentOnUsageOfAIAndMLInDevice,
+            @RequestParam(value = "Documentation_documents+on+compliance+with+jurisdictional+regulatory+requirements", required = false) MultipartFile Documentation_documentsOnComplianceWithJurisdictionalRegulatoryRequirements,
+            @RequestParam(value = "Documentation_regulatory+documentation", required = false) MultipartFile Documentation_regulatoryDocumentation,
+            @RequestParam(value = "Documentation_risk+management+file", required = false) MultipartFile Documentation_riskManagementFile,
+            @RequestParam(value = "Documentation_device+record", required = false) MultipartFile Documentation_deviceRecord,
+            @RequestParam(value = "Documentation_health+software+product+identifier+document", required = false) MultipartFile Documentation_healthSoftwareProductIdentifierDocument,
+            @RequestParam(value = "Documentation_document+on+manufacturer+contract+information", required = false) MultipartFile Documentation_documentOnManufacturerContractInformation,
+            @RequestParam(value = "Documentation_Technical+Use+Specification", required = false) MultipartFile Documentation_technicalUseSpecification,
+            @RequestParam(value = "Documentation_Trend+Reportings", required = false) MultipartFile Documentation_TrendReportings,
+            @RequestParam(value = "Documentation_document+on+special+skills+required+from+user", required = false) MultipartFile Documentation_DocumentOnSpecialSkillsRequiredFromUser,
+            @RequestParam(value = "GeneralContent_documentation", required = false) MultipartFile GeneralContent_documentation,
+            @RequestParam(value = "Documentation_medical+it-network+risk+management+file", required = false) MultipartFile Documentation_medicalItNetworkRiskManagementFile,
+            @RequestParam(value = "GeneralContent_security+case", required = false) MultipartFile GeneralContent_securityCase,
+            @RequestParam(value = "Documentation_assuranceCaseReport", required = false) MultipartFile Documentation_assuranceCaseReport
     ) throws Exception {
         Random random = new Random(System.currentTimeMillis());
         int seed = random.nextInt();
 
         List<String> riskNames = generateSubSelectionRisks(seed, XMLGenerationController.riskNames);
+        Map<String, MultipartFile> extraFields = new HashMap<>();
+        extraFields.put("ceafile", model);
 
-        return fromRisksToXML(seed, riskNames, model);
+        if (CR_model != null){
+            extraFields.put("CR_model",CR_model);
+        }
+        if (CR_result != null){
+            extraFields.put( "CR_result",CR_result);
+        }
+
+
+        if (TVRA_model != null){
+            extraFields.put("TVRA_Model",TVRA_model);
+        }
+        if (TVRA_AttackPaths != null){
+            extraFields.put("TVRA_Attack+Paths",TVRA_AttackPaths);
+        }
+        if (TVRA_Recommendations != null){
+            extraFields.put( "TVRA_Recommendations",TVRA_Recommendations);
+        }
+
+        if (TVRA_Threats != null){
+            extraFields.put("TVRA_Threats",TVRA_Threats);
+        }
+        if (TVRA_Report != null){
+            extraFields.put("TVRA_Report",TVRA_Report);
+        }
+
+        if (Documentation_softwareUpdatesLog != null){
+            extraFields.put("Documentation_softwareUpdatesLog", Documentation_softwareUpdatesLog);;
+        }
+        if (Documentation_softwareVersionNumbersLog != null){
+            extraFields.put("Documentation_softwareVersionNumbersLog", Documentation_softwareVersionNumbersLog);;
+        }
+        if (Documentation_validationReport != null){
+            extraFields.put("Documentation_validationReport", Documentation_validationReport);;
+        }
+        if (documentation_TrendReport != null){
+            extraFields.put("Documentation_TrendReport", documentation_TrendReport);;
+        }
+        if (Documentation_technicalDescription != null){
+            extraFields.put("Documentation_technicalDescription", Documentation_technicalDescription);;
+        }
+        if (Documentation_documentationIntegratedToDevice != null){
+            extraFields.put("Documentation_documentationIntegratedToDevice", Documentation_documentationIntegratedToDevice);;
+        }
+        if (Documentation_riskManagementPlan != null){
+            extraFields.put("Documentation_riskManagementPlan", Documentation_riskManagementPlan);;
+        }
+        if (Documentation_instructionsOfUse != null){
+            extraFields.put("Documentation_instructionsOfUse", Documentation_instructionsOfUse);;
+        }
+        if (Documentation_connectivityTroubleshootingInformationDocument != null){
+            extraFields.put("Documentation_connectivityTroubleshootingInformationDocument", Documentation_connectivityTroubleshootingInformationDocument);;
+        }
+        if (Documentation_disclaimerAndWarningDocument != null){
+            extraFields.put("Documentation_disclaimerAndWarningDocument", Documentation_disclaimerAndWarningDocument);;
+        }
+        if (Documentation_regionalAccommodationRequirement != null){
+            extraFields.put("Documentation_regionalAccommodationRequirement", Documentation_regionalAccommodationRequirement);;
+        }
+        if (Documentation_documentOnUsageOfAIAndMLInDevice != null){
+            extraFields.put("Documentation_documentOnUsageOfAIAndMLInDevice", Documentation_documentOnUsageOfAIAndMLInDevice);;
+        }
+        if (Documentation_documentsOnComplianceWithJurisdictionalRegulatoryRequirements != null){
+            extraFields.put("Documentation_documentsOnComplianceWithJurisdictionalRegulatoryRequirements", Documentation_documentsOnComplianceWithJurisdictionalRegulatoryRequirements);;
+        }
+        if (Documentation_regulatoryDocumentation != null){
+            extraFields.put("Documentation_regulatoryDocumentation", Documentation_regulatoryDocumentation);;
+        }
+        if (Documentation_riskManagementFile != null){
+            extraFields.put("Documentation_riskManagementFile", Documentation_riskManagementFile);;
+        }
+        if (Documentation_deviceRecord != null){
+            extraFields.put("Documentation_deviceRecord", Documentation_deviceRecord);;
+        }
+        if (Documentation_healthSoftwareProductIdentifierDocument != null){
+            extraFields.put("Documentation_healthSoftwareProductIdentifierDocument", Documentation_healthSoftwareProductIdentifierDocument);;
+        }
+        if (Documentation_documentOnManufacturerContractInformation != null){
+            extraFields.put("Documentation_documentOnManufacturerContractInformation", Documentation_documentOnManufacturerContractInformation);;
+        }
+        if (Documentation_technicalUseSpecification != null){
+            extraFields.put("Documentation_technicalUseSpecification", Documentation_technicalUseSpecification);;
+        }
+        if (Documentation_TrendReportings != null){
+            extraFields.put("Documentation_TrendReportings", Documentation_TrendReportings);;
+        }
+        if (Documentation_DocumentOnSpecialSkillsRequiredFromUser != null){
+            extraFields.put("Documentation_DocumentOnSpecialSkillsRequiredFromUser", Documentation_DocumentOnSpecialSkillsRequiredFromUser);;
+        }
+        if (GeneralContent_documentation != null){
+            extraFields.put("GeneralContent_documentation", GeneralContent_documentation);
+        }
+        if (Documentation_medicalItNetworkRiskManagementFile != null){
+            extraFields.put("Documentation_medicalItNetworkRiskManagementFile", Documentation_medicalItNetworkRiskManagementFile);;
+        }
+        if (GeneralContent_securityCase != null){
+            extraFields.put("GeneralContent_securityCase", GeneralContent_securityCase);
+        }
+        if (Documentation_assuranceCaseReport != null){
+            extraFields.put("Documentation_assuranceCaseReport", Documentation_assuranceCaseReport);;
+        }
+
+        return fromRisksToXML(seed, riskNames, extraFields);
     }
 
     private static Node extractRootAndAdaptIt(byte[] xmlDocumentBytes, Document documentToAdaptTo) throws ParserConfigurationException, IOException, SAXException {
@@ -170,7 +273,7 @@ public class XMLGenerationController {
         return documentToAdaptTo.adoptNode(root);
     }
 
-    static String fromRisksToXMLBytesToString(int seed, List<String> riskNames, byte[] toImport) throws Exception {
+    static String fromRisksToXMLBytesToString(int seed, List<String> riskNames, Map<String,byte[]> extraFieldsToImport) throws Exception {
         DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
         Document document = documentBuilder.newDocument();
@@ -185,19 +288,12 @@ public class XMLGenerationController {
         modelDescription.appendChild(seedText);
         root.appendChild(modelDescription);
 
-        if (toImport != null) {
-            Element modelCeaDescription = document.createElement("model_cea_description");
-            Node rootToImport = extractRootAndAdaptIt(toImport, document);
-            rootToImport = document.importNode(rootToImport, true);
-
-            var attributes = rootToImport.getAttributes();
-            for (int i = 0; i < attributes.getLength(); i++) {
-                modelCeaDescription.setAttribute(attributes.item(i).getNodeName(), attributes.item(i).getNodeValue());
+        for (var extraField: extraFieldsToImport.entrySet()) {
+            if (extraField.getValue() == null){
+                continue;
             }
-            NodeList nodesToCopy = rootToImport.getChildNodes();
-            for (int i = 0; i < nodesToCopy.getLength(); i++) {
-                modelCeaDescription.appendChild(document.importNode(nodesToCopy.item(i), true));
-            }
+            Element modelCeaDescription = document.createElement(extraField.getKey());
+            modelCeaDescription.setTextContent(Base64.getEncoder().encodeToString(extraField.getValue()));
             root.appendChild(modelCeaDescription);
         }
 
@@ -220,12 +316,22 @@ public class XMLGenerationController {
         return prettyPrintXML(document);
     }
 
-    private static ResponseEntity<byte[]> fromRisksToXML(int seed, List<String> riskNames, MultipartFile model) throws Exception {
-        return Utils.generateAnswer(fromRisksToXMLBytesToString(seed, riskNames, model.getBytes()), "risks.xml");
+    private static ResponseEntity<byte[]> fromRisksToXML(int seed, List<String> riskNames, Map<String, MultipartFile> fields) throws Exception {
+        var castedFields = fields.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> {
+                    try {
+                        return entry.getValue().getBytes();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        ));
+        return Utils.generateAnswer(fromRisksToXMLBytesToString(seed, riskNames, castedFields), "risks.xml");
     }
 
     private static ResponseEntity<byte[]> fromRisksToXML(int seed, List<String> riskNames) throws Exception {
-        return fromRisksToXML(seed, riskNames, null);
+        return fromRisksToXML(seed, riskNames, Map.of());
     }
 
     @GetMapping("/generateRisks/{seed}")

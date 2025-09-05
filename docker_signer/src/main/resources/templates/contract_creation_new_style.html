@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap Layout</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        header {
+            height: 60px; /* Fixed header height */
+        }
+        footer {
+            height: 50px; /* Fixed footer height */
+        }
+        main {
+            flex: 1;
+            overflow-y: auto;
+        }
+        i.big-icon{
+            font-size: 50px;
+        }
+        .header-logo {
+            height: 100%;
+            max-height: 100%; /* Ensure it doesn't exceed the header */
+            width: auto; /* Maintain aspect ratio */
+            object-fit: contain; /* Keeps the whole logo visible */
+        }
+
+
+
+        .background-container {
+            position: relative;
+            overflow: hidden; /* ensures pseudo-element doesn't spill out */
+            z-index: 0;
+            /*padding: 50px;*/
+            text-align: center;
+            color: white;
+            width: 100%;
+        }
+
+        .background-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://static.wixstatic.com/media/d3bb5c_6979d0ede6394f9c8b620368f35a2903~mv2.jpg/v1/fill/w_345,h_140,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/MedSecurance_web_logo.jpg');
+            background-repeat: repeat; /* repeat the image */
+            background-size: 40px; /* adjust as needed */
+            background-position: 100px 100px;
+            filter: grayscale(100%) opacity(0.3); /* black & white + light effect */
+            z-index: -1; /* put behind content */
+        }
+
+        h2.carousel-item-title {
+            min-height: 2em;
+        }
+
+        h1.carousel-title {
+            min-height: 2em;
+            align-content: end;
+        }
+
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <!--<header class="bg-white border-5 border-bottom d-flex align-items-center justify-content-center">
+        <div class="container h-100 mh-100">
+            <div class="row h-100 mh-100">
+                <div class="col-2 h-100 mh-100">
+                    <img class="header-logo" src="https://static.wixstatic.com/media/d3bb5c_6979d0ede6394f9c8b620368f35a2903~mv2.jpg/v1/fill/w_345,h_140,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/MedSecurance_web_logo.jpg">
+                </div>
+                <div class="col-8  justify-content-center mx-auto text-center" style="font-size: 40px; font-family: Arial, sans-serif;">Contract tool</div>
+            </div>
+        </div>
+    </header>-->
+
+    <header class="bg-white border-5 border-bottom d-flex align-items-center justify-content-center">
+        <div class="col-8  justify-content-center mx-auto text-center"
+             style="
+             font-size: 40px;
+             font-family: Arial, sans-serif;
+             background-image: url('https://static.wixstatic.com/media/d3bb5c_6979d0ede6394f9c8b620368f35a2903~mv2.jpg/v1/fill/w_345,h_140,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/MedSecurance_web_logo.jpg');
+             background-repeat: no-repeat;
+             background-size: auto 60px;
+        ">Contract tool</div>
+        <!--<div class="container h-100 mh-100">
+            <div class="row h-100 mh-100">
+                <div class="col-2 h-100 mh-100">
+                    <img class="header-logo" src="https://static.wixstatic.com/media/d3bb5c_6979d0ede6394f9c8b620368f35a2903~mv2.jpg/v1/fill/w_345,h_140,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/MedSecurance_web_logo.jpg">
+                </div>
+
+            </div>
+        </div>-->
+    </header>
+    <main class="container-flex background-container m-0 d-flex">
+        <div class="container-flex py-5 w-100 justify-content-center h-100">
+            <form class="h-100 w-100 p-3 m-2 d-flex flex-column justify-content-between">
+                <div id="carouselExampleControls" class="carousel slide h-100" data-bs-interval="false" data-bs-wrap="false">
+                    <div class="carousel-inner h-100">
+                        <div class="carousel-item h-100 active" style="background-color: white">
+                            <div class="carousel-item-content h-100 flex">
+                                <div class="carousel-title-container">
+                                    <h1 class="carousel-title" style="color: black">Include CEA model?</h1>
+                                    <h2 style="color: black" class="carousel-item-title"></h2>
+                                </div>
+                                <div
+                                        id="drop-zone-cea-file"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="ceafile" hidden>
+                                </div>
+                                <div id="ceafile_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+
+                        <!-- Communication recommender-->
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content flex">
+                                <h1 class="carousel-title" style="color: black">Include Communication Recommender's model?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(for new analysis in the future)</h2>
+                                <div
+                                        id="drop-zone-CR_model"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="CR_model" hidden>
+                                </div>
+                                <div id="CR_model_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include current Communication Recommender's result?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
+                                <div
+                                        id="drop-zone-CR_result"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="CR_result" hidden>
+                                </div>
+                                <div id="CR_result_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+
+
+
+
+                        <!-- TVRA -->
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include TVRA component's model?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(for new analysis in the future)</h2>
+                                <div
+                                        id="drop-zone-TVRA_model"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="TVRA_model" hidden>
+                                </div>
+                                <div id="TVRA_model_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <!-- TVRA -->
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include current TVRA output's attack paths?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
+                                <div
+                                        id="drop-zone-TVRA_Attack+Paths"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="TVRA_Attack+Paths" hidden>
+                                </div>
+                                <div id="TVRA_Attack+Paths_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include current TVRA output's recommendations?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
+                                <div
+                                        id="drop-zone-TVRA_Recommendations"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="TVRA_Recommendations" hidden>
+                                </div>
+                                <div id="TVRA_Recommendations_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include current TVRA output's identified threats?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
+                                <div
+                                        id="drop-zone-TVRA_Threats"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="TVRA_Threats" hidden>
+                                </div>
+                                <div id="TVRA_Threats_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include current TVRA output's report?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
+                                <div
+                                        id="drop-zone-TVRA_Report"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="TVRA_Report" hidden>
+                                </div>
+                                <div id="TVRA_Report_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <!-- For assurance -->
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black"><!--ToDo--></h1>
+                                <h2 style="color: black" class="carousel-item-title"></h2>
+                                <div
+                                        id="drop-zone-Documentation_software+updates+log"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_software+updates+log" hidden>
+                                </div>
+                                <div id="Documentation_software+updates+log_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include Validation Report?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with IEC 82304)</h2>
+                                <div
+                                        id="drop-zone-Documentation_validation+report"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_validation+report" hidden>
+                                </div>
+                                <div id="Documentation_validation+report_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include the trend report?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with MDCG)</h2>
+                                <div
+                                        id="drop-zone-Documentation_Trend+Report"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_Trend+Report" hidden>
+                                </div>
+                                <div id="Documentation_Trend+Report_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include the technical description?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with IEC 82304)</h2>
+                                <div
+                                        id="drop-zone-Documentation_technical+description"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_technical+description" hidden>
+                                </div>
+                                <div id="Documentation_technical+description_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black"><!--ToDo-->></h1>
+                                <h2 style="color: black" class="carousel-item-title"></h2>
+                                <div
+                                        id="drop-zone-Documentation_documentation+integrated+to+device"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_documentation+integrated+to+device" hidden>
+                                </div>
+                                <div id="Documentation_documentation+integrated+to+device_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include the risk management plan?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with ISO 14971)</h2>
+                                <div
+                                        id="drop-zone-Documentation_risk+management+plan"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_risk+management+plan" hidden>
+                                </div>
+                                <div id="Documentation_risk+management+plan_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include the instructions for use in the contract?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with MDCG, IEC 82304)</h2>
+                                <div
+                                        id="drop-zone-Documentation_instructions+of+use"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_instructions+of+use" hidden>
+                                </div>
+                                <div id="Documentation_instructions+of+use_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black"><!--ToDo--></h1>
+                                <h2 style="color: black" class="carousel-item-title"></h2>
+                                <div
+                                        id="drop-zone-Documentation_connectivity+troubleshooting+information+document"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_connectivity+troubleshooting+information+document" hidden>
+                                </div>
+                                <div id="Documentation_connectivity+troubleshooting+information+document_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black"><!--ToDo--></h1>
+                                <h2 style="color: black" class="carousel-item-title"></h2>
+                                <div
+                                        id="drop-zone-Documentation_disclaimer+and+warning+document"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_disclaimer+and+warning+document" hidden>
+                                </div>
+                                <div id="Documentation_disclaimer+and+warning+document_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black"><!--ToDo--></h1>
+                                <h2 style="color: black" class="carousel-item-title"></h2>
+                                <div
+                                        id="drop-zone-Documentation_regional+accommodation+requirement"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_regional+accommodation+requirement" hidden>
+                                </div>
+                                <div id="Documentation_regional+accommodation+requirement_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black"><!--ToDo--></h1>
+                                <h2 style="color: black" class="carousel-item-title"></h2>
+                                <div
+                                        id="drop-zone-Documentation_document+on+usage+of+AI+and+ML+in+device"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_document+on+usage+of+AI+and+ML+in+device" hidden>
+                                </div>
+                                <div id="Documentation_document+on+usage+of+AI+and+ML+in+device_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black"><!--ToDo-->></h1>
+                                <h2 style="color: black" class="carousel-item-title"></h2>
+                                <div
+                                        id="drop-zone-Documentation_documents+on+compliance+with+jurisdictional+regulatory+requirements"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_documents+on+compliance+with+jurisdictional+regulatory+requirements" hidden>
+                                </div>
+                                <div id="Documentation_documents+on+compliance+with+jurisdictional+regulatory+requirements_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black"><!--ToDo--></h1>
+                                <h2 style="color: black" class="carousel-item-title"></h2>
+                                <div
+                                        id="drop-zone-Documentation_regulatory+documentation"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_regulatory+documentation" hidden>
+                                </div>
+                                <div id="Documentation_regulatory+documentation_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include the risk management in the contract?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with ISO 14971, MDCG and 80001-1)</h2>
+                                <div
+                                        id="drop-zone-Documentation_risk+management+file"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_risk+management+file" hidden>
+                                </div>
+                                <div id="Documentation_risk+management+file_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black"><!--ToDo-->></h1>
+                                <h2 style="color: black" class="carousel-item-title"></h2>
+                                <div
+                                        id="drop-zone-Documentation_device+record"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_device+record" hidden>
+                                </div>
+                                <div id="Documentation_device+record_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include the health software product identifier in the contract?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with ISO 82304)</h2>
+                                <div
+                                        id="drop-zone-Documentation_health+software+product+identifier+document"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_health+software+product+identifier+document" hidden>
+                                </div>
+                                <div id="Documentation_health+software+product+identifier+document_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include the document on manufacturer in the contract?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with ISO 82304)</h2>
+                                <div
+                                        id="drop-zone-Documentation_document+on+manufacturer+contract+information"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_document+on+manufacturer+contract+information" hidden>
+                                </div>
+                                <div id="Documentation_document+on+manufacturer+contract+information_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black"><!--ToDo--></h1>
+                                <h2 style="color: black" class="carousel-item-title"></h2>
+                                <div
+                                        id="drop-zone-Documentation_Technical+Use+Specification"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_Technical+Use+Specification" hidden>
+                                </div>
+                                <div id="Documentation_Technical+Use+Specification_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include the trend reporting in the contract?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with MDCG)</h2>
+                                <div
+                                        id="drop-zone-Documentation_Trend+Reportings"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_Trend+Reportings" hidden>
+                                </div>
+                                <div id="Documentation_Trend+Reportings_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include the document on special skills required from user in the contract?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with IEC 82304)</h2>
+                                <div
+                                        id="drop-zone-Documentation_document+on+special+skills+required+from+user"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_document+on+special+skills+required+from+user" hidden>
+                                </div>
+                                <div id="Documentation_document+on+special+skills+required+from+user_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include the medical it-network risk management file in the contract?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with IEC80001-1)</h2>
+                                <div
+                                        id="drop-zone-Documentation_medical+it-network+risk+management+file"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_medical+it-network+risk+management+file" hidden>
+                                </div>
+                                <div id="Documentation_medical+it-network+risk+management+file_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include the security case in the contract?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with IEC80001-1)</h2>
+                                <div
+                                        id="drop-zone-GeneralContent_security+case"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="GeneralContent_security+case" hidden>
+                                </div>
+                                <div id="GeneralContent_security+case_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black">Include the assurance case in the contract?</h1>
+                                <h2 style="color: black" class="carousel-item-title">(to comply with IEC80001-1)</h2>
+                                <div
+                                        id="drop-zone-Documentation_assuranceCaseReport"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="Documentation_assuranceCaseReport" hidden>
+                                </div>
+                                <div id="Documentation_assuranceCaseReport_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item h-100" style="background-color: white">
+                            <div class="carousel-item-content">
+                                <h1 class="carousel-title" style="color: black"><!--ToDo--></h1>
+                                <h2 style="color: black" class="carousel-item-title"></h2>
+                                <div
+                                        id="drop-zone-GeneralContent_documentation"
+                                        class="border border-secondary rounded p-5 text-center bg-light"
+                                        style="cursor: pointer; transition: background 0.3s;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <input type="file" id="GeneralContent_documentation" hidden>
+                                </div>
+                                <div id="GeneralContent_documentation_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white d-flex align-items-center justify-content-center"
+            style=" font-family: Arial, sans-serif;"
+    >
+        MedSecurance Toolbox
+    </footer>
+</div>
+
+<!-- Bootstrap JS (Optional, for components) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

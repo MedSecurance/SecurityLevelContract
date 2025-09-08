@@ -109,41 +109,29 @@ public class XMLGenerationController {
     public ResponseEntity<byte[]> generateXmlWithModel(
             //For modelling
             @RequestParam("ceafile") MultipartFile model,
+            //For IoMT recommendation
+            @RequestParam(value = "CR_model", required = false) MultipartFile CR_model,
+            @RequestParam(value = "CR_result", required = false) MultipartFile CR_result,
             //For TVRA
             @RequestParam(value = "TVRA_Model", required = false) MultipartFile TVRA_model,
             @RequestParam(value = "TVRA_Attack+Paths", required = false) MultipartFile TVRA_AttackPaths,
             @RequestParam(value = "TVRA_Recommendations", required = false) MultipartFile TVRA_Recommendations,
             @RequestParam(value = "TVRA_Threats", required = false) MultipartFile TVRA_Threats,
             @RequestParam(value = "TVRA_Report", required = false) MultipartFile TVRA_Report,
-            //For IoMT recommendation
-            @RequestParam(value = "CR_model", required = false) MultipartFile CR_model,
-            @RequestParam(value = "CR_result", required = false) MultipartFile CR_result,
             //For assurance
+            @RequestParam(value = "Documentation_risk+management+plan", required = false) MultipartFile Documentation_riskManagementPlan,
+            @RequestParam(value = "GeneralContent_security+case", required = false) MultipartFile GeneralContent_securityCase,
+            @RequestParam(value = "Documentation_medical+it-network+risk+management+file", required = false) MultipartFile Documentation_medicalItNetworkRiskManagementFile,
+            @RequestParam(value = "Documentation_assuranceCaseReport", required = false) MultipartFile Documentation_assuranceCaseReport
+            @RequestParam(value = "Documentation_instructions+of+use", required = false) MultipartFile Documentation_instructionsOfUse,
+            @RequestParam(value = "Documentation_validation+report", required = false) MultipartFile Documentation_validationReport,
+            @RequestParam(value = "Documentation_technical+description", required = false) MultipartFile Documentation_technicalDescription,
+            @RequestParam(value = "Documentation_Trend+Report", required = false) MultipartFile documentation_TrendReport,
             @RequestParam(value = "Documentation_software+updates+log", required = false) MultipartFile Documentation_softwareUpdatesLog,
             @RequestParam(value = "Documentation_software+version+numbers+log", required = false) MultipartFile Documentation_softwareVersionNumbersLog,
-            @RequestParam(value = "Documentation_validation+report", required = false) MultipartFile Documentation_validationReport,
-            @RequestParam(value = "Documentation_Trend+Report", required = false) MultipartFile documentation_TrendReport,
-            @RequestParam(value = "Documentation_technical+description", required = false) MultipartFile Documentation_technicalDescription,
-            @RequestParam(value = "Documentation_documentation+integrated+to+device", required = false) MultipartFile Documentation_documentationIntegratedToDevice,
-            @RequestParam(value = "Documentation_risk+management+plan", required = false) MultipartFile Documentation_riskManagementPlan,
-            @RequestParam(value = "Documentation_instructions+of+use", required = false) MultipartFile Documentation_instructionsOfUse,
-            @RequestParam(value = "Documentation_connectivity+troubleshooting+information+document", required = false) MultipartFile Documentation_connectivityTroubleshootingInformationDocument,
-            @RequestParam(value = "Documentation_disclaimer+and+warning+document", required = false) MultipartFile Documentation_disclaimerAndWarningDocument,
-            @RequestParam(value = "Documentation_regional+accommodation+requirement", required = false) MultipartFile Documentation_regionalAccommodationRequirement,
-            @RequestParam(value = "Documentation_document+on+usage+of+AI+and+ML+in+device", required = false) MultipartFile Documentation_documentOnUsageOfAIAndMLInDevice,
-            @RequestParam(value = "Documentation_documents+on+compliance+with+jurisdictional+regulatory+requirements", required = false) MultipartFile Documentation_documentsOnComplianceWithJurisdictionalRegulatoryRequirements,
             @RequestParam(value = "Documentation_regulatory+documentation", required = false) MultipartFile Documentation_regulatoryDocumentation,
-            @RequestParam(value = "Documentation_risk+management+file", required = false) MultipartFile Documentation_riskManagementFile,
             @RequestParam(value = "Documentation_device+record", required = false) MultipartFile Documentation_deviceRecord,
-            @RequestParam(value = "Documentation_health+software+product+identifier+document", required = false) MultipartFile Documentation_healthSoftwareProductIdentifierDocument,
-            @RequestParam(value = "Documentation_document+on+manufacturer+contract+information", required = false) MultipartFile Documentation_documentOnManufacturerContractInformation,
             @RequestParam(value = "Documentation_Technical+Use+Specification", required = false) MultipartFile Documentation_technicalUseSpecification,
-            @RequestParam(value = "Documentation_Trend+Reportings", required = false) MultipartFile Documentation_TrendReportings,
-            @RequestParam(value = "Documentation_document+on+special+skills+required+from+user", required = false) MultipartFile Documentation_DocumentOnSpecialSkillsRequiredFromUser,
-            @RequestParam(value = "GeneralContent_documentation", required = false) MultipartFile GeneralContent_documentation,
-            @RequestParam(value = "Documentation_medical+it-network+risk+management+file", required = false) MultipartFile Documentation_medicalItNetworkRiskManagementFile,
-            @RequestParam(value = "GeneralContent_security+case", required = false) MultipartFile GeneralContent_securityCase,
-            @RequestParam(value = "Documentation_assuranceCaseReport", required = false) MultipartFile Documentation_assuranceCaseReport
     ) throws Exception {
         Random random = new Random(System.currentTimeMillis());
         int seed = random.nextInt();
@@ -169,90 +157,51 @@ public class XMLGenerationController {
         if (TVRA_Recommendations != null){
             extraFields.put( "TVRA_Recommendations",TVRA_Recommendations);
         }
-
         if (TVRA_Threats != null){
             extraFields.put("TVRA_Threats",TVRA_Threats);
         }
         if (TVRA_Report != null){
             extraFields.put("TVRA_Report",TVRA_Report);
         }
-
+        if (Documentation_riskManagementPlan != null){
+            extraFields.put("Documentation_riskManagementPlan", Documentation_riskManagementPlan);;
+        }
+        if (GeneralContent_securityCase != null){
+            extraFields.put("GeneralContent_securityCase", GeneralContent_securityCase);
+        }
+        if (Documentation_medicalItNetworkRiskManagementFile != null){
+            extraFields.put("Documentation_medicalItNetworkRiskManagementFile", Documentation_medicalItNetworkRiskManagementFile);;
+        }
+        if (Documentation_assuranceCaseReport != null){
+            extraFields.put("Documentation_assuranceCaseReport", Documentation_assuranceCaseReport);;
+        }
+        if (Documentation_instructionsOfUse != null){
+            extraFields.put("Documentation_instructionsOfUse", Documentation_instructionsOfUse);;
+        }
+        if (Documentation_validationReport != null){
+            extraFields.put("Documentation_validationReport", Documentation_validationReport);;
+        }
+        if (Documentation_technicalDescription != null){
+            extraFields.put("Documentation_technicalDescription", Documentation_technicalDescription);;
+        }
+        if (documentation_TrendReport != null){
+            extraFields.put("Documentation_TrendReport", documentation_TrendReport);;
+        }
         if (Documentation_softwareUpdatesLog != null){
             extraFields.put("Documentation_softwareUpdatesLog", Documentation_softwareUpdatesLog);;
         }
         if (Documentation_softwareVersionNumbersLog != null){
             extraFields.put("Documentation_softwareVersionNumbersLog", Documentation_softwareVersionNumbersLog);;
         }
-        if (Documentation_validationReport != null){
-            extraFields.put("Documentation_validationReport", Documentation_validationReport);;
-        }
-        if (documentation_TrendReport != null){
-            extraFields.put("Documentation_TrendReport", documentation_TrendReport);;
-        }
-        if (Documentation_technicalDescription != null){
-            extraFields.put("Documentation_technicalDescription", Documentation_technicalDescription);;
-        }
-        if (Documentation_documentationIntegratedToDevice != null){
-            extraFields.put("Documentation_documentationIntegratedToDevice", Documentation_documentationIntegratedToDevice);;
-        }
-        if (Documentation_riskManagementPlan != null){
-            extraFields.put("Documentation_riskManagementPlan", Documentation_riskManagementPlan);;
-        }
-        if (Documentation_instructionsOfUse != null){
-            extraFields.put("Documentation_instructionsOfUse", Documentation_instructionsOfUse);;
-        }
-        if (Documentation_connectivityTroubleshootingInformationDocument != null){
-            extraFields.put("Documentation_connectivityTroubleshootingInformationDocument", Documentation_connectivityTroubleshootingInformationDocument);;
-        }
-        if (Documentation_disclaimerAndWarningDocument != null){
-            extraFields.put("Documentation_disclaimerAndWarningDocument", Documentation_disclaimerAndWarningDocument);;
-        }
-        if (Documentation_regionalAccommodationRequirement != null){
-            extraFields.put("Documentation_regionalAccommodationRequirement", Documentation_regionalAccommodationRequirement);;
-        }
-        if (Documentation_documentOnUsageOfAIAndMLInDevice != null){
-            extraFields.put("Documentation_documentOnUsageOfAIAndMLInDevice", Documentation_documentOnUsageOfAIAndMLInDevice);;
-        }
-        if (Documentation_documentsOnComplianceWithJurisdictionalRegulatoryRequirements != null){
-            extraFields.put("Documentation_documentsOnComplianceWithJurisdictionalRegulatoryRequirements", Documentation_documentsOnComplianceWithJurisdictionalRegulatoryRequirements);;
-        }
         if (Documentation_regulatoryDocumentation != null){
             extraFields.put("Documentation_regulatoryDocumentation", Documentation_regulatoryDocumentation);;
-        }
-        if (Documentation_riskManagementFile != null){
-            extraFields.put("Documentation_riskManagementFile", Documentation_riskManagementFile);;
         }
         if (Documentation_deviceRecord != null){
             extraFields.put("Documentation_deviceRecord", Documentation_deviceRecord);;
         }
-        if (Documentation_healthSoftwareProductIdentifierDocument != null){
-            extraFields.put("Documentation_healthSoftwareProductIdentifierDocument", Documentation_healthSoftwareProductIdentifierDocument);;
-        }
-        if (Documentation_documentOnManufacturerContractInformation != null){
-            extraFields.put("Documentation_documentOnManufacturerContractInformation", Documentation_documentOnManufacturerContractInformation);;
-        }
         if (Documentation_technicalUseSpecification != null){
             extraFields.put("Documentation_technicalUseSpecification", Documentation_technicalUseSpecification);;
         }
-        if (Documentation_TrendReportings != null){
-            extraFields.put("Documentation_TrendReportings", Documentation_TrendReportings);;
-        }
-        if (Documentation_DocumentOnSpecialSkillsRequiredFromUser != null){
-            extraFields.put("Documentation_DocumentOnSpecialSkillsRequiredFromUser", Documentation_DocumentOnSpecialSkillsRequiredFromUser);;
-        }
-        if (GeneralContent_documentation != null){
-            extraFields.put("GeneralContent_documentation", GeneralContent_documentation);
-        }
-        if (Documentation_medicalItNetworkRiskManagementFile != null){
-            extraFields.put("Documentation_medicalItNetworkRiskManagementFile", Documentation_medicalItNetworkRiskManagementFile);;
-        }
-        if (GeneralContent_securityCase != null){
-            extraFields.put("GeneralContent_securityCase", GeneralContent_securityCase);
-        }
-        if (Documentation_assuranceCaseReport != null){
-            extraFields.put("Documentation_assuranceCaseReport", Documentation_assuranceCaseReport);;
-        }
-
         return fromRisksToXML(seed, riskNames, extraFields);
     }
 

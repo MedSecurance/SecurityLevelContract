@@ -122,16 +122,11 @@ public class XMLGenerationController {
             @RequestParam(value = "Documentation_risk+management+plan", required = false) MultipartFile Documentation_riskManagementPlan,
             @RequestParam(value = "GeneralContent_security+case", required = false) MultipartFile GeneralContent_securityCase,
             @RequestParam(value = "Documentation_medical+it-network+risk+management+file", required = false) MultipartFile Documentation_medicalItNetworkRiskManagementFile,
-            @RequestParam(value = "Documentation_assuranceCaseReport", required = false) MultipartFile Documentation_assuranceCaseReport
+            @RequestParam(value = "Documentation_assuranceCaseReport", required = false) MultipartFile Documentation_assuranceCaseReport,
             @RequestParam(value = "Documentation_instructions+of+use", required = false) MultipartFile Documentation_instructionsOfUse,
             @RequestParam(value = "Documentation_validation+report", required = false) MultipartFile Documentation_validationReport,
             @RequestParam(value = "Documentation_technical+description", required = false) MultipartFile Documentation_technicalDescription,
-            @RequestParam(value = "Documentation_Trend+Report", required = false) MultipartFile documentation_TrendReport,
-            @RequestParam(value = "Documentation_software+updates+log", required = false) MultipartFile Documentation_softwareUpdatesLog,
-            @RequestParam(value = "Documentation_software+version+numbers+log", required = false) MultipartFile Documentation_softwareVersionNumbersLog,
-            @RequestParam(value = "Documentation_regulatory+documentation", required = false) MultipartFile Documentation_regulatoryDocumentation,
-            @RequestParam(value = "Documentation_device+record", required = false) MultipartFile Documentation_deviceRecord,
-            @RequestParam(value = "Documentation_Technical+Use+Specification", required = false) MultipartFile Documentation_technicalUseSpecification,
+            @RequestParam(value = "Documentation_Trend+Report", required = false) MultipartFile documentation_TrendReport
     ) throws Exception {
         Random random = new Random(System.currentTimeMillis());
         int seed = random.nextInt();
@@ -152,7 +147,7 @@ public class XMLGenerationController {
             extraFields.put("TVRA_Model",TVRA_model);
         }
         if (TVRA_AttackPaths != null){
-            extraFields.put("TVRA_Attack+Paths",TVRA_AttackPaths);
+            extraFields.put("TVRA_AttackPaths",TVRA_AttackPaths);
         }
         if (TVRA_Recommendations != null){
             extraFields.put( "TVRA_Recommendations",TVRA_Recommendations);
@@ -186,21 +181,6 @@ public class XMLGenerationController {
         }
         if (documentation_TrendReport != null){
             extraFields.put("Documentation_TrendReport", documentation_TrendReport);;
-        }
-        if (Documentation_softwareUpdatesLog != null){
-            extraFields.put("Documentation_softwareUpdatesLog", Documentation_softwareUpdatesLog);;
-        }
-        if (Documentation_softwareVersionNumbersLog != null){
-            extraFields.put("Documentation_softwareVersionNumbersLog", Documentation_softwareVersionNumbersLog);;
-        }
-        if (Documentation_regulatoryDocumentation != null){
-            extraFields.put("Documentation_regulatoryDocumentation", Documentation_regulatoryDocumentation);;
-        }
-        if (Documentation_deviceRecord != null){
-            extraFields.put("Documentation_deviceRecord", Documentation_deviceRecord);;
-        }
-        if (Documentation_technicalUseSpecification != null){
-            extraFields.put("Documentation_technicalUseSpecification", Documentation_technicalUseSpecification);;
         }
         return fromRisksToXML(seed, riskNames, extraFields);
     }
@@ -288,6 +268,11 @@ public class XMLGenerationController {
         List<String> riskNames = generateSubSelectionRisks(seed, XMLGenerationController.riskNames);
 
         return fromRisksToXML(seed, riskNames);
+    }
+
+    @GetMapping("/generateContract")
+    public String generateXmlBySeed() throws Exception {
+        return "contract_creation_new_style.html";
     }
 
     public static String prettyPrintXML(Document document) throws Exception {

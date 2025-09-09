@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Controller
-@RequestMapping("/file")
+@RequestMapping("/signer")
 public class FileController {
     public void getUserRolesFromKeycloak() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -37,7 +37,7 @@ public class FileController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<byte[]> uploadFile(@RequestParam("file") MultipartFile file,
+    public ResponseEntity<byte[]> uploadFile(@RequestParam("to_sign") MultipartFile file,
                                              @AuthenticationPrincipal Jwt principal) {
         if (file.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

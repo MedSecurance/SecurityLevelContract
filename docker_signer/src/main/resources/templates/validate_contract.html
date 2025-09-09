@@ -104,20 +104,30 @@
     <main class="container-flex background-container m-0 d-flex">
         <div class="container-flex py-5 m-auto">
             <div class="row g-4 justify-content-center">
-                <form action="/signer/upload" id="form_to_submit" method="post" enctype="multipart/form-data" class="h-100 w-100 p-3 m-2 d-flex flex-column justify-content-between">
+                <form action="/validator/upload" id="form_to_submit" method="post" enctype="multipart/form-data" class="h-100 w-100 p-3 m-2 d-flex flex-column justify-content-between">
                     <div class="carousel-item-content">
                         <div class="carousel-item-content-title">
-                            <h1 class="carousel-title" style="color: black">Submit contract to sign</h1>
-                            <h2 style="color: black" class="carousel-item-title">(submit and download the signed contract)</h2>
+                            <h1 class="carousel-title" style="color: black">Submit contract to validate signature's of</h1>
+
+                            <div th:if="${hasSignatures != null}">
+                                <h2 style="color: black" class="carousel-item-title" th:if="${!hasSignatures}">There are no signatures!</h2>
+                                <div th:if="${signatureValid != null}">
+                                    <h2 style="color: black" class="carousel-item-title" th:if="${signatureValid}">Is valid!</h2>
+                                    <h2 style="color: black" class="carousel-item-title" th:unless="${signatureValid}">Is not valid!</h2>
+                                </div>
+                            </div>
+                            <div th:unless="${hasSignatures != null}">
+                                <h2 style="color: black" class="carousel-item-title"></h2>
+                            </div>
                         </div>
                         <div class="carousel-item-content-main">
                             <div
-                                    id="drop-zone-to_sign"
+                                    id="drop-zone-to_verify"
                                     class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
                                     style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                <i id="to_sign_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                <p id="to_sign_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                <input type="file" id="to_sign" name="to_sign" hidden>
+                                <i id="to_verify_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                <p id="to_verify_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                <input type="file" id="filetoverify" name="filetoverify" hidden>
                             </div>
                         </div>
                         <div class="carousel-item-content-footer">
@@ -142,10 +152,10 @@
 <script>
     uploadable_files = [
         {
-            'dropZone_name': 'drop-zone-to_sign',
-            'fileInput_name': 'to_sign',
-            'fileInfo_name': 'to_sign_feedback',
-            'icon': 'to_sign_icon'
+            'dropZone_name': 'drop-zone-to_verify',
+            'fileInput_name': 'filetoverify',
+            'fileInfo_name': 'to_verify_feedback',
+            'icon': 'to_verify_icon'
         }
     ]
 

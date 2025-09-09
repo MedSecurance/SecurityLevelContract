@@ -9,6 +9,7 @@
       "secret": "fTD8XMhlUbhadObG28Ey9S1SI9dX8ICz",
       "redirectUris": [
         "http://localhost:8081/login/oauth2/code/keycloak",
+        "http://signer.consumer/login/oauth2/code/keycloak",
         "http://localhost:8086/login/oauth2/code/keycloak",
         "https://oauth.pstmn.io/v1/callback"
       ],

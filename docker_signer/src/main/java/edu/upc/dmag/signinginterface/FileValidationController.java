@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -24,8 +26,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Controller
-@RequestMapping("/filevalidation")
+@RequestMapping("/validator")
 public class FileValidationController {
+    private static final Logger logger = LoggerFactory.getLogger(FileValidationController.class);
+
     public void getUserRolesFromKeycloak() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -43,10 +47,15 @@ public class FileValidationController {
         // Read original file content
         String content = new String(file.getBytes(), StandardCharsets.UTF_8);
 
-        boolean signatureValid = Signer.validate(content);
-
-        model.addAttribute("signatureValid", signatureValid);
-        return "index";
+        Boolean signatureValid = Signer.validate(content);
+        //logger.debug("Debugging information for /hello endpoint");
+        if (signatureValid == null) {
+            model.addAttribute("hasSignatures", false);
+        } else {
+            model.addAttribute("hasSignatures", true);
+            model.addAttribute("signatureValid", signatureValid);
+        }
+        return "validate_contract.html";
     }
 
     private String retrieveUsernameFromSecurityContext() {

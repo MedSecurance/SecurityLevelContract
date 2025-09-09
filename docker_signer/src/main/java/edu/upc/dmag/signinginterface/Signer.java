@@ -426,7 +426,7 @@ public class Signer {
         return reports.getDiagnosticData();
     }
 
-    public static boolean validate(String content) throws IOException {
+    public static Boolean validate(String content) throws IOException {
         DSSDocument signedDocument = new InMemoryDocument(content.getBytes());
         SignedDocumentValidator validator = getValidator(signedDocument);
 
@@ -436,6 +436,11 @@ public class Signer {
         trustedCertificateSource.addCertificate(certificate);
         certificateVerifier.setTrustedCertSources(getTrustedCertificateSource());
         validator.setCertificateVerifier(certificateVerifier);
+
+        var signatures = validator.getSignatures();
+        if (signatures == null || signatures.isEmpty()) {
+            return null;
+        }
 
         Reports reports = validator.validateDocument();
         DiagnosticData diagnosticData = reports.getDiagnosticData();

@@ -47,19 +47,19 @@ public class XMLGenerationController {
             @RequestParam(value = "CR_result", required = false) MultipartFile CR_result,
             //For TVRA
             @RequestParam(value = "TVRA_Model", required = false) MultipartFile TVRA_model,
-            @RequestParam(value = "TVRA_Attack+Paths", required = false) MultipartFile TVRA_AttackPaths,
+            @RequestParam(value = "TVRA_AttackPaths", required = false) MultipartFile TVRA_AttackPaths,
             @RequestParam(value = "TVRA_Recommendations", required = false) MultipartFile TVRA_Recommendations,
             @RequestParam(value = "TVRA_Threats", required = false) MultipartFile TVRA_Threats,
             @RequestParam(value = "TVRA_Report", required = false) MultipartFile TVRA_Report,
             //For assurance
-            @RequestParam(value = "Documentation_risk+management+plan", required = false) MultipartFile Documentation_riskManagementPlan,
-            @RequestParam(value = "GeneralContent_security+case", required = false) MultipartFile GeneralContent_securityCase,
-            @RequestParam(value = "Documentation_medical+it-network+risk+management+file", required = false) MultipartFile Documentation_medicalItNetworkRiskManagementFile,
+            @RequestParam(value = "Documentation_riskManagementPlan", required = false) MultipartFile Documentation_riskManagementPlan,
+            @RequestParam(value = "GeneralContent_securityCase", required = false) MultipartFile GeneralContent_securityCase,
+            @RequestParam(value = "Documentation_medicalItNetworkRiskManagementFile", required = false) MultipartFile Documentation_medicalItNetworkRiskManagementFile,
             @RequestParam(value = "Documentation_assuranceCaseReport", required = false) MultipartFile Documentation_assuranceCaseReport,
-            @RequestParam(value = "Documentation_instructions+of+use", required = false) MultipartFile Documentation_instructionsOfUse,
-            @RequestParam(value = "Documentation_validation+report", required = false) MultipartFile Documentation_validationReport,
-            @RequestParam(value = "Documentation_technical+description", required = false) MultipartFile Documentation_technicalDescription,
-            @RequestParam(value = "Documentation_Trend+Report", required = false) MultipartFile documentation_TrendReport
+            @RequestParam(value = "Documentation_instructionsOfUse", required = false) MultipartFile Documentation_instructionsOfUse,
+            @RequestParam(value = "Documentation_validationReport", required = false) MultipartFile Documentation_validationReport,
+            @RequestParam(value = "Documentation_technicalDescription", required = false) MultipartFile Documentation_technicalDescription,
+            @RequestParam(value = "Documentation_TrendReport", required = false) MultipartFile documentation_TrendReport
     ) throws Exception {
         Map<String, MultipartFile> extraFields = new HashMap<>();
         extraFields.put("ceafile", model);

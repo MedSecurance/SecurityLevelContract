@@ -98,8 +98,8 @@ services:
       - keycloak
     network_mode: "service:localhost"
 
-  requirements_selector:
-    image: danielnaro/requirements_selector:latest
+  ontology_client:
+    image: danielnaro/ontologyclient:v6
     network_mode: "service:localhost"
 
   nginx:

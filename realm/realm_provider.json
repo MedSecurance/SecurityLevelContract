@@ -16,8 +16,8 @@
       "webOrigins": [
         "*"
       ],
-      "baseUrl": "http://localhost:8086",
-      "adminUrl": "http://localhost:8086",
+      "baseUrl": "http://signer.authenticator",
+      "adminUrl": "http://signer.authenticator",
       "publicClient": false,
       "protocol": "openid-connect",
       "authorizationServicesEnabled": true,

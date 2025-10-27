@@ -11,6 +11,7 @@
         "http://localhost:8081/login/oauth2/code/keycloak",
         "http://signer.consumer/login/oauth2/code/keycloak",
         "http://localhost:8086/login/oauth2/code/keycloak",
+        "http://signer.authenticator/login/oauth2/code/keycloak",
         "https://oauth.pstmn.io/v1/callback"
       ],
       "webOrigins": [

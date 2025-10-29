@@ -178,110 +178,152 @@
 
                         <!-- Communication recommender-->
                         <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content flex">
-                                <h1 class="carousel-title" style="color: black">Include Communication Recommender's model?</h1>
-                                <h2 style="color: black" class="carousel-item-title">(for new analysis in the future)</h2>
-                                <div
-                                        id="drop-zone-CR_model"
-                                        class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                        style="cursor: pointer; transition: background 0.3s;">
-                                    <i id="CR_model_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                    <input type="file" id="CR_model" name="CR_model" hidden>
+                            <div class="carousel-item-content">
+                                <div class="carousel-item-content-title">
+                                    <h1 class="carousel-title" style="color: black">Include Communication Recommender's model?</h1>
+                                    <h2 style="color: black" class="carousel-item-title">(for new analysis in the future)</h2>
                                 </div>
-                                <div id="CR_model_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                                <div class="carousel-item-content-main">
+                                    <div
+                                            id="drop-zone-CR_model"
+                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
+                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
+                                        <i id="CR_model_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                        <p id="CR_model_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                        <input type="file" id="CR_model" name="CR_model" hidden>
+                                    </div>
+                                </div>
+                                <div class="carousel-item-content-footer">
+                                    <div  style="text-align: center" class="mt-3 text-white"></div>
+                                </div>
                             </div>
                         </div>
                         <div class="carousel-item h-100" style="background-color: white">
                             <div class="carousel-item-content">
-                                <h1 class="carousel-title" style="color: black">Include current Communication Recommender's result?</h1>
-                                <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
-                                <div
-                                        id="drop-zone-CR_result"
-                                        class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                        style="cursor: pointer; transition: background 0.3s;">
-                                    <i id="CR_result_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                    <input type="file" id="CR_result" name="CR_result" hidden>
+                                <div class="carousel-item-content-title">
+                                    <h1 class="carousel-title" style="color: black">Include current Communication Recommender's result?</h1>
+                                    <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
                                 </div>
-                                <div id="CR_result_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                                <div class="carousel-item-content-main">
+                                    <div
+                                            id="drop-zone-CR_result"
+                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
+                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
+                                        <i id="CR_result_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                        <p id="CR_result_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                        <input type="file" id="CR_result" name="CR_result" hidden>
+                                    </div>
+                                </div>
+                                <div class="carousel-item-content-footer">
+                                    <div  style="text-align: center" class="mt-3 text-white"></div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- TVRA -->
                         <div class="carousel-item h-100" style="background-color: white">
                             <div class="carousel-item-content">
-                                <h1 class="carousel-title" style="color: black">Include TVRA component's model?</h1>
-                                <h2 style="color: black" class="carousel-item-title">(for new analysis in the future)</h2>
-                                <div
-                                        id="drop-zone-TVRA_model"
-                                        class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                        style="cursor: pointer; transition: background 0.3s;">
-                                    <i id="TVRA_model_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                    <input type="file" id="TVRA_model" name="TVRA_Model" hidden>
+                                <div class="carousel-item-content-title">
+                                    <h1 class="carousel-title" style="color: black">Include TVRA component's model?</h1>
+                                    <h2 style="color: black" class="carousel-item-title">(for new analysis in the future)</h2>
                                 </div>
-                                <div id="TVRA_model_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                                <div class="carousel-item-content-main">
+                                    <div
+                                            id="drop-zone-TVRA_model"
+                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
+                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
+                                        <i id="TVRA_model_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                        <p id="TVRA_model_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                        <input type="file" id="TVRA_model" name="TVRA_Model" hidden>
+                                    </div>
+                                </div>
+                                <div class="carousel-item-content-footer">
+                                    <div  style="text-align: center" class="mt-3 text-white"></div>
+                                </div>
                             </div>
                         </div>
                         <div class="carousel-item h-100" style="background-color: white">
                             <div class="carousel-item-content">
-                                <h1 class="carousel-title" style="color: black">Include current TVRA output's attack paths?</h1>
-                                <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
-                                <div
-                                        id="drop-zone-TVRA_Attack+Paths"
-                                        class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                        style="cursor: pointer; transition: background 0.3s;">
-                                    <i id="TVRA_Attack+Paths_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                    <input type="file" id="TVRA_AttackPaths" name="TVRA_AttackPaths" hidden>
+                                <div class="carousel-item-content-title">
+                                    <h1 class="carousel-title" style="color: black">Include current TVRA output's attack paths?</h1>
+                                    <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
                                 </div>
-                                <div id="TVRA_Attack+Paths_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                                <div class="carousel-item-content-main">
+                                    <div
+                                            id="drop-zone-TVRA_Attack+Paths"
+                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
+                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
+                                        <i id="TVRA_Attack+Paths_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                        <p id="TVRA_Attack+Paths_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                        <input type="file" id="TVRA_AttackPaths" name="TVRA_AttackPaths" hidden>
+                                    </div>
+                                </div>
+                                <div class="carousel-item-content-footer">
+                                    <div  style="text-align: center" class="mt-3 text-white"></div>
+                                </div>
                             </div>
                         </div>
                         <div class="carousel-item h-100" style="background-color: white">
                             <div class="carousel-item-content">
-                                <h1 class="carousel-title" style="color: black">Include current TVRA output's recommendations?</h1>
-                                <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
-                                <div
-                                        id="drop-zone-TVRA_Recommendations"
-                                        class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                        style="cursor: pointer; transition: background 0.3s;">
-                                    <i id="TVRA_Recommendations_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                    <input type="file" id="TVRA_Recommendations" name="TVRA_Recommendations" hidden>
+                                <div class="carousel-item-content-title">
+                                    <h1 class="carousel-title" style="color: black">Include current TVRA output's recommendations?</h1>
+                                    <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
                                 </div>
-                                <div id="TVRA_Recommendations_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                                <div class="carousel-item-content-main">
+                                    <div
+                                            id="drop-zone-TVRA_Recommendations"
+                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
+                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
+                                        <i id="TVRA_Recommendations_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                        <p id="TVRA_Recommendations_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                        <input type="file" id="TVRA_Recommendations" name="TVRA_Recommendations" hidden>
+                                    </div>
+                                </div>
+                                <div class="carousel-item-content-footer">
+                                    <div  style="text-align: center" class="mt-3 text-white"></div>
+                                </div>
                             </div>
                         </div>
                         <div class="carousel-item h-100" style="background-color: white">
                             <div class="carousel-item-content">
-                                <h1 class="carousel-title" style="color: black">Include current TVRA output's identified threats?</h1>
-                                <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
-                                <div
-                                        id="drop-zone-TVRA_Threats"
-                                        class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                        style="cursor: pointer; transition: background 0.3s;">
-                                    <i id="TVRA_Threats_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                    <input type="file" id="TVRA_Threats" name="TVRA_Threats" hidden>
+                                <div class="carousel-item-content-title">
+                                    <h1 class="carousel-title" style="color: black">Include current TVRA output's identified threats?</h1>
+                                    <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
                                 </div>
-                                <div id="TVRA_Threats_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                                <div class="carousel-item-content-main">
+                                    <div
+                                            id="drop-zone-TVRA_Threats"
+                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
+                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
+                                        <i id="TVRA_Threats_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                        <p id="TVRA_Threats_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                        <input type="file" id="TVRA_Threats" name="TVRA_Threats" hidden>
+                                    </div>
+                                </div>
+                                <div class="carousel-item-content-footer">
+                                    <div  style="text-align: center" class="mt-3 text-white"></div>
+                                </div>
                             </div>
                         </div>
                         <div class="carousel-item h-100" style="background-color: white">
                             <div class="carousel-item-content">
-                                <h1 class="carousel-title" style="color: black">Include current TVRA output's report?</h1>
-                                <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
-                                <div
-                                        id="drop-zone-TVRA_Report"
-                                        class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                        style="cursor: pointer; transition: background 0.3s;">
-                                    <i id="TVRA_Report_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                    <p class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                    <input type="file" id="TVRA_Report" name="TVRA_Report" hidden>
+                                <div class="carousel-item-content-title">
+                                    <h1 class="carousel-title" style="color: black">Include current TVRA output's report?</h1>
+                                    <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
                                 </div>
-                                <div id="TVRA_Report_feedback" style="text-align: center" class="mt-3 text-white"></div>
+                                <div class="carousel-item-content-main">
+                                    <div
+                                            id="drop-zone-TVRA_Report"
+                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
+                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
+                                        <i id="TVRA_Report_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                        <p id="TVRA_Report_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                        <input type="file" id="TVRA_Report" name="TVRA_Report" hidden>
+                                    </div>
+                                </div>
+                                <div class="carousel-item-content-footer">
+                                    <div  style="text-align: center" class="mt-3 text-white"></div>
+                                </div>
                             </div>
                         </div>
 

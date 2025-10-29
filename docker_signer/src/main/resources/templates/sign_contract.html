@@ -156,7 +156,11 @@
         const icon = document.getElementById(element_names["icon"]);
 
         // When clicking the drop zone, trigger the hidden file input
-        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('click', () => {
+            if (!dropZone.classList.contains("dropzone-disabled")) {
+                fileInput.click()
+            }
+        });
 
         // Handle file selection
         fileInput.addEventListener('change', () => {
@@ -190,20 +194,19 @@
 
         // Handle dropped file
         dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('bg-primary', 'bg-opacity-10');
+            if (!dropZone.classList.contains("dropzone-disabled")){
+                e.preventDefault();
+                dropZone.classList.remove('bg-primary', 'bg-opacity-10');
+                dropZone.classList.add("dropzone-disabled")
 
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                fileInput.files = files;
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
 
-                fileInfo.textContent = `Dropped file: ${files[0].name} Drag & drop a file here or `;
-                const span = document.createElement('span');
-                span.className = 'text-primary';
-                span.textContent = 'click to change the uploaded file';
-                fileInfo.appendChild(span);
+                    fileInfo.textContent = `Dropped file: ${files[0].name} Wait, it is being signed`;
 
-                document.getElementById("form_to_submit").submit();
+                    document.getElementById("form_to_submit").submit();
+                }
             }
         });
     })

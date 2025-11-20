@@ -42,6 +42,43 @@
         "address",
         "phone"
       ]
+    },{
+      "clientId": "minio",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "2KNoCxf2vvLUwaHiJWGcCbyopirSOEv2",
+      "redirectUris": [
+        "http://localhost:9000(",
+        "http://signer.minio/"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "baseUrl": "http://signer.minio/",
+      "adminUrl": "http://signer.minio/",
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "authorizationServicesEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "post.logout.redirect.uri": "/logout",
+        "oauth2.device.authorization.grant.enabled": "false"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "role_list",
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone"
+      ]
     }
   ],
   "roles": {

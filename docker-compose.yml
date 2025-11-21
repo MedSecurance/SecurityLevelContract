@@ -119,10 +119,6 @@ services:
     environment:
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
-      - MINIO_IDENTITY_OPENID_CONFIG_URL=http://signer.authenticator/auth/realms/master/.well-known/openid-configuration # Keycloak URL
-      - MINIO_IDENTITY_OPENID_CLIENT_ID=minio
-      - MINIO_IDENTITY_OPENID_CLIENT_SECRET=2KNoCxf2vvLUwaHiJWGcCbyopirSOEv2
-      - MINIO_IDENTITY_OPENID_REDIRECT_URI=http://signer.minio
     volumes:
       - ./minioContainer:/data
     network_mode: "service:localhost"

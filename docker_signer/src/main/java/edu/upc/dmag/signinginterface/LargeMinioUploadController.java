@@ -12,10 +12,20 @@ public class LargeMinioUploadController {
 
     private final MinioMultipartUploadService uploadService;
 
-    @PostMapping("/large")
-    public ResponseEntity<String> uploadLargeFile(@RequestParam("file") MultipartFile file) throws Exception {
+    @PostMapping("/large/{project}/{filename}")
+    public ResponseEntity<String> uploadLargeFile(
+            @PathVariable String project,
+            @PathVariable String filename,
+            @RequestParam("file") MultipartFile file) throws Exception {
+        project = project.strip();
+        filename = filename.strip();
+        String key;
+        if (project.isEmpty()){
+            key = filename;
+        } else {
+            key = project + "/" + filename;
+        }
 
-        String key = file.getOriginalFilename();
         uploadService.uploadLargeFile(file.getInputStream(), key);
 
         return ResponseEntity.ok("Uploaded to MinIO: " + key);

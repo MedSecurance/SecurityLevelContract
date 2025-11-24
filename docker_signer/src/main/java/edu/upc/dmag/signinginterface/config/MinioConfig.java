@@ -14,12 +14,11 @@ public class MinioConfig {
 
     @Bean
     public S3AsyncClient s3AsyncClient() {
+        var credentials = AwsBasicCredentials.builder().accountId("local").accessKeyId("myuseraccesskey").secretAccessKey("myusersecretkey").build();
         return S3AsyncClient.builder()
                 .endpointOverride(URI.create("http://signer.minio:9000"))
                 .credentialsProvider(
-                        StaticCredentialsProvider.create(
-                                AwsBasicCredentials.create("accesskey", "secretkey")
-                        )
+                        StaticCredentialsProvider.create( credentials )
                 )
                 .region(Region.US_EAST_1) // MinIO ignores region but required by SDK
                 .serviceConfiguration(

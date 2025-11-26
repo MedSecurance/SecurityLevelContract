@@ -134,390 +134,44 @@
             <form action="/generateRisksWithModel" method="post" enctype="multipart/form-data" class="h-100 w-100 p-3 m-2 d-flex flex-column justify-content-between">
                 <div id="carouselExampleControls" class="carousel carousel-dark slide h-100" data-bs-interval="false" data-bs-wrap="false" data-ri>
                     <div class="carousel-indicators">
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="0" class="active" aria-current="true" aria-label="CEA model"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="1" aria-label="Communication Recommender's model"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="2" aria-label="Communication Recommender's result"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="3" aria-label="TVRA component's model"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="4" aria-label="TVRA output's attack paths"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="5" aria-label="TVRA output's recommendations"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="6" aria-label="TVRA output's identified threats"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="7" aria-label="TVRA output's report"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="8" aria-label="risk management plan"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="9" aria-label="security case"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="10" aria-label="Medical IT-Network risk management document"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="11" aria-label="assurance case report"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="12" aria-label="Instructions of Use"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="13" aria-label="validation report"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="14" aria-label="technical description"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="15" aria-label="trend report"></button>
-                        <button type="button" data-bs-target="#carouselExampleControls" data-bs-slide-to="16" aria-label="submit"></button>
+                        <!--/*@thymesVar id="documents" type="edu.upc.dmag.signinginterface.KnownDocuments[]"*/-->
+                        <button
+                                th:each="document, iter : ${documents}"
+                                type="button"
+                                data-bs-target="#carouselExampleControls"
+                                th:attr="data-bs-slide-to=${iter.index}, aria-label=${document.getName()}"
+                                data-bs-slide-to="0"
+                                th:classappend="${iter.first} ? 'active'"
+                                aria-current="true"
+                                aria-label="CEA model"
+                        ></button>
+                        <!--/*@thymesVar id="documents" type="edu.upc.dmag.signinginterface.KnownDocuments[]"*/-->
+                        <button
+                                type="button"
+                                data-bs-target="#carouselExampleControls"
+                                th:attr="data-bs-slide-to=${#arrays.length(documents)}"
+                                aria-label="submit"></button>
                     </div>
+
+
                     <div class="carousel-inner h-100">
-                        <div class="carousel-item h-100 active" style="background-color: white">
+                        <!-- th:object="${document}"  -->
+                        <!--/*@thymesVar id="documents" type="edu.upc.dmag.signinginterface.KnownDocuments[]"*/-->
+                        <div th:each="document, iter : ${documents}" class="carousel-item h-100" th:classappend="${iter.first} ? 'active'" style="background-color: white">
+                            <h1 ></h1>
                             <div class="carousel-item-content">
                                 <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">CEA model to include (mandatory)</h1>
-                                    <h2 style="color: black" class="carousel-item-title"></h2>
+                                    <h1 class="carousel-title" th:text="${document.getCaption()}" style="color: black"></h1>
+                                    <h2 style="color: black" class="carousel-item-title" th:text="${document.getGoal()}"></h2>
                                 </div>
                                 <div class="carousel-item-content-main">
                                     <div
-                                            id="drop-zone-cea-file"
+                                            th:id="${document.getDropZoneId()()}"
                                             class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
                                             style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="ceafile_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="ceafile_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="ceafile" name="ceafile" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <!-- Communication recommender-->
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include Communication Recommender's model?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(for new analysis in the future)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-CR_model"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="CR_model_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="CR_model_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="CR_model" name="CR_model" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include current Communication Recommender's result?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-CR_result"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="CR_result_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="CR_result_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="CR_result" name="CR_result" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- TVRA -->
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include TVRA component's model?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(for new analysis in the future)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-TVRA_model"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="TVRA_model_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="TVRA_model_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="TVRA_model" name="TVRA_Model" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include current TVRA output's attack paths?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-TVRA_Attack+Paths"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="TVRA_Attack+Paths_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="TVRA_Attack+Paths_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="TVRA_AttackPaths" name="TVRA_AttackPaths" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include current TVRA output's recommendations?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-TVRA_Recommendations"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="TVRA_Recommendations_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="TVRA_Recommendations_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="TVRA_Recommendations" name="TVRA_Recommendations" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include current TVRA output's identified threats?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-TVRA_Threats"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="TVRA_Threats_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="TVRA_Threats_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="TVRA_Threats" name="TVRA_Threats" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include current TVRA output's report?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to compare with future results)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-TVRA_Report"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="TVRA_Report_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="TVRA_Report_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="TVRA_Report" name="TVRA_Report" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- For assurance -->
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include the risk management plan?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to assure compliance with ISO 14971, IEC 80001-1 and MDCG)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-riskManagementPlan"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="riskManagementPlan_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="riskManagementPlan_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="Documentation_riskManagementPlan" name="Documentation_riskManagementPlan" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include Security case?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to assure compliance with IEC 80001-2)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-GeneralContent_securityCase"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="GeneralContent_securityCase_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="GeneralContent_securityCase_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="GeneralContent_securityCase" name="GeneralContent_securityCase" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include the Medical IT-Network risk management document?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to assure compliance with IEC 80001-1)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-Documentation_medicalItNetworkRiskManagementFile"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="Documentation_medicalItNetworkRiskManagementFile_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="Documentation_medicalItNetworkRiskManagementFile_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="Documentation_medicalItNetworkRiskManagementFile" name="Documentation_medicalItNetworkRiskManagementFile" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include the assurance case report?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to assure compliance with IEC 80001-1)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-Documentation_assuranceCaseReport"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="Documentation_assuranceCaseReport_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="Documentation_assuranceCaseReport_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="Documentation_assuranceCaseReport" name="Documentation_assuranceCaseReport" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include the Instructions of Use?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to assure compliance with MDCG and IEC 82304)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-Documentation_instructionsOfUse"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="Documentation_instructionsOfUse_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="Documentation_instructionsOfUse_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="Documentation_instructionsOfUse" name="Documentation_instructionsOfUse" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include the validation report?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to assure compliance with IEC 82304)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-Documentation_validationReport"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="Documentation_validationReport_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="Documentation_validationReport_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="Documentation_validationReport" name="Documentation_validationReport" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include the technical description?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to assure compliance with IEC 82304)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-Documentation_technicalDescription"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="Documentation_technicalDescription_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="Documentation_technicalDescription_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="Documentation_technicalDescription" name="Documentation_technicalDescription" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Include the trend report?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(to assure compliance with MDCG)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            id="drop-zone-Documentation_TrendReport"
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <i id="Documentation_TrendReport_icon" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                        <p id="Documentation_TrendReport_feedback" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
-                                        <input type="file" id="Documentation_TrendReport" name="Documentation_TrendReport" hidden>
-                                    </div>
-                                </div>
-                                <div class="carousel-item-content-footer">
-                                    <div  style="text-align: center" class="mt-3 text-white"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="carousel-item h-100" style="background-color: white">
-                            <div class="carousel-item-content">
-                                <div class="carousel-item-content-title">
-                                    <h1 class="carousel-title" style="color: black">Submit?</h1>
-                                    <h2 style="color: black" class="carousel-item-title">(submit and download the contract without signatures)</h2>
-                                </div>
-                                <div class="carousel-item-content-main">
-                                    <div
-                                            class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
-                                            style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                        <button type="submit"
-                                                class="btn btn-warning btn-logo d-flex flex-column align-items-center mx-auto">
-                                            <i class="bi bi-file-earmark-arrow-down-fill big-icon"></i>
-                                            <span class="mt-1">Submit</span>
-                                        </button>
+                                        <i th:id="${document.getIconId()}" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                                        <p th:id="${document.getFeedbackId()}" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                        <input type="file" th:id="${document.getId()}" th:name="${document.getId()}" hidden>
                                     </div>
                                 </div>
                                 <div class="carousel-item-content-footer">
@@ -549,91 +203,10 @@
     <!-- Bootstrap JS (Optional, for components) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        uploadable_files = [
-            {
-                'dropZone_name': 'drop-zone-cea-file',
-                'fileInput_name': 'ceafile',
-                'fileInfo_name': 'ceafile_feedback',
-                'icon': 'ceafile_icon'
-            },{
-                'dropZone_name': 'drop-zone-CR_model',
-                'fileInput_name': 'CR_model',
-                'fileInfo_name': 'CR_model_feedback',
-                'icon': 'CR_model_icon'
-            },{
-                'dropZone_name': 'drop-zone-CR_result',
-                'fileInput_name': 'CR_result',
-                'fileInfo_name': 'CR_result_feedback',
-                'icon': 'CR_result_icon'
-            },{
-                'dropZone_name': 'drop-zone-TVRA_model',
-                'fileInput_name': 'TVRA_model',
-                'fileInfo_name': 'TVRA_model_feedback',
-                'icon': 'TVRA_model_icon'
-            },{
-                'dropZone_name': 'drop-zone-TVRA_Attack+Paths',
-                'fileInput_name': 'TVRA_AttackPaths',
-                'fileInfo_name': 'TVRA_Attack+Paths_feedback',
-                'icon': 'TVRA_Attack+Paths_icon'
-            },{
-                'dropZone_name': 'drop-zone-TVRA_Recommendations',
-                'fileInput_name': 'TVRA_Recommendations',
-                'fileInfo_name': 'TVRA_Recommendations_feedback',
-                'icon': 'TVRA_Recommendations_icon'
-            },{
-                'dropZone_name': 'drop-zone-TVRA_Threats',
-                'fileInput_name': 'TVRA_Threats',
-                'fileInfo_name': 'TVRA_Threats_feedback',
-                'icon': 'TVRA_Threats_icon'
-            },{
-                'dropZone_name': 'drop-zone-TVRA_Report',
-                'fileInput_name': 'TVRA_Report',
-                'fileInfo_name': 'TVRA_Report_feedback',
-                'icon': 'TVRA_Report_icon'
-            },{
-                'dropZone_name': 'drop-zone-riskManagementPlan',
-                'fileInput_name': 'Documentation_riskManagementPlan',
-                'fileInfo_name': 'riskManagementPlan_feedback',
-                'icon': 'riskManagementPlan_icon'
-            },{
-                'dropZone_name': 'drop-zone-GeneralContent_securityCase',
-                'fileInput_name': 'GeneralContent_securityCase',
-                'fileInfo_name': 'GeneralContent_securityCase_feedback',
-                'icon': 'GeneralContent_securityCase_icon'
-            },{
-                'dropZone_name': 'drop-zone-Documentation_medicalItNetworkRiskManagementFile',
-                'fileInput_name': 'Documentation_medicalItNetworkRiskManagementFile',
-                'fileInfo_name': 'Documentation_medicalItNetworkRiskManagementFile_feedback',
-                'icon': 'Documentation_medicalItNetworkRiskManagementFile_icon'
-            },{
-                'dropZone_name': 'drop-zone-Documentation_assuranceCaseReport',
-                'fileInput_name': 'Documentation_assuranceCaseReport',
-                'fileInfo_name': 'Documentation_assuranceCaseReport_feedback',
-                'icon': 'Documentation_assuranceCaseReport_icon'
-            },{
-                'dropZone_name': 'drop-zone-Documentation_instructionsOfUse',
-                'fileInput_name': 'Documentation_instructionsOfUse',
-                'fileInfo_name': 'Documentation_instructionsOfUse_feedback',
-                'icon': 'Documentation_instructionsOfUse_icon'
-            },{
-                'dropZone_name': 'drop-zone-Documentation_validationReport',
-                'fileInput_name': 'Documentation_validationReport',
-                'fileInfo_name': 'Documentation_validationReport_feedback',
-                'icon': 'Documentation_validationReport_icon'
-            },{
-                'dropZone_name': 'drop-zone-Documentation_technicalDescription',
-                'fileInput_name': 'Documentation_technicalDescription',
-                'fileInfo_name': 'Documentation_technicalDescription_feedback',
-                'icon': 'Documentation_technicalDescription_icon'
-            },{
-                'dropZone_name': 'drop-zone-Documentation_TrendReport',
-                'fileInput_name': 'Documentation_TrendReport',
-                'fileInfo_name': 'Documentation_TrendReport_feedback',
-                'icon': 'Documentation_TrendReport_icon'
-            }
+    <script th:inline="javascript">
+        // Inject Java objects
+        const uploadable_files = /*[[${KnownDocuments.getMap()}]]*/ {};
 
-        ]
 
         uploadable_files.forEach( element_names => {
             const dropZone = document.getElementById(element_names["dropZone_name"]);

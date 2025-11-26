@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 @RestController
 @RequestMapping("/upload")
@@ -28,7 +29,9 @@ public class LargeMinioUploadController {
 
         uploadService.uploadLargeFile(file.getInputStream(), key);
 
-        return ResponseEntity.ok("Uploaded to MinIO: " + key);
+        final String bucketName = "test";
+
+        return ResponseEntity.ok("http://signer.minio/"+bucketName+"/"+key);
     }
 }
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 import org.w3c.dom.*;
 
 import java.net.HttpURLConnection;
@@ -157,8 +158,11 @@ public class XMLGenerationController {
     }
 
     @GetMapping("/generateContract")
-    public String generateXmlBySeed() throws Exception {
-        return "contract_creation_new_style.html";
+    public ModelAndView generateXmlBySeed() throws Exception {
+        ModelAndView mav = new ModelAndView("contract_creation_new_style.html");
+        mav.addObject("documents", KnownDocuments.values());
+
+        return mav;
     }
 
     public static String prettyPrintXML(Document document) throws Exception {

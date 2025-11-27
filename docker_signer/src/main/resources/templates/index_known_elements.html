@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!--/*@thymesVar id="files" type="java.util.Map.Entry<edu.upc.dmag.signinginterface.KnownDocuments, java.lang.Boolean>[]"*/-->
+<div th:each="entry : ${files}">
+    <h1 th:text="${entry.key}"></h1><p th:text="${entry.value}"></p>
+</div>
+</body>
+</html>

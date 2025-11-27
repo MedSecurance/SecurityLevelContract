@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -91,6 +93,19 @@ public class MinioMultipartUploadService {
 
             throw ex;
         }
+    }
+
+    public List<S3Object> getListOfFiles(String project) throws ExecutionException, InterruptedException {
+        // List objects in the folder
+        ListObjectsV2Request listReq = ListObjectsV2Request.builder()
+                .bucket(bucketName)
+                .prefix(project)
+                .build();
+
+        CompletableFuture<ListObjectsV2Response> itermediary = s3.listObjectsV2(listReq);
+        ListObjectsV2Response listRes = itermediary.get();
+        s3.close();
+        return listRes.contents();
     }
 }
 

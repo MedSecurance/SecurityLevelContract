@@ -6,6 +6,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,9 +25,14 @@ import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.xml.sax.SAXException;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 @Controller
+@RequiredArgsConstructor
+@Slf4j
 public class XMLGenerationController {
+    private final MinioService minioService;
 
     private static String responseToString(HttpURLConnection connection) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -39,84 +46,33 @@ public class XMLGenerationController {
         return response.toString();
     }
 
-    @PostMapping("/generateRisksWithModel")
-    public ResponseEntity<byte[]> generateXmlWithModel(
-            //For modelling
-            @RequestParam("ceafile") MultipartFile model,
-            //For IoMT recommendation
-            @RequestParam(value = "CR_model", required = false) MultipartFile CR_model,
-            @RequestParam(value = "CR_result", required = false) MultipartFile CR_result,
-            //For TVRA
-            @RequestParam(value = "TVRA_Model", required = false) MultipartFile TVRA_model,
-            @RequestParam(value = "TVRA_AttackPaths", required = false) MultipartFile TVRA_AttackPaths,
-            @RequestParam(value = "TVRA_Recommendations", required = false) MultipartFile TVRA_Recommendations,
-            @RequestParam(value = "TVRA_Threats", required = false) MultipartFile TVRA_Threats,
-            @RequestParam(value = "TVRA_Report", required = false) MultipartFile TVRA_Report,
-            //For assurance
-            @RequestParam(value = "Documentation_riskManagementPlan", required = false) MultipartFile Documentation_riskManagementPlan,
-            @RequestParam(value = "GeneralContent_securityCase", required = false) MultipartFile GeneralContent_securityCase,
-            @RequestParam(value = "Documentation_medicalItNetworkRiskManagementFile", required = false) MultipartFile Documentation_medicalItNetworkRiskManagementFile,
-            @RequestParam(value = "Documentation_assuranceCaseReport", required = false) MultipartFile Documentation_assuranceCaseReport,
-            @RequestParam(value = "Documentation_instructionsOfUse", required = false) MultipartFile Documentation_instructionsOfUse,
-            @RequestParam(value = "Documentation_validationReport", required = false) MultipartFile Documentation_validationReport,
-            @RequestParam(value = "Documentation_technicalDescription", required = false) MultipartFile Documentation_technicalDescription,
-            @RequestParam(value = "Documentation_TrendReport", required = false) MultipartFile documentation_TrendReport
-    ) throws Exception {
-        Map<String, MultipartFile> extraFields = new HashMap<>();
-        extraFields.put("ceafile", model);
+    @GetMapping("/generateUnsignedContract")
+    public ResponseEntity<byte[]> generateXmlWithModel() throws Exception {
+        String project = "test";
+        var uploaded_files = minioService.getListOfFiles(project);
 
-        if (CR_model != null){
-            extraFields.put("CR_model",CR_model);
-        }
-        if (CR_result != null){
-            extraFields.put( "CR_result",CR_result);
+        Map<KnownDocuments, DownloadResult> fields = new HashMap<>();
+
+        for(S3Object s3Object: uploaded_files) {
+            log.error("listed file: {}", s3Object.key());
+            String filename_to_search = s3Object.key().replace(project + "/", "");
+            log.error("searching for file: {}", filename_to_search);
+            try {
+                fields.put(
+                    KnownDocuments.valueOf(filename_to_search),
+                    minioService.downloadAsBase64(project, s3Object)
+                );
+            }catch (Exception ignore) {
+                log.error("An error occurred while working on "+filename_to_search, ignore);
+            }
         }
 
 
-        if (TVRA_model != null){
-            extraFields.put("TVRA_Model",TVRA_model);
-        }
-        if (TVRA_AttackPaths != null){
-            extraFields.put("TVRA_AttackPaths",TVRA_AttackPaths);
-        }
-        if (TVRA_Recommendations != null){
-            extraFields.put( "TVRA_Recommendations",TVRA_Recommendations);
-        }
-        if (TVRA_Threats != null){
-            extraFields.put("TVRA_Threats",TVRA_Threats);
-        }
-        if (TVRA_Report != null){
-            extraFields.put("TVRA_Report",TVRA_Report);
-        }
-        if (Documentation_riskManagementPlan != null){
-            extraFields.put("Documentation_riskManagementPlan", Documentation_riskManagementPlan);;
-        }
-        if (GeneralContent_securityCase != null){
-            extraFields.put("GeneralContent_securityCase", GeneralContent_securityCase);
-        }
-        if (Documentation_medicalItNetworkRiskManagementFile != null){
-            extraFields.put("Documentation_medicalItNetworkRiskManagementFile", Documentation_medicalItNetworkRiskManagementFile);;
-        }
-        if (Documentation_assuranceCaseReport != null){
-            extraFields.put("Documentation_assuranceCaseReport", Documentation_assuranceCaseReport);;
-        }
-        if (Documentation_instructionsOfUse != null){
-            extraFields.put("Documentation_instructionsOfUse", Documentation_instructionsOfUse);;
-        }
-        if (Documentation_validationReport != null){
-            extraFields.put("Documentation_validationReport", Documentation_validationReport);;
-        }
-        if (Documentation_technicalDescription != null){
-            extraFields.put("Documentation_technicalDescription", Documentation_technicalDescription);;
-        }
-        if (documentation_TrendReport != null){
-            extraFields.put("Documentation_TrendReport", documentation_TrendReport);;
-        }
-        return fromFieldsToXML(extraFields);
+        return fromFieldsToXML(fields);
     }
 
     static String fromFieldsToXMLBytesToString(
-            Map<String,byte[]> extraFieldsToImport
+            Map<KnownDocuments,DownloadResult> extraFieldsToImport
     ) throws Exception {
         DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
@@ -131,9 +87,17 @@ public class XMLGenerationController {
             if (extraField.getValue() == null){
                 continue;
             }
-            Element modelCeaDescription = document.createElement(extraField.getKey());
-            modelCeaDescription.setTextContent(Base64.getEncoder().encodeToString(extraField.getValue()));
-            root.appendChild(modelCeaDescription);
+            Element documentElement = document.createElement(extraField.getKey().name());
+            documentElement.appendChild(
+                document.createElement("hash")).setTextContent(extraField.getValue().sha256Hash()
+            );
+            documentElement.appendChild(
+                document.createElement("version")).setTextContent(extraField.getValue().versionId()
+            );
+            documentElement.appendChild(
+                document.createElement("data")).setTextContent(extraField.getValue().base64Data()
+            );
+            root.appendChild(documentElement);
         }
 
         // Signatures
@@ -143,18 +107,8 @@ public class XMLGenerationController {
         return prettyPrintXML(document);
     }
 
-    private static ResponseEntity<byte[]> fromFieldsToXML(Map<String, MultipartFile> fields) throws Exception {
-        var castedFields = fields.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> {
-                    try {
-                        return entry.getValue().getBytes();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-        ));
-        return Utils.generateAnswer(fromFieldsToXMLBytesToString(castedFields), "contract.xml");
+    private static ResponseEntity<byte[]> fromFieldsToXML(Map<KnownDocuments,DownloadResult> extraFieldsToImport) throws Exception {
+        return Utils.generateAnswer(fromFieldsToXMLBytesToString(extraFieldsToImport), "contract.xml");
     }
 
     @GetMapping("/generateContract")

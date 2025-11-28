@@ -4,14 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 @RestController
 @RequestMapping("/upload")
 @RequiredArgsConstructor
 public class LargeMinioUploadController {
 
-    private final MinioMultipartUploadService uploadService;
+    private final MinioService uploadService;
 
     @PostMapping("/large/{project}/{filename}")
     public ResponseEntity<String> uploadLargeFile(

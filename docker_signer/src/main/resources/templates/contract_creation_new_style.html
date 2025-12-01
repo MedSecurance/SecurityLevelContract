@@ -177,7 +177,7 @@
                                         \| document.toString() = [[${document}]]
                                         \| s3Objects.class = [[${s3Objects != null ? s3Objects.getClass().name : 'null'}]]
                                         \| s3Objects size = [[${s3Objects != null ? s3Objects.size() : 0}]]
-                                        \| s3Objects[document] = [[${s3Objects[document]}]]
+                                        \| s3Objects[document.name()] = [[${s3Objects[document.name()]}]]
                                     </div>
 
                                     <!-- DEBUG: recorre todas las entradas del mapa para ver las claves -->
@@ -193,7 +193,7 @@
                                     <p th:id="${document.getFeedbackId()}"
                                        class="mt-3 mb-0"
                                        style="color: black"
-                                       th:if="${s3Objects[document]} == null">
+                                       th:if="${s3Objects[document.name()]} == null">
                                         Drag &amp; drop a file here or
                                         <span class="text-primary">click to upload</span>
                                     </p>
@@ -201,9 +201,9 @@
                                     <p th:id="${document.getFeedbackId()}"
                                        class="mt-3 mb-0"
                                        style="color: black"
-                                       th:if="${s3Objects[document]} != null"
+                                       th:if="${s3Objects[document.name()]} != null"
                                        th:inline="text">
-                                        A file has been uploaded [[${#dates.format(s3Objects[document].lastModified(), 'dd/MM/yyyy HH:mm')}]]. Drag &amp; drop a file here or
+                                        A file has been uploaded [[${#dates.format(s3Objects[document.name()].lastModified(), 'dd/MM/yyyy HH:mm')}]]. Drag &amp; drop a file here or
                                         <span class="text-primary">click to upload</span>
                                     </p>
 

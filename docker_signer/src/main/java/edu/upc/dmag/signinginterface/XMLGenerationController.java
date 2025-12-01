@@ -121,15 +121,15 @@ public class XMLGenerationController {
         String project = "test";
         ModelAndView mav = new ModelAndView("contract_creation_new_style.html");
         mav.addObject("documents", KnownDocuments.values());
-        Map<KnownDocuments, S3Object> s3Objects = new HashMap<>();
+        Map<String, S3Object> s3Objects = new HashMap<>();
         Arrays.stream(KnownDocuments.values()).forEach(d -> {
-            s3Objects.put(d, null);
+            s3Objects.put(d.name(), null);
         });
         minioService.getListOfFiles(project).forEach(it -> {
             s3Objects.put(
                 KnownDocuments.valueOf(
                     it.key().replace(project+"/", "")
-                ), it
+                ).name(), it
             );
         });
         mav.addObject("s3Objects", s3Objects);

@@ -1,5 +1,6 @@
 package edu.upc.dmag.signinginterface;
 
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.adapters.spi.KeycloakAccount;
@@ -25,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 
 @Controller
 @RequestMapping("/signer")
+@Slf4j
 public class FileController {
     public void getUserRolesFromKeycloak() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -57,8 +59,9 @@ public class FileController {
         try {
             // Read original file content
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
-
+            log.error("about to sign document");
             String modifiedContent = Signer.test(content);
+            log.error("document is signed");
 
             return Utils.generateAnswer(modifiedContent, "modified_" + file.getOriginalFilename());
 

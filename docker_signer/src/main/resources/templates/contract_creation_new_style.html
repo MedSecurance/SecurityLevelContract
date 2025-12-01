@@ -170,6 +170,26 @@
                                         class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
                                         style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
                                     <i th:id="${document.getIconId()}" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+
+                                    <!-- DEBUG: muestra la clave y el valor en s3Objects -->
+                                    <div style="color:red; font-size: 12px;" th:inline="text">
+                                        DEBUG document.class = [[${document.getClass().name}]]
+                                        \| document.toString() = [[${document}]]
+                                        \| s3Objects.class = [[${s3Objects != null ? s3Objects.getClass().name : 'null'}]]
+                                        \| s3Objects size = [[${s3Objects != null ? s3Objects.size() : 0}]]
+                                        \| s3Objects[document] = [[${s3Objects[document]}]]
+                                    </div>
+
+                                    <!-- DEBUG: recorre todas las entradas del mapa para ver las claves -->
+                                    <ul style="color:red; font-size: 12px;" th:if="${s3Objects != null}">
+                                        <li th:each="entry : ${s3Objects.entrySet()}"
+                                            th:inline="text">
+                                            KEY class = [[${entry.key.getClass().name}]]
+                                            \| KEY = [[${entry.key}]]
+                                            \| VALUE = [[${entry.value}]]
+                                        </li>
+                                    </ul>
+
                                     <p th:id="${document.getFeedbackId()}"
                                        class="mt-3 mb-0"
                                        style="color: black"

@@ -74,7 +74,6 @@ public class Signer {
     protected static String removeSignatures(String inputXML) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
-        System.out.println(inputXML);
         ByteArrayInputStream input = new ByteArrayInputStream(inputXML.getBytes(StandardCharsets.UTF_8));
         Document document = builder.parse(input);
 

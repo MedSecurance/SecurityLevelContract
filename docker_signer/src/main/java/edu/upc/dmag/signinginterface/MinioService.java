@@ -106,7 +106,6 @@ public class MinioService {
 
         CompletableFuture<ListObjectsV2Response> itermediary = s3.listObjectsV2(listReq);
         ListObjectsV2Response listRes = itermediary.get();
-        s3.close();
         return listRes.contents();
     }
 

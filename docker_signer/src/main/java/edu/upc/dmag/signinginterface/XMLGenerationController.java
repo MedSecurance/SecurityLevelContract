@@ -49,7 +49,10 @@ public class XMLGenerationController {
     @GetMapping("/generateUnsignedContract")
     public ResponseEntity<byte[]> generateXmlWithModel() throws Exception {
         String project = "test";
+        log.error("about to request files");
         var uploaded_files = minioService.getListOfFiles(project);
+        log.error("requested files");
+        uploaded_files.forEach(file -> {log.error("file listed: {}", file);});
 
         Map<KnownDocuments, DownloadResult> fields = new HashMap<>();
 

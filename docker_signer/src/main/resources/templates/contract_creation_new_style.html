@@ -171,25 +171,6 @@
                                         style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
                                     <i th:id="${document.getIconId()}" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
 
-                                    <!-- DEBUG: muestra la clave y el valor en s3Objects -->
-                                    <div style="color:red; font-size: 12px;" th:inline="text">
-                                        DEBUG document.class = [[${document.getClass().name}]]
-                                        \| document.toString() = [[${document}]]
-                                        \| s3Objects.class = [[${s3Objects != null ? s3Objects.getClass().name : 'null'}]]
-                                        \| s3Objects size = [[${s3Objects != null ? s3Objects.size() : 0}]]
-                                        \| s3Objects[document.name()] = [[${s3Objects[document.name()]}]]
-                                    </div>
-
-                                    <!-- DEBUG: recorre todas las entradas del mapa para ver las claves -->
-                                    <ul style="color:red; font-size: 12px;" th:if="${s3Objects != null}">
-                                        <li th:each="entry : ${s3Objects.entrySet()}"
-                                            th:inline="text">
-                                            KEY class = [[${entry.key.getClass().name}]]
-                                            \| KEY = [[${entry.key}]]
-                                            \| VALUE = [[${entry.value}]]
-                                        </li>
-                                    </ul>
-
                                     <p th:id="${document.getFeedbackId()}"
                                        class="mt-3 mb-0"
                                        style="color: black"
@@ -204,7 +185,7 @@
                                        th:if="${s3Objects[document.name()]} != null"
                                        th:inline="text">
                                         A file has been uploaded [[${#dates.format(s3Objects[document.name()].lastModified(), 'dd/MM/yyyy HH:mm')}]]. Drag &amp; drop a file here or
-                                        <span class="text-primary">click to upload</span>
+                                        <span class="text-primary">click to upload a new version</span>
                                     </p>
 
                                     <div class="progress" style="width: 50%; display: none" th:id="${document.getProgressContainerId()}">

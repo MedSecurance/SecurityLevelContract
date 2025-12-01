@@ -11,4 +11,4 @@ COPY ./pom.xml .
 COPY ./src ./src
 RUN mvn package
 
-ENTRYPOINT ["java", "-jar", "target/SigningInterface-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-Xms512m", "-Xmx4g", "-jar", "target/SigningInterface-0.0.1-SNAPSHOT.jar"]

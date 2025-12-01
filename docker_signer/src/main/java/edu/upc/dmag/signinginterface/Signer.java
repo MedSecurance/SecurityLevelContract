@@ -29,6 +29,7 @@ import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.dss.xades.XAdESSignatureParameters;
 import eu.europa.esig.dss.xades.signature.XAdESService;
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -51,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 public class Signer {
     private static final char[] PKI_FACTORY_KEYSTORE_PASSWORD = {'k', 's', '-', 'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
 
@@ -197,30 +199,44 @@ public class Signer {
         storeBytes(content.getBytes(), "/tmp/original.xml");
         outputPaths.add("/tmp/original.xml");
 
+        log.error("removing signatures");
         var workingDocument = removeSignatures(content);
+        log.error("signatures removed");
 
         for (int i=0; i< pathToKeys.size(); i++){
             DSSDocument toSignDocument = new FileDocument(workingDocument.toFile());
 
             String pathToKey = pathToKeys.get(i);
             char[] keyForCertificate = keysForCertificate.get(i);
+            log.error("signing once");
             DSSDocument signedDocument = basicSignDocument(
                     toSignDocument,
                     pathToKey,
                     keyForCertificate
             );
+            log.error("once signed");
             toSignDocument = signedDocument;
 
+            log.error("extending to t");
             DSSDocument tLevelSignature = extendToT(toSignDocument);
+
+            log.error("extending to lt");
             DSSDocument ltLevelDocument = extendToLT(tLevelSignature);
+
+            log.error("extending to lta");
             DSSDocument ltaLevelDocument = extendToLTA(ltLevelDocument);
+            log.error("extended");
+
 
             String outputPath = "/tmp/signed_"+i+".xml";
             ltaLevelDocument.save(outputPath);
+            log.error("saved");
             outputPaths.add(outputPath);
         }
 
+        log.error("merging signatures");
         var mergedResult = merge_signatures(outputPaths);
+        log.error("signatures merged");
         return document_to_string(mergedResult);
 
 

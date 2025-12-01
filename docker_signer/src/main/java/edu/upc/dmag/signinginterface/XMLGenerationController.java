@@ -8,6 +8,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.web.servlet.MultipartAutoConfiguration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 @Slf4j
 public class XMLGenerationController {
     private final MinioService minioService;
+    private final MultipartAutoConfiguration multipartAutoConfiguration;
 
     private static String responseToString(HttpURLConnection connection) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -116,8 +118,21 @@ public class XMLGenerationController {
 
     @GetMapping("/generateContract")
     public ModelAndView generateXmlBySeed() throws Exception {
+        String project = "test";
         ModelAndView mav = new ModelAndView("contract_creation_new_style.html");
         mav.addObject("documents", KnownDocuments.values());
+        Map<KnownDocuments, S3Object> s3Objects = new HashMap<>();
+        Arrays.stream(KnownDocuments.values()).forEach(d -> {
+            s3Objects.put(d, null);
+        });
+        minioService.getListOfFiles(project).forEach(it -> {
+            s3Objects.put(
+                KnownDocuments.valueOf(
+                    it.key().replace(project+"/", "")
+                ), it
+            );
+        });
+        mav.addObject("s3Objects", s3Objects);
 
         return mav;
     }

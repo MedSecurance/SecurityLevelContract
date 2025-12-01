@@ -170,7 +170,23 @@
                                         class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
                                         style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
                                     <i th:id="${document.getIconId()}" class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                    <p th:id="${document.getFeedbackId()}" class="mt-3 mb-0" style="color: black">Drag & drop a file here or <span class="text-primary">click to upload</span></p>
+                                    <p th:id="${document.getFeedbackId()}"
+                                       class="mt-3 mb-0"
+                                       style="color: black"
+                                       th:if="${s3Objects[document]} == null">
+                                        Drag &amp; drop a file here or
+                                        <span class="text-primary">click to upload</span>
+                                    </p>
+
+                                    <p th:id="${document.getFeedbackId()}"
+                                       class="mt-3 mb-0"
+                                       style="color: black"
+                                       th:if="${s3Objects[document]} != null"
+                                       th:inline="text">
+                                        A file has been uploaded [[${#dates.format(s3Objects[document].lastModified(), 'dd/MM/yyyy HH:mm')}]]. Drag &amp; drop a file here or
+                                        <span class="text-primary">click to upload</span>
+                                    </p>
+
                                     <div class="progress" style="width: 50%; display: none" th:id="${document.getProgressContainerId()}">
                                         <div th:id="${document.getProgressId()}" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>

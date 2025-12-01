@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -61,7 +62,7 @@ public class FileController {
 
             return Utils.generateAnswer(modifiedContent, "modified_" + file.getOriginalFilename());
 
-        } catch (IOException | ParserConfigurationException | SAXException | TransformerException e) {
+        } catch (IOException | ParserConfigurationException | SAXException | TransformerException | XMLStreamException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -2,8 +2,6 @@ package edu.upc.dmag.signinginterface;
 
 import eu.europa.esig.dss.diagnostic.AbstractTokenProxy;
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
-import eu.europa.esig.dss.diagnostic.SignatureWrapper;
-import eu.europa.esig.dss.diagnostic.TimestampWrapper;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SignaturePackaging;
@@ -39,11 +37,15 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Date;
@@ -71,7 +73,7 @@ public class Signer {
         return trustedCertificateSource;
     }
 
-    protected static String removeSignatures(String inputXML) throws ParserConfigurationException, IOException, SAXException, TransformerException {
+    protected static Path removeSignatures(String inputXML) throws ParserConfigurationException, IOException, SAXException, TransformerException, XMLStreamException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         ByteArrayInputStream input = new ByteArrayInputStream(inputXML.getBytes(StandardCharsets.UTF_8));
@@ -86,16 +88,17 @@ public class Signer {
             }
         }
 
-        // Convert the modified document back to a string in memory
+        DOMSource source = new DOMSource(document);
+        Path tempFile = Files.createTempFile("xml-output-", ".xml");
+        XMLOutputFactory outputFactory = XMLOutputFactory.newFactory();
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
-        //transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        DOMSource source = new DOMSource(document);
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        StreamResult result = new StreamResult(output);
-        transformer.transform(source, result);
 
-        return output.toString(StandardCharsets.UTF_8);
+        try (OutputStream out = Files.newOutputStream(tempFile)) {
+            transformer.transform(source, new StreamResult(out));
+        }
+
+        return tempFile;
     }
 
     protected static CertificateSource getModifiedOnlineTrustedCertificateSource() throws IOException {
@@ -180,7 +183,7 @@ public class Signer {
         return getOnlineTSPSourceByName(GOOD_TSA);
     }
 
-    protected static String test(String content) throws IOException, ParserConfigurationException, SAXException, TransformerException {
+    protected static String test(String content) throws IOException, ParserConfigurationException, SAXException, TransformerException, XMLStreamException {
         List<String> pathToKeys = List.of(new String[]{
                 //"C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\consumer\\consumer.p12",
                 //"C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\provider\\provider.p12",
@@ -194,10 +197,10 @@ public class Signer {
         storeBytes(content.getBytes(), "/tmp/original.xml");
         outputPaths.add("/tmp/original.xml");
 
-        content = removeSignatures(content);
+        var workingDocument = removeSignatures(content);
 
         for (int i=0; i< pathToKeys.size(); i++){
-            DSSDocument toSignDocument = new InMemoryDocument(content.getBytes());
+            DSSDocument toSignDocument = new FileDocument(workingDocument.toFile());
 
             String pathToKey = pathToKeys.get(i);
             char[] keyForCertificate = keysForCertificate.get(i);

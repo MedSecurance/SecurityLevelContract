@@ -23,6 +23,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateException;
 
 @Controller
 @RequestMapping("/signer")
@@ -65,7 +66,8 @@ public class FileController {
 
             return Utils.generateAnswer(modifiedContent, "modified_" + file.getOriginalFilename());
 
-        } catch (IOException | ParserConfigurationException | SAXException | TransformerException | XMLStreamException e) {
+        } catch (IOException | ParserConfigurationException | SAXException | TransformerException | XMLStreamException |
+                 CertificateException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

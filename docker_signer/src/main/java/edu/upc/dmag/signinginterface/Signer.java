@@ -48,6 +48,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -185,7 +186,7 @@ public class Signer {
         return getOnlineTSPSourceByName(GOOD_TSA);
     }
 
-    protected static String test(String content) throws IOException, ParserConfigurationException, SAXException, TransformerException, XMLStreamException {
+    protected static String test(String content) throws IOException, ParserConfigurationException, SAXException, TransformerException, XMLStreamException, CertificateException {
         List<String> pathToKeys = List.of(new String[]{
                 //"C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\consumer\\consumer.p12",
                 //"C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\provider\\provider.p12",
@@ -232,6 +233,22 @@ public class Signer {
             ltaLevelDocument.save(outputPath);
             log.error("saved");
             outputPaths.add(outputPath);
+
+            try (KeyStoreSignatureTokenConnection t = new KeyStoreSignatureTokenConnection(pathToKey, "PKCS12", new KeyStore.PasswordProtection(keyForCertificate))) {
+                DSSPrivateKeyEntry entry = t.getKeys().get(0);
+                byte[] encoded = entry.getCertificate().getEncoded();
+                java.security.cert.CertificateFactory cf = java.security.cert.CertificateFactory.getInstance("X.509");
+                java.security.cert.X509Certificate x509 = (java.security.cert.X509Certificate) cf.generateCertificate(new java.io.ByteArrayInputStream(encoded));
+                String dn = x509.getSubjectX500Principal().getName();
+                String cn = "";
+                String o = "";
+                for (String part : dn.split(",")) {
+                    part = part.trim();
+                    if (part.startsWith("CN=")) cn = part.substring(3);
+                    if (part.startsWith("O=")) o = part.substring(2);
+                }
+                log.info("CN={}, O={}", cn, o);
+            }
         }
 
         log.error("merging signatures");

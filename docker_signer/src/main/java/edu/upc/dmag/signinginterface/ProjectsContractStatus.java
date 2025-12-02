@@ -76,7 +76,7 @@ public class ProjectsContractStatus {
         var documentStatus = contractStatus.documents.computeIfAbsent(knownDocument, k -> new DocumentStatus());
         documentStatus.setTimestamp(s3Object.lastModified());
         documentStatus.setHash(s3Object.eTag());
-
+        saveAsync();
 
     }
 

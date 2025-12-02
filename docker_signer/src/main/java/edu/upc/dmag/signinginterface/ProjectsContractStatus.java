@@ -3,6 +3,8 @@ package edu.upc.dmag.signinginterface;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +35,17 @@ public class ProjectsContractStatus {
     private static final String BUCKET = "test";
     private static final String KEY = "ProjectsContractStatus.json";
 
+    private static ObjectMapper createMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        return mapper;
+    }
+
     @PostConstruct
     public void init() throws IOException {
-        ObjectMapper mapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ObjectMapper mapper = createMapper();
 
         GetObjectRequest req = GetObjectRequest.builder()
                 .bucket(BUCKET)
@@ -84,8 +93,7 @@ public class ProjectsContractStatus {
     public CompletableFuture<Void> saveAsync() {
         final byte[] data;
         try {
-            ObjectMapper mapper = new ObjectMapper()
-                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            ObjectMapper mapper = createMapper();
             synchronized (projects) {
                 // snapshot to avoid concurrent-modification during serialization
                 data = mapper.writeValueAsBytes(new HashMap<>(projects));

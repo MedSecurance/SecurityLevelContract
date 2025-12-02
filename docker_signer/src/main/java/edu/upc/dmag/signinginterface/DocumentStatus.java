@@ -1,9 +1,12 @@
 package edu.upc.dmag.signinginterface;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DocumentStatus {
     public Instant timestamp;
     public String hash;

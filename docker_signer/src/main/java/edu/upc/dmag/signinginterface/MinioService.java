@@ -21,10 +21,11 @@ public class MinioService {
 
     private final S3AsyncClient s3;
     private final String bucketName = "test";
+    private final ProjectsContractStatus projectsContractStatus;
 
     private static final int PART_SIZE = 10 * 1024 * 1024; // 10 MB
 
-    public String uploadLargeFile(InputStream input, String key) throws Exception {
+    public S3Object uploadLargeFile(InputStream input, String key) throws Exception {
 
         CreateMultipartUploadRequest createReq = CreateMultipartUploadRequest.builder()
                 .bucket(bucketName)
@@ -83,7 +84,19 @@ public class MinioService {
                             .build();
 
             s3.completeMultipartUpload(completeReq).get();
-            return key;
+            ListObjectsV2Request listReq = ListObjectsV2Request.builder()
+                    .bucket(bucketName)
+                    .prefix(key)
+                    .maxKeys(1)
+                    .build();
+
+            ListObjectsV2Response listRes = s3.listObjectsV2(listReq).get();
+
+            if (listRes.contents().isEmpty()) {
+                throw new IllegalStateException("Object not found after upload: " + key);
+            }
+
+            return listRes.contents().getFirst();
 
         } catch (Exception ex) {
 

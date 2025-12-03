@@ -3,6 +3,7 @@ package edu.upc.dmag.signinginterface;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
@@ -20,9 +21,13 @@ public class IndexController {
     private final MinioService uploadService;
     private final ProjectsContractStatus projectsContractStatus;
 
+    @Value("${INSTANCE_ROLE:}")
+    private String instanceRole;
+
     @SneakyThrows
     @GetMapping({"/upload-form", "/", "/index.html"})
     public String uploadForm(Model model, @AuthenticationPrincipal Jwt principal) {
+        model.addAttribute("instanceRole", instanceRole);
         String project = "test";
         var uploadedFiles = uploadService.getListOfFiles(project);
         if (false) {

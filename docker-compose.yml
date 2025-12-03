@@ -80,6 +80,7 @@ services:
       REALM_NAME: medsecurance_consumer
       CLIENT_NAME: signer-consumer
       URL_DOMAIN: signer.consumer
+      INSTANCE_ROLE: consumer
     volumes:
       - ./docker_CA/signing_keys/consumer:/key
       - ./docker_CA/signing_keys/trust_anchors:/trust_anchors
@@ -99,6 +100,7 @@ services:
       REALM_NAME: medsecurance_provider
       CLIENT_NAME: signer-provider
       URL_DOMAIN: signer.provider
+      INSTANCE_ROLE: provider
     volumes:
       - ./docker_CA/signing_keys/provider:/key
       - ./docker_CA/signing_keys/trust_anchors:/trust_anchors

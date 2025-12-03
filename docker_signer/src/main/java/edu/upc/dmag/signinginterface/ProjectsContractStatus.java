@@ -9,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.ResponseBytes;
@@ -32,6 +33,10 @@ import java.util.concurrent.CompletionException;
 @RequiredArgsConstructor
 public class ProjectsContractStatus {
     private final S3AsyncClient s3;
+
+    @Value("${INSTANCE_ROLE:}")
+    private String instanceRole;
+
     private final Map<String, ContractStatus> projects = new HashMap<>();
     private static final String BUCKET = "test";
     private static final String KEY = "ProjectsContractStatus.json";
@@ -46,6 +51,10 @@ public class ProjectsContractStatus {
 
     @PostConstruct
     public void init() throws IOException {
+        if (!"provider".equalsIgnoreCase(instanceRole)) {
+            log.info("Skipping ProjectsContractStatus init because instance role is not 'provider' (is '{}')", instanceRole);
+            return;
+        }
         ObjectMapper mapper = createMapper();
 
         GetObjectRequest req = GetObjectRequest.builder()
@@ -88,6 +97,10 @@ public class ProjectsContractStatus {
 
 
     public void registerNewDocumentVersion(String project, KnownDocuments knownDocument, S3Object s3Object) {
+        if (!"provider".equalsIgnoreCase(instanceRole)) {
+            log.info("Skipping ProjectsContractStatus save because instance role is not 'provider' (is '{}')", instanceRole);
+            return;
+        }
         var contractStatus = this.projects.computeIfAbsent(project, k -> new ContractStatus());
         var documentStatus = contractStatus.documents.computeIfAbsent(knownDocument, k -> new DocumentStatus());
         documentStatus.setTimestamp(s3Object.lastModified());
@@ -98,17 +111,29 @@ public class ProjectsContractStatus {
     }
 
     public Set<String> getOrganizationsForProject(String project) {
+        if (!"provider".equalsIgnoreCase(instanceRole)) {
+            log.info("Skipping ProjectsContractStatus save because instance role is not 'provider' (is '{}')", instanceRole);
+            return null;
+        }
         var contractStatus = this.projects.computeIfAbsent(project, k-> new ContractStatus());
         return contractStatus.getOrganizations();
     }
 
     public Map<KnownDocuments, DocumentStatus> getDocumentsStatusForProject(String project) {
+        if (!"provider".equalsIgnoreCase(instanceRole)) {
+            log.info("Skipping ProjectsContractStatus save because instance role is not 'provider' (is '{}')", instanceRole);
+            return null;
+        }
         var contractStatus = this.projects.computeIfAbsent(project, k-> new ContractStatus());
         return contractStatus.getDocuments();
     }
 
 
     public CompletableFuture<Void> saveAsync() {
+        if (!"provider".equalsIgnoreCase(instanceRole)) {
+            log.info("Skipping ProjectsContractStatus save because instance role is not 'provider' (is '{}')", instanceRole);
+            return CompletableFuture.completedFuture(null);
+        }
         final byte[] data;
         try {
             ObjectMapper mapper = createMapper();
@@ -137,6 +162,10 @@ public class ProjectsContractStatus {
     }
 
     public void registerNewSignature(String project, KnownDocuments knownDocument, String cn, String organization) {
+        if (!"provider".equalsIgnoreCase(instanceRole)) {
+            log.info("Skipping ProjectsContractStatus save because instance role is not 'provider' (is '{}')", instanceRole);
+            return;
+        }
         var contractStatus = this.projects.computeIfAbsent(project, k -> new ContractStatus());
         var documentStatus = contractStatus.documents.computeIfAbsent(knownDocument, k -> new DocumentStatus());
         var signatureStatus = new SignatureStatus(Instant.now(), cn, organization);
@@ -147,9 +176,17 @@ public class ProjectsContractStatus {
 
     @PreDestroy
     public void shutdown() {
+        if (!"provider".equalsIgnoreCase(instanceRole)) {
+            log.info("Skipping ProjectsContractStatus save because instance role is not 'provider' (is '{}')", instanceRole);
+            return;
+        }
+
         try {
             log.error("Saving ProjectsContractStatus on shutdown...");
             log.error("ProjectsContractStatus save result: {}",this.projects);
+            for (Map.Entry<String, ContractStatus> entry : this.projects.entrySet()) {
+                log.error("Project: {} -> {}", entry.getKey(), entry.getValue().toString());
+            }
             saveAsync().join();
         } catch (Exception e) {
             log.error("Error while saving ProjectsContractStatus on shutdown", e);

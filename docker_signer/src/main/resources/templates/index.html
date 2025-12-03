@@ -113,7 +113,7 @@
             <div class="row g-4 justify-content-center">
 
                 <!-- Button 1 -->
-                <div class="col text-center d-flex">
+                <div class="col text-center d-flex" th:if="${instanceRole == 'provider'}">
                     <a href="/generateContract"
                        class="btn btn-primary btn-logo d-flex flex-column align-items-center mx-auto">
                         <i class="bi bi-file-earmark-plus big-icon"></i>
@@ -145,7 +145,8 @@
             <!-- Table: rows per KnownDocument, columns per organization (model attribute `organizations`) -->
             <!--/*@thymesVar id="has_files" type="Boolean"*/-->
             <!--/*@thymesVar id="documents_to_status" type="java.util.Map<edu.upc.dmag.signinginterface.KnownDocuments, edu.upc.dmag.signinginterface.DocumentStatus>"*/-->
-            <div class="row mt-5 " th:if="${has_files}">
+            <!--/*@thymesVar id="instanceRole" type="java.lang.String"*/-->
+            <div class="row mt-5 " th:if="${has_files and instanceRole == 'provider'}">
                 <div class="col-12">
                     <div style="max-height: 50vh; overflow: auto; border: 1px solid #e9ecef; border-radius: 4px; box-sizing: border-box;">
                         <table class="table table-striped table-hover mb-0">

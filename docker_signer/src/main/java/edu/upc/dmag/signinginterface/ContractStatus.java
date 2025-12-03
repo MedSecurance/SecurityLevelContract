@@ -40,4 +40,13 @@ public class ContractStatus {
         }
         return orgs;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<KnownDocuments, DocumentStatus> entry : documents.entrySet()) {
+            sb.append("- ").append(entry.getKey()).append(": ").append(entry.getValue().toString()).append("\n");
+        }
+        return sb.toString();
+    }
 }

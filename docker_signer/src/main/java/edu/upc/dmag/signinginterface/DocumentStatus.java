@@ -45,4 +45,13 @@ public class DocumentStatus {
     public void setSignatures(List<SignatureStatus> signatures) {
         this.signatures = signatures;
     }
+
+    @Override
+    public String toString() {
+        return "DocumentStatus{" +
+                "timestamp=" + timestamp +
+                ", hash='" + hash + '\'' +
+                ", signatures=" + signatures +
+                '}';
+    }
 }

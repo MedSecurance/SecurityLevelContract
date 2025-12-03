@@ -18,6 +18,7 @@ import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,8 +57,14 @@ public class ProjectsContractStatus {
             ResponseBytes<GetObjectResponse> bytes = s3.getObject(req, AsyncResponseTransformer.toBytes()).join();
             byte[] data = bytes.asByteArray();
 
+            log.error("data: {}",bytes.asString(StandardCharsets.UTF_8));
             TypeReference<Map<String, ContractStatus>> typeRef = new TypeReference<>() {};
             Map<String, ContractStatus> fromS3 = mapper.readValue(data, typeRef);
+            log.error("ProjectsContractStatus loaded data: {}",fromS3);
+            for (Map.Entry<String, ContractStatus> entry : fromS3.entrySet()) {
+                log.error("Project: {} -> {}", entry.getKey(), entry.getValue().toString());
+            }
+
 
             synchronized (projects) {
                 projects.clear();
@@ -85,6 +92,7 @@ public class ProjectsContractStatus {
         var documentStatus = contractStatus.documents.computeIfAbsent(knownDocument, k -> new DocumentStatus());
         documentStatus.setTimestamp(s3Object.lastModified());
         documentStatus.setHash(s3Object.eTag());
+        documentStatus.signatures.clear();
         saveAsync();
 
     }
@@ -140,6 +148,8 @@ public class ProjectsContractStatus {
     @PreDestroy
     public void shutdown() {
         try {
+            log.error("Saving ProjectsContractStatus on shutdown...");
+            log.error("ProjectsContractStatus save result: {}",this.projects);
             saveAsync().join();
         } catch (Exception e) {
             log.error("Error while saving ProjectsContractStatus on shutdown", e);

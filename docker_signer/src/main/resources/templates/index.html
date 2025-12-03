@@ -65,6 +65,12 @@
             z-index: -1; /* put behind content */
         }
 
+        .table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
     </style>
 </head>
 <body>
@@ -139,34 +145,27 @@
             <!-- Table: rows per KnownDocument, columns per organization (model attribute `organizations`) -->
             <!--/*@thymesVar id="has_files" type="Boolean"*/-->
             <!--/*@thymesVar id="documents_to_status" type="java.util.Map<edu.upc.dmag.signinginterface.KnownDocuments, edu.upc.dmag.signinginterface.DocumentStatus>"*/-->
-            <div class="row mt-5" th:if="${has_files}">
+            <div class="row mt-5 " th:if="${has_files}">
                 <div class="col-12">
-                    <div style="max-height: 50vh; overflow: auto; border: 1px solid #e9ecef; border-radius: 4px;">
+                    <div style="max-height: 50vh; overflow: auto; border: 1px solid #e9ecef; border-radius: 4px; box-sizing: border-box;">
                         <table class="table table-striped table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="position: sticky; top: 60px; z-index: 20; background: #fff;">Document</th>
-                                    <th style="position: sticky; top: 60px; z-index: 19; background: #fff;">Last modified</th>
-                                    <th style="position: sticky; top: 60px; z-index: 18; background: #fff;">Hash</th>
+                                    <th>Document</th>
+                                    <th>Last modified</th>
                                     <!--/*@thymesVar id="organizations" type="String[]"*/-->
                                     <!--/*@thymesVar id="documents_to_status" type="java.util.Map<edu.upc.dmag.signinginterface.KnownDocuments, edu.upc.dmag.signinginterface.DocumentStatus>"*/-->
-                                    <th th:each="org : ${organizations}" th:text="${org}"
-                                        style="position: sticky; top: 60px; z-index: 17; background: #fff;"></th>
+                                    <th th:each="org : ${organizations}" th:text="${org}"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Iterate only over documents present in documents_to_status -->
-
-                                <tr th:each="entry : ${documents_to_status.entrySet()}" th:with="doc=${entry.key}, status=${entry.value}">
+                                <tr th:each="entry : ${documents_to_status.entrySet()}" th:if="${entry.value != null}" th:with="doc=${entry.key}, status=${entry.value}">
                                     <!-- Document name: if key is KnownDocuments use getName(), otherwise show the key as-is -->
                                     <td th:text="${doc.getClass().getName() == 'edu.upc.dmag.signinginterface.KnownDocuments' ? doc.getName() : doc}"
                                         th:attr="data-docid=${doc.getClass().getName() == 'edu.upc.dmag.signinginterface.KnownDocuments' ? doc.getId() : doc}"></td>
 
                                     <!-- human-friendly timestamp; use #temporals to format Java Time instants -->
                                     <td th:text="${status == null ? '\u2014' : #temporals.format(status.timestamp, 'dd MMM yyyy HH:mm')}"></td>
-
-                                    <!-- hash -->
-                                    <td th:text="${status == null ? '\u2014' : status.hash}"></td>
 
                                     <!--/*@thymesVar id="organizations" type="String[]"*/-->
                                     <td th:each="org : ${organizations}">
@@ -182,7 +181,6 @@
                             </tbody>
                         </table>
                     </div>
-                    <small class="text-muted">Rows generated from KnownDocuments enum and resolved against <code>documents_to_status</code> (Map&lt;KnownDocuments, DocumentStatus&gt;); supply a model attribute named <code>organizations</code> (List&lt;String&gt;) to render organization columns.</small>
                 </div>
             </div>
 

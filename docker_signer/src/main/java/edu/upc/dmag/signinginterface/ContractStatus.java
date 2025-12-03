@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ContractStatus {
@@ -25,5 +27,17 @@ public class ContractStatus {
     @JsonProperty("documents")
     public void setDocuments(Map<KnownDocuments, DocumentStatus> documents) {
         this.documents = documents;
+    }
+
+    public Set<String> getOrganizations() {
+        Set<String> orgs = new HashSet<>();
+        for (DocumentStatus docStatus : documents.values()) {
+            if (docStatus != null) {
+                for (SignatureStatus sigStatus : docStatus.getSignatures()) {
+                    orgs.add(sigStatus.getOrganization());
+                }
+            }
+        }
+        return orgs;
     }
 }

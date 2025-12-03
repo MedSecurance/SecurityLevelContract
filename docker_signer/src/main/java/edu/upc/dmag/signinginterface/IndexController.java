@@ -2,6 +2,7 @@ package edu.upc.dmag.signinginterface;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
@@ -14,8 +15,10 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Controller
+@Slf4j
 public class IndexController {
     private final MinioService uploadService;
+    private final ProjectsContractStatus projectsContractStatus;
 
     @SneakyThrows
     @GetMapping({"/upload-form", "/", "/index.html"})
@@ -41,9 +44,36 @@ public class IndexController {
                 )
             );
 
+            model.addAttribute(
+                "has_files",
+                Boolean.TRUE
+            );
+            model.addAttribute(
+                "organizations",
+                projectsContractStatus.getOrganizationsForProject(project).toArray(String[]::new)
+            );
+            model.addAttribute(
+                "documents_to_status",
+                projectsContractStatus.getDocumentsStatusForProject(project)
+            );
+
             return "index_known_elements.html";
         } else {
-            //model.addAttribute("message", principal.getTokenValue());
+            model.addAttribute(
+                    "has_files",
+                    Boolean.TRUE
+            );
+            log.error("Organizations: {}", projectsContractStatus.getOrganizationsForProject(project));
+            model.addAttribute(
+                    "organizations",
+                    projectsContractStatus.getOrganizationsForProject(project).toArray(String[]::new)
+            );
+            log.error("Documents to status: {}", projectsContractStatus.getDocumentsStatusForProject(project));
+            model.addAttribute(
+                    "documents_to_status",
+                    projectsContractStatus.getDocumentsStatusForProject(project)
+            );
+
             return "index.html";
         }
     }

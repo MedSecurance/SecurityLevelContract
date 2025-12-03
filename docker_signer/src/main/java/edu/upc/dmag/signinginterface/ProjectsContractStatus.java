@@ -17,12 +17,11 @@ import software.amazon.awssdk.core.async.AsyncResponseTransformer;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.*;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -88,6 +87,16 @@ public class ProjectsContractStatus {
         documentStatus.setHash(s3Object.eTag());
         saveAsync();
 
+    }
+
+    public Set<String> getOrganizationsForProject(String project) {
+        var contractStatus = this.projects.computeIfAbsent(project, k-> new ContractStatus());
+        return contractStatus.getOrganizations();
+    }
+
+    public Map<KnownDocuments, DocumentStatus> getDocumentsStatusForProject(String project) {
+        var contractStatus = this.projects.computeIfAbsent(project, k-> new ContractStatus());
+        return contractStatus.getDocuments();
     }
 
 

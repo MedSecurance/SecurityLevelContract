@@ -20,6 +20,7 @@ import software.amazon.awssdk.services.s3.model.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -116,6 +117,14 @@ public class ProjectsContractStatus {
                     log.error("Failed to save ProjectsContractStatus to S3/MinIO", ex);
                     return null;
                 });
+    }
+
+    public void registerNewSignature(String project, KnownDocuments knownDocument, String cn, String organization) {
+        var contractStatus = this.projects.computeIfAbsent(project, k -> new ContractStatus());
+        var documentStatus = contractStatus.documents.computeIfAbsent(knownDocument, k -> new DocumentStatus());
+        var signatureStatus = new SignatureStatus(Instant.now(), cn, organization);
+        documentStatus.getSignatures().add(signatureStatus);
+        saveAsync();
     }
 
 

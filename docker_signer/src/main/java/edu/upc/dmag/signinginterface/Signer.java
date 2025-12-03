@@ -29,8 +29,11 @@ import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.dss.xades.XAdESSignatureParameters;
 import eu.europa.esig.dss.xades.signature.XAdESService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -49,12 +52,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
+@RequiredArgsConstructor
+@Component
 public class Signer {
+    private final ProjectsContractStatus projectsContractStatus;
     private static final char[] PKI_FACTORY_KEYSTORE_PASSWORD = {'k', 's', '-', 'p', 'a', 's', 's', 'w', 'o', 'r', 'd'};
 
     private static final String PKI_FACTORY_HOST = "http://dss.nowina.lu/pki-factory/";
@@ -186,7 +190,7 @@ public class Signer {
         return getOnlineTSPSourceByName(GOOD_TSA);
     }
 
-    protected static String test(String content) throws IOException, ParserConfigurationException, SAXException, TransformerException, XMLStreamException, CertificateException {
+    protected String test(String project, String content) throws Exception {
         List<String> pathToKeys = List.of(new String[]{
                 //"C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\consumer\\consumer.p12",
                 //"C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\provider\\provider.p12",
@@ -203,6 +207,17 @@ public class Signer {
         log.error("removing signatures");
         var workingDocument = removeSignatures(content);
         log.error("signatures removed");
+
+        Set<KnownDocuments> includedDocuments = new HashSet<>();
+        List<Element> children = XmlParserUtils.getRootChildrenExcludingSignatures(content);
+        for (Element el : children) {
+            String name = el.getLocalName() != null ? el.getLocalName() : el.getNodeName();
+            try {
+                includedDocuments.add(KnownDocuments.valueOf(name));
+            } catch (IllegalArgumentException ignore) {
+                log.warn("Unknown document element found in XML: {}", name);
+            }
+        }
 
         for (int i=0; i< pathToKeys.size(); i++){
             DSSDocument toSignDocument = new FileDocument(workingDocument.toFile());
@@ -248,6 +263,10 @@ public class Signer {
                     if (part.startsWith("O=")) o = part.substring(2);
                 }
                 log.info("CN={}, O={}", cn, o);
+
+                for (var document: includedDocuments) {
+                    projectsContractStatus.registerNewSignature(project, document, cn, o);
+                }
             }
         }
 

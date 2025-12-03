@@ -1,5 +1,6 @@
 package edu.upc.dmag.signinginterface;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
@@ -27,8 +29,11 @@ import java.security.cert.CertificateException;
 
 @Controller
 @RequestMapping("/signer")
+@RequiredArgsConstructor
 @Slf4j
 public class FileController {
+    private final Signer signer;
+
     public void getUserRolesFromKeycloak() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -54,6 +59,7 @@ public class FileController {
         } else {
             username = retrieveUsernameFromSecurityContext();
         }
+        String project = "test";
 
 
 
@@ -61,7 +67,7 @@ public class FileController {
             // Read original file content
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
             log.error("about to sign document");
-            String modifiedContent = Signer.test(content);
+            String modifiedContent = signer.test(project, content);
             log.error("document is signed");
 
             return Utils.generateAnswer(modifiedContent, "modified_" + file.getOriginalFilename());
@@ -70,6 +76,8 @@ public class FileController {
                  CertificateException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

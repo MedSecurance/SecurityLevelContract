@@ -29,41 +29,10 @@ public class IndexController {
     public String uploadForm(Model model, @AuthenticationPrincipal Jwt principal) {
         model.addAttribute("instanceRole", instanceRole);
         String project = "test";
-        var uploadedFiles = uploadService.getListOfFiles(project);
-        if (false) {
-        //if (!uploadedFiles.isEmpty()) {
-            Map<KnownDocuments, Boolean> files = new LinkedHashMap<>();
-            for (KnownDocuments knownDocuments : KnownDocuments.values()) {
-                files.put(knownDocuments, false);
-            }
-            for(S3Object s3Object: uploadedFiles) {
-                try {
-                    files.put(KnownDocuments.valueOf(s3Object.key().replace(project + "/", "")), Boolean.TRUE);
-                }catch (Exception ignore) {}
-            }
 
-            model.addAttribute(
-                "files",
-                files.entrySet().toArray(
-                        java.util.Map.Entry[]::new
-                )
-            );
+        if ("provider".equalsIgnoreCase(instanceRole)) {
+            var uploadedFiles = uploadService.getListOfFiles(project);
 
-            model.addAttribute(
-                "has_files",
-                Boolean.TRUE
-            );
-            model.addAttribute(
-                "organizations",
-                projectsContractStatus.getOrganizationsForProject(project).toArray(String[]::new)
-            );
-            model.addAttribute(
-                "documents_to_status",
-                projectsContractStatus.getDocumentsStatusForProject(project)
-            );
-
-            return "index_known_elements.html";
-        } else {
             model.addAttribute(
                     "has_files",
                     Boolean.TRUE
@@ -78,9 +47,13 @@ public class IndexController {
                     "documents_to_status",
                     projectsContractStatus.getDocumentsStatusForProject(project)
             );
-
-            return "index.html";
+        } else {
+            model.addAttribute(
+                    "has_files",
+                    Boolean.FALSE
+            );
         }
+        return "index.html";
     }
 
 }

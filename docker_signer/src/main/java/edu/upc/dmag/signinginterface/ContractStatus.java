@@ -45,7 +45,12 @@ public class ContractStatus {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<KnownDocuments, DocumentStatus> entry : documents.entrySet()) {
-            sb.append("- ").append(entry.getKey()).append(": ").append(entry.getValue().toString()).append("\n");
+            sb.append("- ").append(entry.getKey()).append(": ");
+            if (entry.getValue() != null) {
+                sb.append(entry.getValue().toString()).append("\n");
+            } else {
+                sb.append("null\n");
+            }
         }
         return sb.toString();
     }

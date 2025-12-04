@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap Layout</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        header {
+            height: 60px; /* Fixed header height */
+        }
+        footer {
+            height: 50px; /* Fixed footer height */
+        }
+        main {
+            flex: 1;
+            overflow-y: auto;
+        }
+        i.big-icon{
+            font-size: 50px;
+        }
+        .header-logo {
+            height: 100%;
+            max-height: 100%; /* Ensure it doesn't exceed the header */
+            width: auto; /* Maintain aspect ratio */
+            object-fit: contain; /* Keeps the whole logo visible */
+        }
+
+
+
+        .background-container {
+            position: relative;
+            overflow: hidden; /* ensures pseudo-element doesn't spill out */
+            z-index: 0;
+            /*padding: 50px;*/
+            text-align: center;
+            color: white;
+            width: 100%;
+        }
+
+        .background-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /*background-image: url('https://static.wixstatic.com/media/d3bb5c_6979d0ede6394f9c8b620368f35a2903~mv2.jpg/v1/fill/w_345,h_140,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/MedSecurance_web_logo.jpg');
+            background-repeat: repeat; /* repeat the image */
+            /*background-size: 40px; /* adjust as needed */
+            /*background-position: 50px 50px;*/
+            background-color: lightgrey;
+            filter: grayscale(100%) opacity(0.3); /* black & white + light effect */
+            z-index: -1; /* put behind content */
+        }
+
+        .table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <!--<header class="bg-white border-5 border-bottom d-flex align-items-center justify-content-center">
+        <div class="container h-100 mh-100">
+            <div class="row h-100 mh-100">
+                <div class="col-2 h-100 mh-100">
+                    <img class="header-logo" src="https://static.wixstatic.com/media/d3bb5c_6979d0ede6394f9c8b620368f35a2903~mv2.jpg/v1/fill/w_345,h_140,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/MedSecurance_web_logo.jpg">
+                </div>
+                <div class="col-8  justify-content-center mx-auto text-center" style="font-size: 40px; font-family: Arial, sans-serif;">Contract tool</div>
+            </div>
+        </div>
+    </header>-->
+
+    <header class="bg-white border-5 border-bottom d-flex align-items-center justify-content-center">
+        <a href="/" class="col-8  justify-content-center mx-auto text-center"
+             style="
+             display: block;
+           font-size: 40px;
+           font-family: Arial, sans-serif;
+           background-image: url('https://static.wixstatic.com/media/d3bb5c_6979d0ede6394f9c8b620368f35a2903~mv2.jpg/v1/fill/w_345,h_140,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/MedSecurance_web_logo.jpg');
+           background-repeat: no-repeat;
+           background-size: auto 60px;
+           cursor: pointer;
+           color: inherit;
+           color: inherit;
+        ">Contract tool</a>
+        <!--<div class="container h-100 mh-100">
+            <div class="row h-100 mh-100">
+                <div class="col-2 h-100 mh-100">
+                    <img class="header-logo" src="https://static.wixstatic.com/media/d3bb5c_6979d0ede6394f9c8b620368f35a2903~mv2.jpg/v1/fill/w_345,h_140,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/MedSecurance_web_logo.jpg">
+                </div>
+
+            </div>
+        </div>-->
+    </header>
+    <main class="container-flex background-container m-0 d-flex">
+        <div class="container-flex py-5 m-auto">
+            <div class="row g-4 justify-content-center">
+
+                <!-- Button 1 -->
+                <div class="col text-center d-flex" th:if="${instanceRole != null and #strings.equalsIgnoreCase(instanceRole, 'provider')}">
+                    <a th:href="@{'/' + project + '/generateContract'}"
+                       class="btn btn-primary btn-logo d-flex flex-column align-items-center mx-auto">
+                        <i class="bi bi-file-earmark-plus big-icon"></i>
+                        <span class="mt-1">Create contract</span>
+                    </a>
+                </div>
+
+
+
+                <!-- Button 2 -->
+                <div class="col text-center d-flex">
+                    <a th:href="@{'/' + project + '/signer'}"
+                       class="btn btn-success btn-logo d-flex flex-column align-items-center mx-auto">
+                        <i class="bi bi-patch-check big-icon"></i>
+                        <span class="mt-1">Sign contract</span>
+                    </a>
+                </div>
+
+                <!-- Button 3 -->
+                <div class="col text-center d-flex">
+                    <a th:href="@{'/' + project + '/validator'}"
+                        class="btn btn-warning btn-logo d-flex flex-column align-items-center mx-auto">
+                        <i class="bi bi-file-earmark-check-fill big-icon" ></i>
+                        <span class="mt-1">Verify signatures</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Table: rows per KnownDocument, columns per organization (model attribute `organizations`) -->
+            <!--/*@thymesVar id="has_files" type="Boolean"*/-->
+            <!--/*@thymesVar id="documents_to_status" type="java.util.Map<edu.upc.dmag.signinginterface.KnownDocuments, edu.upc.dmag.signinginterface.DocumentStatus>"*/-->
+            <!--/*@thymesVar id="instanceRole" type="java.lang.String"*/-->
+            <div class="row mt-5 " th:if="${has_files and instanceRole != null and #strings.equalsIgnoreCase(instanceRole, 'provider')}">
+                <div class="col-12">
+                    <div style="max-height: 50vh; overflow: auto; border: 1px solid #e9ecef; border-radius: 4px; box-sizing: border-box;">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Document</th>
+                                    <th>Last modified</th>
+                                    <!--/*@thymesVar id="organizations" type="String[]"*/-->
+                                    <!--/*@thymesVar id="documents_to_status" type="java.util.Map<edu.upc.dmag.signinginterface.KnownDocuments, edu.upc.dmag.signinginterface.DocumentStatus>"*/-->
+                                    <th th:each="org : ${organizations}" th:text="${org}"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="entry : ${documents_to_status.entrySet()}" th:if="${entry.value != null}" th:with="doc=${entry.key}, status=${entry.value}">
+                                    <!-- Document name: if key is KnownDocuments use getName(), otherwise show the key as-is -->
+                                    <td th:text="${doc.getClass().getName() == 'edu.upc.dmag.signinginterface.KnownDocuments' ? doc.getName() : doc}"
+                                        th:attr="data-docid=${doc.getClass().getName() == 'edu.upc.dmag.signinginterface.KnownDocuments' ? doc.getId() : doc}"></td>
+
+                                    <!-- human-friendly timestamp; use #temporals to format Java Time instants -->
+                                    <td th:text="${status == null ? '\u2014' : #temporals.format(status.timestamp, 'dd MMM yyyy HH:mm')}"></td>
+
+                                    <!--/*@thymesVar id="organizations" type="String[]"*/-->
+                                    <td th:each="org : ${organizations}" th:with="signature=${status.getSignatureByOrganization(org)}">
+                                        <!-- Show a checkbox which is checked when `status` exists for this document -->
+                                        <div th:if="${signature != null}" class="text-center">
+                                            <div><i class="bi bi-file-earmark-check-fill"></i></div>
+                                            <div style="font-size: 0.8rem;">
+                                                <span th:text="${signature.actor}"></span>
+                                                @
+                                                <span th:text="${#temporals.format(signature.signatureTime, 'dd MMM yyyy HH:mm')}"></span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white d-flex align-items-center justify-content-center"
+            style=" font-family: Arial, sans-serif;"
+    >
+        MedSecurance Toolbox
+    </footer>
+</div>
+
+<!-- Bootstrap JS (Optional, for components) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

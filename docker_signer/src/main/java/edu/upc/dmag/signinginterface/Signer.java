@@ -22,7 +22,6 @@ import eu.europa.esig.dss.spi.x509.KeyStoreCertificateSource;
 import eu.europa.esig.dss.spi.x509.tsp.TSPSource;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.KeyStoreSignatureTokenConnection;
-import eu.europa.esig.dss.utils.Utils;
 import eu.europa.esig.dss.validation.CertificateVerifier;
 import eu.europa.esig.dss.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
@@ -32,7 +31,6 @@ import eu.europa.esig.dss.xades.signature.XAdESService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.input.NullInputStream;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
@@ -44,8 +42,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -57,6 +53,7 @@ import java.security.DigestInputStream;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.*;
 
 @Slf4j
@@ -85,13 +82,12 @@ public class Signer {
         return trustedCertificateSource;
     }
 
-    protected static Path removeSignatures(String inputXML) throws ParserConfigurationException, IOException, SAXException, TransformerException, XMLStreamException {
+    protected static Path removeSignatures(String inputXML) throws ParserConfigurationException, IOException, SAXException, TransformerException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         ByteArrayInputStream input = new ByteArrayInputStream(inputXML.getBytes(StandardCharsets.UTF_8));
         Document document = builder.parse(input);
 
-        // Get the <signatures> element and remove all its children
         NodeList signaturesList = document.getElementsByTagName("signatures");
         if (signaturesList.getLength() > 0) {
             Node signaturesNode = signaturesList.item(0);
@@ -102,7 +98,6 @@ public class Signer {
 
         DOMSource source = new DOMSource(document);
         Path tempFile = Files.createTempFile("xml-output-", ".xml");
-        XMLOutputFactory outputFactory = XMLOutputFactory.newFactory();
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
 
@@ -114,7 +109,6 @@ public class Signer {
     }
 
     protected static CertificateSource getModifiedOnlineTrustedCertificateSource() throws IOException {
-        //KeyStoreCertificateSource keystore = new KeyStoreCertificateSource(new File("C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\trust_anchors\\trust-anchors.jks"), "JKS", PKI_FACTORY_KEYSTORE_PASSWORD);
         KeyStoreCertificateSource keystore = new KeyStoreCertificateSource(new File("/trust_anchors/trust-anchors.jks"), "JKS", PKI_FACTORY_KEYSTORE_PASSWORD);
         CommonTrustedCertificateSource trustedCertificateSource = new CommonTrustedCertificateSource();
         trustedCertificateSource.importAsTrusted(keystore);
@@ -209,9 +203,9 @@ public class Signer {
         storeBytes(content.getBytes(), "/tmp/original.xml");
         outputPaths.add("/tmp/original.xml");
 
-        log.error("removing signatures");
+        log.debug("removing signatures");
         var workingDocument = removeSignatures(content);
-        log.error("signatures removed");
+        log.debug("signatures removed");
 
         Set<KnownDocuments> includedDocuments = new HashSet<>();
         List<Element> children = XmlParserUtils.getRootChildrenExcludingSignatures(content);
@@ -228,68 +222,60 @@ public class Signer {
 
             String pathToKey = pathToKeys.get(i);
             char[] keyForCertificate = keysForCertificate.get(i);
-            log.error("signing once");
+            log.debug("signing once");
             DSSDocument signedDocument = basicSignDocument(
                     toSignDocument,
                     pathToKey,
                     keyForCertificate
             );
-            log.error("once signed");
+            log.debug("once signed");
             toSignDocument = signedDocument;
 
-            log.error("extending to t");
+            log.debug("extending to t");
             DSSDocument tLevelSignature = extendToT(toSignDocument);
 
-            log.error("extending to lt");
+            log.debug("extending to lt");
             DSSDocument ltLevelDocument = extendToLT(tLevelSignature);
 
-            log.error("extending to lta");
+            log.debug("extending to lta");
             DSSDocument ltaLevelDocument = extendToLTA(ltLevelDocument);
-            log.error("extended");
+            log.debug("extended");
 
 
             String outputPath = "/tmp/signed_"+i+".xml";
             ltaLevelDocument.save(outputPath);
-            log.error("saved");
+            log.debug("saved");
             outputPaths.add(outputPath);
 
-            try (KeyStoreSignatureTokenConnection t = new KeyStoreSignatureTokenConnection(pathToKey, "PKCS12", new KeyStore.PasswordProtection(keyForCertificate))) {
-                DSSPrivateKeyEntry entry = t.getKeys().get(0);
-                byte[] encoded = entry.getCertificate().getEncoded();
-                java.security.cert.CertificateFactory cf = java.security.cert.CertificateFactory.getInstance("X.509");
-                java.security.cert.X509Certificate x509 = (java.security.cert.X509Certificate) cf.generateCertificate(new java.io.ByteArrayInputStream(encoded));
-                String dn = x509.getSubjectX500Principal().getName();
-                String cn = "";
-                String o = "";
-                for (String part : dn.split(",")) {
-                    part = part.trim();
-                    if (part.startsWith("CN=")) cn = part.substring(3);
-                    if (part.startsWith("O=")) o = part.substring(2);
-                }
-                log.info("CN={}, O={}", cn, o);
+            registerSignatures(project, pathToKey, keyForCertificate, includedDocuments);
+        }
 
-                for (var document: includedDocuments) {
-                    projectsContractStatus.registerNewSignature(project, document, cn, o);
-                }
+        log.debug("merging signatures");
+        var mergedResult = merge_signatures(outputPaths);
+        log.debug("signatures merged");
+        return document_to_string(mergedResult);
+    }
+
+    private void registerSignatures(String project, String pathToKey, char[] keyForCertificate, Set<KnownDocuments> includedDocuments) throws CertificateException, IOException {
+        try (KeyStoreSignatureTokenConnection t = new KeyStoreSignatureTokenConnection(pathToKey, "PKCS12", new KeyStore.PasswordProtection(keyForCertificate))) {
+            DSSPrivateKeyEntry entry = t.getKeys().get(0);
+            byte[] encoded = entry.getCertificate().getEncoded();
+            java.security.cert.CertificateFactory cf = java.security.cert.CertificateFactory.getInstance("X.509");
+            java.security.cert.X509Certificate x509 = (java.security.cert.X509Certificate) cf.generateCertificate(new ByteArrayInputStream(encoded));
+            String dn = x509.getSubjectX500Principal().getName();
+            String cn = "";
+            String o = "";
+            for (String part : dn.split(",")) {
+                part = part.trim();
+                if (part.startsWith("CN=")) cn = part.substring(3);
+                if (part.startsWith("O=")) o = part.substring(2);
+            }
+            log.info("CN={}, O={}", cn, o);
+
+            for (var document: includedDocuments) {
+                projectsContractStatus.registerNewSignature(project, document, cn, o);
             }
         }
-
-        log.error("merging signatures");
-        var mergedResult = merge_signatures(outputPaths);
-        log.error("signatures merged");
-        return document_to_string(mergedResult);
-
-
-        /*DSSDocument ltaLevelDocument = new FileDocument(new File("/data/signed.xml"));
-        ltaLevelDocument.save("/data/signed.xml");
-
-        ServiceLoader<DocumentValidatorFactory> serviceLoaders = ServiceLoader.load(DocumentValidatorFactory.class);
-        for (DocumentValidatorFactory factory : serviceLoaders) {
-            System.out.println("one factory found: "+ factory.getClass());
-        }
-
-
-        testFinalDocument(ltaLevelDocument);*/
     }
 
     private boolean dataChildHashIsValid(String project, Element el, String name) throws NoSuchAlgorithmException {
@@ -318,11 +304,9 @@ public class Signer {
         try (InputStream is = new ByteArrayInputStream(base64Data.getBytes(StandardCharsets.UTF_8));
              InputStream base64is = Base64.getDecoder().wrap(is);
              DigestInputStream dis = new DigestInputStream(base64is, md)) {
-            // Consume el stream para calcular el hash. StreamUtils.copy a un NullOutputStream
-            // es una forma eficiente de hacer esto sin mantener los datos en memoria.
             StreamUtils.copy(dis, new OutputStream() {
                 @Override
-                public void write(int b) throws IOException {
+                public void write(int b) {
                     // discard data
                 }
             });
@@ -407,66 +391,40 @@ public class Signer {
     }
 
     private static DSSDocument extendToLTA(DSSDocument ltLevelDocument) throws IOException {
-        XAdESSignatureParameters parameters;
-        XAdESService xadesService;
-        CommonCertificateVerifier certificateVerifier;
-
-        // end::demoLTExtend[]
-
-        // tag::demoLTAExtend[]
-        // import eu.europa.esig.dss.enumerations.SignatureLevel;
-        // import eu.europa.esig.dss.model.DSSDocument;
-        // import eu.europa.esig.dss.service.crl.OnlineCRLSource;
-        // import eu.europa.esig.dss.service.ocsp.OnlineOCSPSource;
-        // import eu.europa.esig.dss.validation.CommonCertificateVerifier;
-        // import eu.europa.esig.dss.xades.XAdESSignatureParameters;
-        // import eu.europa.esig.dss.xades.signature.XAdESService;
-
-        // Create signature parameters with target extension level
-        parameters = new XAdESSignatureParameters();
+        var parameters = new XAdESSignatureParameters();
         parameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_LTA);
 
-        // Initialize CertificateVerifier with data revocation data requesting
-        certificateVerifier = new CommonCertificateVerifier();
-
-        // init revocation sources for CRL/OCSP requesting
-        certificateVerifier.setCrlSource(new OnlineCRLSource());
-        certificateVerifier.setOcspSource(new OnlineOCSPSource());
-
-        // Trust anchors should be defined for revocation data requesting
-        certificateVerifier.setTrustedCertSources(getTrustedCertificateSource());
-
-        // Initialize signature service with TSP Source for time-stamp requesting
-        xadesService = new XAdESService(certificateVerifier);
-        xadesService.setTspSource(getOnlineTSPSource());
-
-        // Extend signature
-        DSSDocument ltaLevelDocument = xadesService.extendDocument(ltLevelDocument, parameters);
-        return ltaLevelDocument;
+        return performExtension(ltLevelDocument, parameters);
     }
 
     private static DSSDocument extendToLT(DSSDocument tLevelSignature) throws IOException {
-        XAdESService xadesService;
-        XAdESSignatureParameters parameters;
-        CommonCertificateVerifier certificateVerifier;
-
-        // end::demoTExtend[]
-
-        // tag::demoLTExtend[]
-        // import eu.europa.esig.dss.enumerations.SignatureLevel;
-        // import eu.europa.esig.dss.model.DSSDocument;
-        // import eu.europa.esig.dss.service.crl.OnlineCRLSource;
-        // import eu.europa.esig.dss.service.ocsp.OnlineOCSPSource;
-        // import eu.europa.esig.dss.validation.CommonCertificateVerifier;
-        // import eu.europa.esig.dss.xades.XAdESSignatureParameters;
-        // import eu.europa.esig.dss.xades.signature.XAdESService;
-
         // Create signature parameters with target extension level
-        parameters = new XAdESSignatureParameters();
+        XAdESSignatureParameters parameters = new XAdESSignatureParameters();
         parameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_LT);
 
+        return performExtension(tLevelSignature, parameters);
+    }
+
+    private static DSSDocument performExtension(DSSDocument tLevelSignature, XAdESSignatureParameters parameters) throws IOException {
         // Create a CertificateVerifier with revocation sources for -LT level extension
-        certificateVerifier = new CommonCertificateVerifier();
+        CommonCertificateVerifier certificateVerifier = getCommonCertificateVerifier();
+
+        // Init service for signature augmentation
+        XAdESService xadesService = getXAdESService(certificateVerifier);
+
+        // Extend signature
+        return xadesService.extendDocument(tLevelSignature, parameters);
+    }
+
+    private static XAdESService getXAdESService(CommonCertificateVerifier certificateVerifier) {
+        XAdESService xadesService;
+        xadesService = new XAdESService(certificateVerifier);
+        xadesService.setTspSource(getOnlineTSPSource());
+        return xadesService;
+    }
+
+    private static CommonCertificateVerifier getCommonCertificateVerifier() throws IOException {
+        CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
 
         // init revocation sources for CRL/OCSP requesting
         certificateVerifier.setCrlSource(new OnlineCRLSource());
@@ -474,39 +432,16 @@ public class Signer {
 
         // Trust anchors should be defined for revocation data requesting
         certificateVerifier.setTrustedCertSources(getTrustedCertificateSource());
-
-        // Init service for signature augmentation
-        xadesService = new XAdESService(certificateVerifier);
-        xadesService.setTspSource(getOnlineTSPSource());
-
-        // Extend signature
-        DSSDocument ltLevelDocument = xadesService.extendDocument(tLevelSignature, parameters);
-        return ltLevelDocument;
+        return certificateVerifier;
     }
 
-    private static DSSDocument extendToT(DSSDocument signedDocument) {
-        // tag::demoTExtend[]
-        // import eu.europa.esig.dss.enumerations.SignatureLevel;
-        // import eu.europa.esig.dss.model.DSSDocument;
-        // import eu.europa.esig.dss.validation.CommonCertificateVerifier;
-        // import eu.europa.esig.dss.xades.XAdESSignatureParameters;
-        // import eu.europa.esig.dss.xades.signature.XAdESService;
+    private static DSSDocument extendToT(DSSDocument signedDocument) throws IOException {
 
         // Create signature parameters with target extension level
         XAdESSignatureParameters parameters = new XAdESSignatureParameters();
         parameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_T);
 
-        // Create a CertificateVerifier (empty configuration is possible for T-level extension)
-        CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
-
-        // Init service for signature augmentation
-        XAdESService xadesService = new XAdESService(certificateVerifier);
-
-        // init TSP source for timestamp requesting
-        xadesService.setTspSource(getOnlineTSPSource());
-
-        DSSDocument tLevelSignature = xadesService.extendDocument(signedDocument, parameters);
-        return tLevelSignature;
+        return performExtension(signedDocument, parameters);
     }
 
     protected static SignedDocumentValidator getValidator(DSSDocument signedDocument) {
@@ -515,26 +450,6 @@ public class Signer {
         return validator;
     }
 
-    protected static DiagnosticData testFinalDocument(DSSDocument signedDocument) throws IOException {
-        return testFinalDocument(signedDocument, null);
-    }
-
-    protected static DiagnosticData testFinalDocument(DSSDocument signedDocument, List<DSSDocument> detachedContents) throws IOException {
-        SignedDocumentValidator validator = getValidator(signedDocument);
-
-        CertificateVerifier certificateVerifier = new CommonCertificateVerifier();
-        CommonTrustedCertificateSource  trustedCertificateSource = new CommonTrustedCertificateSource();
-        CertificateToken certificate = DSSUtils.loadCertificate(new File("src/main/resources/cc-root-ca.crt"));
-        trustedCertificateSource.addCertificate(certificate);
-        certificateVerifier.setTrustedCertSources(getTrustedCertificateSource());
-        validator.setCertificateVerifier(certificateVerifier);
-
-        if (Utils.isCollectionNotEmpty(detachedContents)) {
-            validator.setDetachedContents(detachedContents);
-        }
-        Reports reports = validator.validateDocument();
-        return reports.getDiagnosticData();
-    }
 
     public Boolean validate(String project, String content) throws IOException {
         DSSDocument signedDocument = new InMemoryDocument(content.getBytes());

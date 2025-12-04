@@ -1,4 +1,5 @@
 package edu.upc.dmag.signinginterface.config;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -12,11 +13,21 @@ import java.net.URI;
 @Configuration
 public class MinioConfig {
 
+    @Value("${minio.access.name}")
+    String accessKey;
+    @Value("${minio.access.secret}")
+    String secretKey;
+    @Value("${minio.url}")
+    String minioUrl;
+    @Value("${minio.account.id}")
+    String accountId;
+
+
     @Bean
     public S3AsyncClient s3AsyncClient() {
-        var credentials = AwsBasicCredentials.builder().accountId("local").accessKeyId("myuseraccesskey").secretAccessKey("myusersecretkey").build();
+        var credentials = AwsBasicCredentials.builder().accountId(accountId).accessKeyId(accessKey).secretAccessKey(secretKey).build();
         return S3AsyncClient.builder()
-                .endpointOverride(URI.create("http://signer.minio:9000"))
+                .endpointOverride(URI.create(minioUrl))
                 .credentialsProvider(
                         StaticCredentialsProvider.create( credentials )
                 )
@@ -29,5 +40,3 @@ public class MinioConfig {
                 .build();
     }
 }
-
-

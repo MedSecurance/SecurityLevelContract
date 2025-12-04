@@ -1,6 +1,7 @@
 package edu.upc.dmag.signinginterface;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.core.async.AsyncResponseTransformer;
@@ -20,11 +21,14 @@ import java.util.concurrent.ExecutionException;
 public class MinioService {
 
     private final S3AsyncClient s3;
-    private final String bucketName = "test";
-    private final ProjectsContractStatus projectsContractStatus;
+
+    @Value("${minio.bucket.name}")
+    private String bucketName;
+
 
     private static final int PART_SIZE = 10 * 1024 * 1024; // 10 MB
 
+    //ToDo simplify this code
     public S3Object uploadLargeFile(InputStream input, String key) throws Exception {
 
         CreateMultipartUploadRequest createReq = CreateMultipartUploadRequest.builder()
@@ -117,8 +121,8 @@ public class MinioService {
                 .prefix(project)
                 .build();
 
-        CompletableFuture<ListObjectsV2Response> itermediary = s3.listObjectsV2(listReq);
-        ListObjectsV2Response listRes = itermediary.get();
+        CompletableFuture<ListObjectsV2Response> intermediary = s3.listObjectsV2(listReq);
+        ListObjectsV2Response listRes = intermediary.get();
         return listRes.contents();
     }
 
@@ -133,17 +137,6 @@ public class MinioService {
         }
     }
 
-
-    public DownloadResult downloadAsBase64(String minioUrl) throws Exception {
-        ParsedMinioUrl parsed = parseMinioUrl(minioUrl);
-
-        GetObjectRequest req = GetObjectRequest.builder()
-                .bucket(parsed.bucket())
-                .key(parsed.object())
-                .build();
-
-        return getDownloadResult(req);
-    }
 
     public DownloadResult downloadAsBase64(String bucket, S3Object obj) throws ExecutionException, InterruptedException {
 
@@ -171,29 +164,6 @@ public class MinioService {
                     return new DownloadResult(version, hash, base64);
                 }).get();
     }
-
-    private ParsedMinioUrl parseMinioUrl(String url) {
-        // Remove http:// or https://
-        String noProtocol = url.replaceFirst("https?://", "");
-
-        // Skip host:port
-        int firstSlash = noProtocol.indexOf('/');
-        if (firstSlash == -1)
-            throw new IllegalArgumentException("Invalid MinIO URL: missing bucket");
-
-        String rest = noProtocol.substring(firstSlash + 1);
-
-        int bucketEnd = rest.indexOf('/');
-        if (bucketEnd == -1)
-            throw new IllegalArgumentException("Invalid MinIO URL: missing object");
-
-        String bucket = rest.substring(0, bucketEnd);
-        String object = rest.substring(bucketEnd + 1);
-
-        return new ParsedMinioUrl(bucket, object);
-    }
-
-    private record ParsedMinioUrl(String bucket, String object) {}
 
 }
 

@@ -81,7 +81,7 @@
     </header>-->
 
     <header class="bg-white border-5 border-bottom d-flex align-items-center justify-content-center">
-        <a href="/" class="col-8  justify-content-center mx-auto text-center"
+        <a th:href="@{'/' + project + '/'}" class="col-8  justify-content-center mx-auto text-center"
            style="
              display: block;
            font-size: 40px;
@@ -104,7 +104,8 @@
     <main class="container-flex background-container m-0 d-flex">
         <div class="container-flex py-5 m-auto">
             <div class="row g-4 justify-content-center">
-                <form action="/signer/upload" id="form_to_submit" method="post" enctype="multipart/form-data" class="h-100 w-100 p-3 m-2 d-flex flex-column justify-content-between">
+
+                <form th:action="@{'/' + project + '/signer/upload'}" id="form_to_submit" method="post" enctype="multipart/form-data" class="h-100 w-100 p-3 m-2 d-flex flex-column justify-content-between">
                     <div class="carousel-item-content">
                         <div class="carousel-item-content-title">
                             <h1 class="carousel-title" style="color: black">Submit contract to sign</h1>

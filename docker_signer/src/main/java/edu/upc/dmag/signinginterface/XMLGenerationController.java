@@ -1,32 +1,20 @@
 package edu.upc.dmag.signinginterface;
 
-import java.io.*;
 import java.util.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
+
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.web.servlet.MultipartAutoConfiguration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.w3c.dom.*;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.stream.Collectors;
-
-import org.json.JSONObject;
-import org.json.JSONArray;
-import org.xml.sax.SAXException;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 @Controller
@@ -34,41 +22,28 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 @Slf4j
 public class XMLGenerationController {
     private final MinioService minioService;
-    private final MultipartAutoConfiguration multipartAutoConfiguration;
 
-    private static String responseToString(HttpURLConnection connection) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-        return response.toString();
-    }
-
-    @GetMapping("/generateUnsignedContract")
-    public ResponseEntity<byte[]> generateXmlWithModel() throws Exception {
-        String project = "test";
-        log.error("about to request files");
+    @GetMapping("/{project}/generateUnsignedContract")
+    public ResponseEntity<byte[]> generateXmlWithModel(@PathVariable String project, Model model) throws Exception {
+        model.addAttribute("project", project);
+        log.debug("about to request files");
         var uploaded_files = minioService.getListOfFiles(project);
-        log.error("requested files");
-        uploaded_files.forEach(file -> {log.error("file listed: {}", file);});
+        log.debug("requested files");
+        uploaded_files.forEach(file -> {log.debug("file listed: {}", file);});
 
         Map<KnownDocuments, DownloadResult> fields = new HashMap<>();
 
         for(S3Object s3Object: uploaded_files) {
-            log.error("listed file: {}", s3Object.key());
+            log.debug("listed file: {}", s3Object.key());
             String filename_to_search = s3Object.key().replace(project + "/", "");
-            log.error("searching for file: {}", filename_to_search);
+            log.debug("searching for file: {}", filename_to_search);
             try {
                 fields.put(
                     KnownDocuments.valueOf(filename_to_search),
                     minioService.downloadAsBase64(project, s3Object)
                 );
-            }catch (Exception ignore) {
-                log.error("An error occurred while working on "+filename_to_search, ignore);
+            }catch (Exception exception) {
+                log.error("An error occurred while working on {}", filename_to_search, exception);
             }
         }
 
@@ -116,9 +91,9 @@ public class XMLGenerationController {
         return Utils.generateAnswer(fromFieldsToXMLBytesToString(extraFieldsToImport), "contract.xml");
     }
 
-    @GetMapping("/generateContract")
-    public ModelAndView generateXmlBySeed() throws Exception {
-        String project = "test";
+    @GetMapping("/{project}/generateContract")
+    public ModelAndView generateContract(@PathVariable String project, Model model) throws Exception {
+        model.addAttribute("project", project);
         ModelAndView mav = new ModelAndView("contract_creation_new_style.html");
         mav.addObject("documents", KnownDocuments.values());
         Map<String, S3Object> s3Objects = new HashMap<>();

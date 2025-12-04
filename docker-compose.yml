@@ -81,6 +81,11 @@ services:
       CLIENT_NAME: signer-consumer
       URL_DOMAIN: signer.consumer
       INSTANCE_ROLE: consumer
+      MINIO_ACCESS_NAME: myuseraccesskey
+      MINIO_ACCESS_SECRET: myusersecretkey
+      MINIO_URL: http://signer.minio:9000
+      MINIO_BUCKET_NAME: test
+      MINIO_ACCOUNT_ID: local
     volumes:
       - ./docker_CA/signing_keys/consumer:/key
       - ./docker_CA/signing_keys/trust_anchors:/trust_anchors
@@ -101,6 +106,11 @@ services:
       CLIENT_NAME: signer-provider
       URL_DOMAIN: signer.provider
       INSTANCE_ROLE: provider
+      MINIO_ACCESS_NAME: myuseraccesskey
+      MINIO_ACCESS_SECRET: myusersecretkey
+      MINIO_URL: http://signer.minio:9000
+      MINIO_BUCKET_NAME: test
+      MINIO_ACCOUNT_ID: local
     volumes:
       - ./docker_CA/signing_keys/provider:/key
       - ./docker_CA/signing_keys/trust_anchors:/trust_anchors

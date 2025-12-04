@@ -1,12 +1,8 @@
 package edu.upc.dmag.signinginterface;
 
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
+import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+@Getter
 public enum KnownDocuments {
     CEA_FILE(IDs.id_CEA_FILE,"CEA model","Include CEA model?", ""),
     CR_MODEL(IDs.id_CR_MODEL, "Communication Recommender's model","Include Communication Recommender's model?", "for new analysis in the future"),
@@ -56,10 +52,6 @@ public enum KnownDocuments {
         this.goal = goal;
     }
 
-    public String getId() {
-        return id;
-    }
-
     public String getDropZoneId() {
         return "drop-zone-" + getId();
     }
@@ -72,14 +64,6 @@ public enum KnownDocuments {
         return getId() + "_feedback";
     }
 
-    public String getHiddenUrl() {
-        return getId() + "_url";
-    }
-
-    public String getHiddenName() {
-        return getHiddenUrl();
-    }
-
     public String getProgressId() {
         return getId() + "_progress";
     }
@@ -88,34 +72,4 @@ public enum KnownDocuments {
         return getId() + "_progress_container";
     }
 
-    public String getCaption() {
-        return caption;
-    }
-
-    public String getGoal() {
-        return goal;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-
-    public static List<Map<String, String>> getMap(){
-        List<Map<String, String>> result = new ArrayList<>();
-        for(KnownDocuments doc : KnownDocuments.values()){
-            Map<String, String> entry = new HashMap<>();
-            entry.put("file_entry", doc.name());
-            entry.put("dropZone_name", doc.getDropZoneId());
-            entry.put("fileInput_name", doc.getId());
-            entry.put("fileInfo_name", doc.getFeedbackId());
-            entry.put("icon", doc.getIconId());
-            entry.put("feedback_id", doc.getFeedbackId());
-            entry.put("hidden_url", doc.getHiddenUrl());
-            entry.put("progress_id", doc.getProgressId());
-            entry.put("progress_container_id", doc.getProgressContainerId());
-            result.add(entry);
-        }
-        return result;
-    }
 }

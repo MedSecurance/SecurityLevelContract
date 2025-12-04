@@ -88,7 +88,7 @@
 
     <header class="bg-white border-5 border-bottom d-flex align-items-center justify-content-center">
         <a href="/" class="col-8  justify-content-center mx-auto text-center"
-             style="
+           style="
              display: block;
            font-size: 40px;
            font-family: Arial, sans-serif;
@@ -112,81 +112,13 @@
         <div class="container-flex py-5 m-auto">
             <div class="row g-4 justify-content-center">
 
-                <!-- Button 1 -->
-                <div class="col text-center d-flex" th:if="${instanceRole != null and #strings.equalsIgnoreCase(instanceRole, 'provider')}">
-                    <a href="/generateContract"
-                       class="btn btn-primary btn-logo d-flex flex-column align-items-center mx-auto">
-                        <i class="bi bi-file-earmark-plus big-icon"></i>
-                        <span class="mt-1">Create contract</span>
-                    </a>
-                </div>
-
-
-
-                <!-- Button 2 -->
-                <div class="col text-center d-flex">
-                    <a href="/signer"
-                       class="btn btn-success btn-logo d-flex flex-column align-items-center mx-auto">
-                        <i class="bi bi-patch-check big-icon"></i>
-                        <span class="mt-1">Sign contract</span>
-                    </a>
-                </div>
-
-                <!-- Button 3 -->
-                <div class="col text-center d-flex">
-                    <a href="/validator"
-                        class="btn btn-warning btn-logo d-flex flex-column align-items-center mx-auto">
-                        <i class="bi bi-file-earmark-check-fill big-icon" ></i>
-                        <span class="mt-1">Verify signatures</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Table: rows per KnownDocument, columns per organization (model attribute `organizations`) -->
-            <!--/*@thymesVar id="has_files" type="Boolean"*/-->
-            <!--/*@thymesVar id="documents_to_status" type="java.util.Map<edu.upc.dmag.signinginterface.KnownDocuments, edu.upc.dmag.signinginterface.DocumentStatus>"*/-->
-            <!--/*@thymesVar id="instanceRole" type="java.lang.String"*/-->
-            <div class="row mt-5 " th:if="${has_files and instanceRole != null and #strings.equalsIgnoreCase(instanceRole, 'provider')}">
-                <div class="col-12">
-                    <div style="max-height: 50vh; overflow: auto; border: 1px solid #e9ecef; border-radius: 4px; box-sizing: border-box;">
-                        <table class="table table-striped table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Document</th>
-                                    <th>Last modified</th>
-                                    <!--/*@thymesVar id="organizations" type="String[]"*/-->
-                                    <!--/*@thymesVar id="documents_to_status" type="java.util.Map<edu.upc.dmag.signinginterface.KnownDocuments, edu.upc.dmag.signinginterface.DocumentStatus>"*/-->
-                                    <th th:each="org : ${organizations}" th:text="${org}"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="entry : ${documents_to_status.entrySet()}" th:if="${entry.value != null}" th:with="doc=${entry.key}, status=${entry.value}">
-                                    <!-- Document name: if key is KnownDocuments use getName(), otherwise show the key as-is -->
-                                    <td th:text="${doc.getClass().getName() == 'edu.upc.dmag.signinginterface.KnownDocuments' ? doc.getName() : doc}"
-                                        th:attr="data-docid=${doc.getClass().getName() == 'edu.upc.dmag.signinginterface.KnownDocuments' ? doc.getId() : doc}"></td>
-
-                                    <!-- human-friendly timestamp; use #temporals to format Java Time instants -->
-                                    <td th:text="${status == null ? '\u2014' : #temporals.format(status.timestamp, 'dd MMM yyyy HH:mm')}"></td>
-
-                                    <!--/*@thymesVar id="organizations" type="String[]"*/-->
-                                    <td th:each="org : ${organizations}" th:with="signature=${status.getSignatureByOrganization(org)}">
-                                        <!-- Show a checkbox which is checked when `status` exists for this document -->
-                                        <div th:if="${signature != null}" class="text-center">
-                                            <div><i class="bi bi-file-earmark-check-fill"></i></div>
-                                            <div style="font-size: 0.8rem;">
-                                                <span th:text="${signature.actor}"></span>
-                                                @
-                                                <span th:text="${#temporals.format(signature.signatureTime, 'dd MMM yyyy HH:mm')}"></span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <!--/*@thymesVar id="projects" type="java.util.Set<String>"*/-->
+                <div class="col-12 text-center">
+                    <div class="list-group">
+                        <a th:each="name : ${projects}" th:href="@{'/' + ${name} + '/'}" class="list-group-item list-group-item-action" th:text="${name}"></a>
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 

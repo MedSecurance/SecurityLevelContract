@@ -71,23 +71,5 @@ public final class XmlParserUtils {
         }
         return result;
     }
-
-    /**
-     * Convert a DOM Element to a compact XML String. Useful for debugging or logging the extracted children.
-     */
-    public static String elementToString(Element element) {
-        if (element == null) return "";
-        try {
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer transformer = tf.newTransformer();
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            transformer.setOutputProperty(OutputKeys.INDENT, "no");
-            StringWriter writer = new StringWriter();
-            transformer.transform(new DOMSource(element), new StreamResult(writer));
-            return writer.toString();
-        } catch (Exception e) {
-            return "" + e.getMessage();
-        }
-    }
 }
 

@@ -2,18 +2,14 @@ package edu.upc.dmag.signinginterface;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StreamUtils;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
 
 @RestController
 @RequestMapping("/upload")
@@ -22,12 +18,20 @@ public class LargeMinioUploadController {
     private final ProjectsContractStatus projectsContractStatus;
     private final MinioService uploadService;
 
-    @PostMapping("/large/{project}/{filename}")
+    @Value("${minio.url}")
+    private String minioUrl;
+
+    @Value("${minio.bucket.name}")
+    private String bucketName;
+
+    @PostMapping("/{project}/large/{filename}")
     public ResponseEntity<String> uploadLargeFile(
             @PathVariable String project,
             @PathVariable String filename,
-            @RequestParam("file") MultipartFile file) throws Exception {
+            @RequestParam("file") MultipartFile file,
+            Model model) throws Exception {
         project = project.strip();
+        model.addAttribute("project", project);
         filename = filename.strip();
         String key;
         if (project.isEmpty()){
@@ -46,8 +50,6 @@ public class LargeMinioUploadController {
             s3Object = uploadService.uploadLargeFile(is, key);
         }
 
-        final String bucketName = "test";
-
         projectsContractStatus.registerNewDocumentVersion(
             project,
             KnownDocuments.valueOf(filename),
@@ -55,7 +57,7 @@ public class LargeMinioUploadController {
             sha256
         );
 
-        return ResponseEntity.ok("http://signer.minio/"+bucketName+"/"+key);
+        return ResponseEntity.ok(minioUrl+"/"+bucketName+"/"+key);
     }
 }
 

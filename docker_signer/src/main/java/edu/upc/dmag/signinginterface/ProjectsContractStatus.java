@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -38,7 +39,10 @@ public class ProjectsContractStatus {
     private String instanceRole;
 
     private final Map<String, ContractStatus> projects = new HashMap<>();
-    private static final String BUCKET = "test";
+
+    @Value("${minio.bucket.name}")
+    private String BUCKET = "test";
+
     private static final String KEY = "ProjectsContractStatus.json";
 
     private static ObjectMapper createMapper() {
@@ -66,12 +70,12 @@ public class ProjectsContractStatus {
             ResponseBytes<GetObjectResponse> bytes = s3.getObject(req, AsyncResponseTransformer.toBytes()).join();
             byte[] data = bytes.asByteArray();
 
-            log.error("data: {}",bytes.asString(StandardCharsets.UTF_8));
+            log.debug("data: {}",bytes.asString(StandardCharsets.UTF_8));
             TypeReference<Map<String, ContractStatus>> typeRef = new TypeReference<>() {};
             Map<String, ContractStatus> fromS3 = mapper.readValue(data, typeRef);
-            log.error("ProjectsContractStatus loaded data: {}",fromS3);
+            log.debug("ProjectsContractStatus loaded data: {}",fromS3);
             for (Map.Entry<String, ContractStatus> entry : fromS3.entrySet()) {
-                log.error("Project: {} -> {}", entry.getKey(), entry.getValue().toString());
+                log.debug("Project: {} -> {}", entry.getKey(), entry.getValue().toString());
             }
 
 
@@ -105,7 +109,7 @@ public class ProjectsContractStatus {
         var documentStatus = contractStatus.documents.computeIfAbsent(knownDocument, k -> new DocumentStatus());
         documentStatus.setTimestamp(s3Object.lastModified());
         documentStatus.setHash(sha256);
-        documentStatus.seteTag(s3Object.eTag());
+        documentStatus.setETag(s3Object.eTag());
         documentStatus.signatures.clear();
         saveAsync();
 
@@ -127,6 +131,10 @@ public class ProjectsContractStatus {
         }
         var contractStatus = this.projects.computeIfAbsent(project, k-> new ContractStatus());
         return contractStatus.getDocuments();
+    }
+
+    public Set<String> getProjectNames() {
+        return projects.keySet();
     }
 
 
@@ -183,10 +191,10 @@ public class ProjectsContractStatus {
         }
 
         try {
-            log.error("Saving ProjectsContractStatus on shutdown...");
-            log.error("ProjectsContractStatus save result: {}",this.projects);
+            log.debug("Saving ProjectsContractStatus on shutdown...");
+            log.debug("ProjectsContractStatus save result: {}",this.projects);
             for (Map.Entry<String, ContractStatus> entry : this.projects.entrySet()) {
-                log.error("Project: {} -> {}", entry.getKey(), entry.getValue().toString());
+                log.debug("Project: {} -> {}", entry.getKey(), entry.getValue().toString());
             }
             saveAsync().join();
         } catch (Exception e) {

@@ -27,35 +27,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        /*http
-                // Enable OAuth2 login for interactive login with Keycloak
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/oauth2/authorization/keycloak") // Redirect user to login page
-                )
-                // Enable JWT-based authentication for APIs
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                )
-                // Disable CSRF protection since this is a stateless API
-                .csrf(AbstractHttpConfigurer::disable)
-                // Secure endpoint based on roles and authentication
-                .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/file/upload").authorize()
-                        .requestMatchers("/*").authenticated()  // Protect /file/ endpoints
-                        .anyRequest().permitAll()  // Allow all other requests
-                );
-        return http.build();*/
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/oauth2/authorization/keycloak") // Redirect user to login page
-                )
-                .authorizeHttpRequests((authorize) -> authorize
-                        .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer((oauth2) -> oauth2
-                        .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter())  // Enable JWT-based authentication
-                ));
+            .csrf(AbstractHttpConfigurer::disable)
+            .oauth2Login(oauth2 -> oauth2
+                    .loginPage("/oauth2/authorization/keycloak") // Redirect user to login page
+            )
+            .authorizeHttpRequests((authorize) -> authorize
+                    .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer((oauth2) -> oauth2
+                    .jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwtAuthenticationConverter())  // Enable JWT-based authentication
+            ));
         return http.build();
     }
 

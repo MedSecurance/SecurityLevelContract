@@ -1,7 +1,12 @@
 package edu.upc.dmag.signinginterface;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.Instant;
 
+@Setter
+@Getter
 public class SignatureStatus {
     public Instant signatureTime;
     public String actor;
@@ -25,27 +30,4 @@ public class SignatureStatus {
         this.organization = organization;
     }
 
-    public String getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(String organization) {
-        this.organization = organization;
-    }
-
-    public Instant getSignatureTime() {
-        return signatureTime;
-    }
-
-    public void setSignatureTime(Instant signatureTime) {
-        this.signatureTime = signatureTime;
-    }
-
-    public String getActor() {
-        return actor;
-    }
-
-    public void setActor(String actor) {
-        this.actor = actor;
-    }
 }

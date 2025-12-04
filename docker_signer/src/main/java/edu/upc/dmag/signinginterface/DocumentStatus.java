@@ -1,12 +1,16 @@
 package edu.upc.dmag.signinginterface;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+@Setter
+@Getter
 @Slf4j
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DocumentStatus {
@@ -24,38 +28,6 @@ public class DocumentStatus {
 
     public DocumentStatus() {
         this.signatures = new ArrayList<>();
-    }
-
-    public String getHash() {
-        return hash;
-    }
-
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
-
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public String geteTag() {
-        return eTag;
-    }
-
-    public void seteTag(String eTag) {
-        this.eTag = eTag;
-    }
-
-    public List<SignatureStatus> getSignatures() {
-        return signatures;
-    }
-
-    public void setSignatures(List<SignatureStatus> signatures) {
-        this.signatures = signatures;
     }
 
     @Override

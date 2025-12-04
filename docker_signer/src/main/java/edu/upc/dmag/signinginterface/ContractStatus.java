@@ -2,7 +2,6 @@ package edu.upc.dmag.signinginterface;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -30,15 +29,15 @@ public class ContractStatus {
     }
 
     public Set<String> getOrganizations() {
-        Set<String> orgs = new HashSet<>();
+        Set<String> organizations = new HashSet<>();
         for (DocumentStatus docStatus : documents.values()) {
             if (docStatus != null) {
                 for (SignatureStatus sigStatus : docStatus.getSignatures()) {
-                    orgs.add(sigStatus.getOrganization());
+                    organizations.add(sigStatus.getOrganization());
                 }
             }
         }
-        return orgs;
+        return organizations;
     }
 
     @Override
@@ -47,7 +46,7 @@ public class ContractStatus {
         for (Map.Entry<KnownDocuments, DocumentStatus> entry : documents.entrySet()) {
             sb.append("- ").append(entry.getKey()).append(": ");
             if (entry.getValue() != null) {
-                sb.append(entry.getValue().toString()).append("\n");
+                sb.append(entry.getValue()).append("\n");
             } else {
                 sb.append("null\n");
             }

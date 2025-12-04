@@ -54,4 +54,15 @@ public class DocumentStatus {
                 ", signatures=" + signatures +
                 '}';
     }
+
+    public SignatureStatus getSignatureByOrganization(String org) {
+        if (org == null || this.signatures == null) return null;
+        for (SignatureStatus s : this.signatures) {
+            if (s != null && s.getOrganization() != null && s.getOrganization().equalsIgnoreCase(org)) {
+                return s;
+            }
+        }
+        return null;
+    }
+
 }

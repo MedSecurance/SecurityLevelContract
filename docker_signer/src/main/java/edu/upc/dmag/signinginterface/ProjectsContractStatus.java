@@ -96,7 +96,7 @@ public class ProjectsContractStatus {
 
 
 
-    public void registerNewDocumentVersion(String project, KnownDocuments knownDocument, S3Object s3Object) {
+    public void registerNewDocumentVersion(String project, KnownDocuments knownDocument, S3Object s3Object, String sha256) {
         if (!"provider".equalsIgnoreCase(instanceRole)) {
             log.info("Skipping ProjectsContractStatus save because instance role is not 'provider' (is '{}')", instanceRole);
             return;
@@ -104,7 +104,8 @@ public class ProjectsContractStatus {
         var contractStatus = this.projects.computeIfAbsent(project, k -> new ContractStatus());
         var documentStatus = contractStatus.documents.computeIfAbsent(knownDocument, k -> new DocumentStatus());
         documentStatus.setTimestamp(s3Object.lastModified());
-        documentStatus.setHash(s3Object.eTag());
+        documentStatus.setHash(sha256);
+        documentStatus.seteTag(s3Object.eTag());
         documentStatus.signatures.clear();
         saveAsync();
 

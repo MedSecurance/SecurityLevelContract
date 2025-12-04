@@ -1,11 +1,13 @@
 package edu.upc.dmag.signinginterface;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DocumentStatus {
     public Instant timestamp;
@@ -56,6 +58,10 @@ public class DocumentStatus {
     }
 
     public SignatureStatus getSignatureByOrganization(String org) {
+        log.error("Getting signature for organization: {} in document with signatures:", org);
+        for (SignatureStatus s : this.signatures) {
+            log.error(" - {}", s);
+        }
         if (org == null || this.signatures == null) return null;
         for (SignatureStatus s : this.signatures) {
             if (s != null && s.getOrganization() != null && s.getOrganization().equalsIgnoreCase(org)) {

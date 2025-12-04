@@ -169,9 +169,9 @@
                                     <td th:text="${status == null ? '\u2014' : #temporals.format(status.timestamp, 'dd MMM yyyy HH:mm')}"></td>
 
                                     <!--/*@thymesVar id="organizations" type="String[]"*/-->
-                                    <td th:each="org : ${organizations}">
+                                    <td th:each="org : ${organizations}" th:with="signature=${status.getSignatureByOrganization(org)}">
                                         <!-- Show a checkbox which is checked when `status` exists for this document -->
-                                        <div th:with="signature=${status.getSignatureByOrganization(org)}" th:if="${signature != null}" class="text-center">
+                                        <div th:if="${signature != null}" class="text-center">
                                             <div><i class="bi bi-file-earmark-check-fill"></i></div>
                                             <div style="font-size: 0.8rem;">
                                                 <span th:text="${signature.actor}"></span>

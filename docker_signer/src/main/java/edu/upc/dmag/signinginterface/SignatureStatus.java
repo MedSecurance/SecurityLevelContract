@@ -10,6 +10,15 @@ public class SignatureStatus {
     public SignatureStatus() {
     }
 
+    @Override
+    public String toString() {
+        return "SignatureStatus{" +
+                "signatureTime=" + signatureTime +
+                ", actor='" + actor + '\'' +
+                ", organization='" + organization + '\'' +
+                '}';
+    }
+
     public SignatureStatus(Instant signatureTime, String actor, String organization) {
         this.signatureTime = signatureTime;
         this.actor = actor;

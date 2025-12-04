@@ -4,21 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.adapters.spi.KeycloakAccount;
-import org.keycloak.adapters.springsecurity.token.KeycloakAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
@@ -67,7 +62,7 @@ public class FileController {
             // Read original file content
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
             log.error("about to sign document");
-            String modifiedContent = signer.test(project, content);
+            String modifiedContent = signer.sign(project, content);
             log.error("document is signed");
 
             return Utils.generateAnswer(modifiedContent, "modified_" + file.getOriginalFilename());

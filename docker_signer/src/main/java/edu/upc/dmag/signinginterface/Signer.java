@@ -31,7 +31,10 @@ import eu.europa.esig.dss.xades.XAdESSignatureParameters;
 import eu.europa.esig.dss.xades.signature.XAdESService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.input.NullInputStream;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -50,8 +53,10 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.DigestInputStream;
 import java.security.KeyStore;
-import java.security.cert.CertificateException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 @Slf4j
@@ -190,7 +195,7 @@ public class Signer {
         return getOnlineTSPSourceByName(GOOD_TSA);
     }
 
-    protected String test(String project, String content) throws Exception {
+    protected String sign(String project, String content) throws Exception {
         List<String> pathToKeys = List.of(new String[]{
                 //"C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\consumer\\consumer.p12",
                 //"C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\provider\\provider.p12",
@@ -212,10 +217,9 @@ public class Signer {
         List<Element> children = XmlParserUtils.getRootChildrenExcludingSignatures(content);
         for (Element el : children) {
             String name = el.getLocalName() != null ? el.getLocalName() : el.getNodeName();
-            try {
+            boolean hashIsValid = dataChildHashIsValid(project, el, name);
+            if (hashIsValid) {
                 includedDocuments.add(KnownDocuments.valueOf(name));
-            } catch (IllegalArgumentException ignore) {
-                log.warn("Unknown document element found in XML: {}", name);
             }
         }
 
@@ -286,6 +290,58 @@ public class Signer {
 
 
         testFinalDocument(ltaLevelDocument);*/
+    }
+
+    private boolean dataChildHashIsValid(String project, Element el, String name) throws NoSuchAlgorithmException {
+        boolean hashIsValid = false;
+        try {
+            NodeList dataNodeList = el.getElementsByTagName("data");
+            if (dataNodeList.getLength() > 0) {
+                Node dataNode = dataNodeList.item(0);
+                String base64Data = dataNode.getTextContent();
+
+                if (isHashValid(project, base64Data, name)){
+                    hashIsValid = true;
+                }
+            }
+
+        } catch (IllegalArgumentException ignore) {
+            log.warn("Unknown document element found in XML: {}", name);
+        }
+        return hashIsValid;
+    }
+
+    private boolean isHashValid(String project, String base64Data, String name) throws NoSuchAlgorithmException {
+        boolean hashIsValid = false;
+
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        try (InputStream is = new ByteArrayInputStream(base64Data.getBytes(StandardCharsets.UTF_8));
+             InputStream base64is = Base64.getDecoder().wrap(is);
+             DigestInputStream dis = new DigestInputStream(base64is, md)) {
+            // Consume el stream para calcular el hash. StreamUtils.copy a un NullOutputStream
+            // es una forma eficiente de hacer esto sin mantener los datos en memoria.
+            StreamUtils.copy(dis, new OutputStream() {
+                @Override
+                public void write(int b) throws IOException {
+                    // discard data
+                }
+            });
+            byte[] digest = md.digest();
+            String sha256 = Hex.encodeHexString(digest);
+
+            if (projectsContractStatus.checkDocumentHash(
+                    project,
+                    KnownDocuments.valueOf(name),
+                    sha256
+            )){
+                hashIsValid = true;
+            } else {
+                log.warn("Document {} not included in signatures because hash mismatch (calculated: {}, expected: {})", name, sha256, projectsContractStatus.getDocumentHash(project, KnownDocuments.valueOf(name)));
+            }
+        } catch (IOException e) {
+            log.error("Error reading base64 data for element: {}", name, e);
+        }
+        return hashIsValid;
     }
 
     private static String document_to_string(Document mergedResult) throws IOException, TransformerException {
@@ -504,16 +560,18 @@ public class Signer {
             try {
                 for(var child: XmlParserUtils.getRootChildrenExcludingSignatures(content)){
                     String name = child.getLocalName() != null ? child.getLocalName() : child.getNodeName();
-                    try {
-                        KnownDocuments kd = KnownDocuments.valueOf(name);
-                        projectsContractStatus.registerNewSignature(
-                                project,
-                                kd,
-                                sig.getSigningCertificate().getCommonName(),
-                                sig.getSigningCertificate().getOrganizationName()
-                        );
-                    } catch (IllegalArgumentException ignore) {
-                        log.warn("Unknown document element found in XML: {}", name);
+                    if (dataChildHashIsValid(project, child, name)) {
+                        try {
+                            KnownDocuments kd = KnownDocuments.valueOf(name);
+                            projectsContractStatus.registerNewSignature(
+                                    project,
+                                    kd,
+                                    sig.getSigningCertificate().getCommonName(),
+                                    sig.getSigningCertificate().getOrganizationName()
+                            );
+                        } catch (IllegalArgumentException ignore) {
+                            log.warn("Unknown document element found in XML: {}", name);
+                        }
                     }
                 };
             } catch (Exception e) {

@@ -193,4 +193,36 @@ public class ProjectsContractStatus {
             log.error("Error while saving ProjectsContractStatus on shutdown", e);
         }
     }
+
+    public boolean checkDocumentHash(String project, KnownDocuments knownDocuments, String sha256) {
+        if (!"provider".equalsIgnoreCase(instanceRole)) {
+            log.info("Skipping ProjectsContractStatus save because instance role is not 'provider' (is '{}')", instanceRole);
+            return false;
+        }
+        if (!this.projects.containsKey(project)) {
+            return false;
+        }
+        var contractStatus = this.projects.get(project);
+        if (!contractStatus.documents.containsKey(knownDocuments)) {
+            return false;
+        }
+        var documentStatus = contractStatus.documents.get(knownDocuments);
+        return documentStatus.getHash() != null && documentStatus.getHash().equalsIgnoreCase(sha256);
+    }
+
+    public String getDocumentHash(String project, KnownDocuments knownDocuments) {
+        if (!"provider".equalsIgnoreCase(instanceRole)) {
+            log.info("Skipping ProjectsContractStatus save because instance role is not 'provider' (is '{}')", instanceRole);
+            return null;
+        }
+        if (!this.projects.containsKey(project)) {
+            return null;
+        }
+        var contractStatus = this.projects.get(project);
+        if (!contractStatus.documents.containsKey(knownDocuments)) {
+            return null;
+        }
+        var documentStatus = contractStatus.documents.get(knownDocuments);
+        return documentStatus.getHash();
+    }
 }

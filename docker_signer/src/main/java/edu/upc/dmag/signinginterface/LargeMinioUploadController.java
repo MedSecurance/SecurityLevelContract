@@ -36,14 +36,15 @@ public class LargeMinioUploadController {
             key = project + "/" + filename;
         }
 
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        InputStream is = file.getInputStream();
-        DigestInputStream dis = new DigestInputStream(is, md);
+        String sha256;
+        try (InputStream is = file.getInputStream()) {
+            sha256 = DigestUtils.sha256Hex(is);
+        }
 
-        S3Object s3Object = uploadService.uploadLargeFile(dis, key);
-
-        byte[] digest = md.digest();
-        String sha256 = DigestUtils.sha256Hex(digest);
+        S3Object s3Object;
+        try (InputStream is = file.getInputStream()) {
+            s3Object = uploadService.uploadLargeFile(is, key);
+        }
 
         final String bucketName = "test";
 

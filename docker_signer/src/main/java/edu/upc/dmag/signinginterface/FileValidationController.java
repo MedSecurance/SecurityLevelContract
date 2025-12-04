@@ -1,5 +1,6 @@
 package edu.upc.dmag.signinginterface;
 
+import lombok.RequiredArgsConstructor;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.springframework.http.HttpHeaders;
@@ -27,7 +28,9 @@ import java.nio.charset.StandardCharsets;
 
 @Controller
 @RequestMapping("/validator")
+@RequiredArgsConstructor
 public class FileValidationController {
+    private final Signer signer;
     private static final Logger logger = LoggerFactory.getLogger(FileValidationController.class);
 
     public void getUserRolesFromKeycloak() {
@@ -44,10 +47,11 @@ public class FileValidationController {
     @PostMapping("/upload")
     public String uploadFile(@RequestParam("filetoverify") MultipartFile file,
                              @AuthenticationPrincipal Jwt principal, Model model) throws IOException {
+        String project = "test";
         // Read original file content
         String content = new String(file.getBytes(), StandardCharsets.UTF_8);
 
-        Boolean signatureValid = Signer.validate(content);
+        Boolean signatureValid = signer.validate(project, content);
         //logger.debug("Debugging information for /hello endpoint");
         if (signatureValid == null) {
             model.addAttribute("hasSignatures", false);

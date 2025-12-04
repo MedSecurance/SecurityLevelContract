@@ -480,7 +480,7 @@ public class Signer {
         return reports.getDiagnosticData();
     }
 
-    public static Boolean validate(String content) throws IOException {
+    public Boolean validate(String project, String content) throws IOException {
         DSSDocument signedDocument = new InMemoryDocument(content.getBytes());
         SignedDocumentValidator validator = getValidator(signedDocument);
 
@@ -498,6 +498,29 @@ public class Signer {
 
         Reports reports = validator.validateDocument();
         DiagnosticData diagnosticData = reports.getDiagnosticData();
+
+        diagnosticData.getSignatures().forEach(sig -> {
+            if (!sig.isSignatureValid()) { return; }
+            try {
+                for(var child: XmlParserUtils.getRootChildrenExcludingSignatures(content)){
+                    String name = child.getLocalName() != null ? child.getLocalName() : child.getNodeName();
+                    try {
+                        KnownDocuments kd = KnownDocuments.valueOf(name);
+                        projectsContractStatus.registerNewSignature(
+                                project,
+                                kd,
+                                sig.getSigningCertificate().getCommonName(),
+                                sig.getSigningCertificate().getOrganizationName()
+                        );
+                    } catch (IllegalArgumentException ignore) {
+                        log.warn("Unknown document element found in XML: {}", name);
+                    }
+                };
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            log.info("Signature validity: {}", sig.isSignatureValid());
+        });
 
         return diagnosticData.getSignatures().stream().allMatch(AbstractTokenProxy::isSignatureValid);
     }

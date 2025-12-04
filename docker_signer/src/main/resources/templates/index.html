@@ -171,11 +171,13 @@
                                     <!--/*@thymesVar id="organizations" type="String[]"*/-->
                                     <td th:each="org : ${organizations}">
                                         <!-- Show a checkbox which is checked when `status` exists for this document -->
-                                        <div class="form-check" th:with="signature=${status.getSignatureByOrganization(org)}">
-                                            <input class="form-check-input" type="checkbox" th:id="${'chk_' + (doc.getClass().getName() == 'edu.upc.dmag.signinginterface.KnownDocuments' ? doc.name() : doc)}"
-                                                   th:name="${'status[' + (doc.getClass().getName() == 'edu.upc.dmag.signinginterface.KnownDocuments' ? doc.name() : doc) + '][' + org + ']'}"
-                                                   th:checked="${signature != null}" />
-                                            <label class="form-check-label" th:for="${'chk_' + (doc.getClass().getName() == 'edu.upc.dmag.signinginterface.KnownDocuments' ? doc.name() : doc)}"></label>
+                                        <div th:with="signature=${status.getSignatureByOrganization(org)}" th:if="${signature != null}" class="text-center">
+                                            <div><i class="bi bi-file-earmark-check-fill"></i></div>
+                                            <div style="font-size: 0.8rem;">
+                                                <span th:text="${signature.actor}"></span>
+                                                @
+                                                <span th:text="${#temporals.format(signature.signatureTime, 'dd MMM yyyy HH:mm')}"></span>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

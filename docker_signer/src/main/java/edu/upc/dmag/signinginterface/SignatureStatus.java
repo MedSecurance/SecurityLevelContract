@@ -7,6 +7,9 @@ public class SignatureStatus {
     public String actor;
     public String organization;
 
+    public SignatureStatus() {
+    }
+
     public SignatureStatus(Instant signatureTime, String actor, String organization) {
         this.signatureTime = signatureTime;
         this.actor = actor;

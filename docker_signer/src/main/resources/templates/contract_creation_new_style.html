@@ -109,7 +109,7 @@
     </header>-->
 
     <header class="bg-white border-5 border-bottom d-flex align-items-center justify-content-center">
-        <a th:href="@{'/' + project + '/'}" class="col-8  justify-content-center mx-auto text-center"
+        <a th:href="@{'/' + ${project} + '/'}" class="col-8  justify-content-center mx-auto text-center"
            style="
              display: block;
            font-size: 40px;
@@ -211,7 +211,7 @@
                                 <div
                                         class="border border-secondary rounded p-5 text-center bg-light h-100 d-flex flex-column justify-content-center align-items-center"
                                         style="cursor: pointer; transition: background 0.3s; flex-grow: 1">
-                                    <a th:href="@{'/' + project + '/generateUnsignedContract'}" download>
+                                    <a th:href="@{'/' + ${project} + '/generateUnsignedContract'}" download>
                                         <button>Download XML</button>
                                     </a>
                                 </div>
@@ -296,7 +296,7 @@
                 progressContainer.style.display = "flex";
                 progressBar.style.width = "0%";
                 progressBar.setAttribute("aria-valuenow", 0);
-                var project="test"
+                var project=/*[[${project}]]*/"";
 
 
                 const formData = new FormData();

@@ -114,7 +114,7 @@
 
                 <!-- Button 1 -->
                 <div class="col text-center d-flex" th:if="${instanceRole != null and #strings.equalsIgnoreCase(instanceRole, 'provider')}">
-                    <a th:href="@{'/' + project + '/generateContract'}"
+                    <a th:href="@{'/' + ${project} + '/generateContract'}"
                        class="btn btn-primary btn-logo d-flex flex-column align-items-center mx-auto">
                         <i class="bi bi-file-earmark-plus big-icon"></i>
                         <span class="mt-1">Create contract</span>
@@ -125,7 +125,7 @@
 
                 <!-- Button 2 -->
                 <div class="col text-center d-flex">
-                    <a th:href="@{'/' + project + '/signer'}"
+                    <a th:href="@{'/' + ${project} + '/signer'}"
                        class="btn btn-success btn-logo d-flex flex-column align-items-center mx-auto">
                         <i class="bi bi-patch-check big-icon"></i>
                         <span class="mt-1">Sign contract</span>
@@ -134,7 +134,7 @@
 
                 <!-- Button 3 -->
                 <div class="col text-center d-flex">
-                    <a th:href="@{'/' + project + '/validator'}"
+                    <a th:href="@{'/' + ${project} + '/validator'}"
                         class="btn btn-warning btn-logo d-flex flex-column align-items-center mx-auto">
                         <i class="bi bi-file-earmark-check-fill big-icon" ></i>
                         <span class="mt-1">Verify signatures</span>

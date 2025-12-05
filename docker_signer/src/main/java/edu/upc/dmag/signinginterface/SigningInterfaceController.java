@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class SigningInterfaceController {
-    @GetMapping({"/{project}/signer/"})
+    @GetMapping({"/{project}/signer/", "/{project}/signer"})
     public String uploadForm(@PathVariable String project, Model model) {
         model.addAttribute("project", project);
         return "sign_contract.html";

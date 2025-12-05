@@ -18,6 +18,7 @@ public class IndexController {
     @SneakyThrows
     @GetMapping({"/", "/index.html"})
     public String handle(Model model) {
+
         model.addAttribute("projects", projectsContractStatus.getProjectNames());
         log.debug("Rendering index with projects: {}", projectsContractStatus.getProjectNames());
         return "index.html";

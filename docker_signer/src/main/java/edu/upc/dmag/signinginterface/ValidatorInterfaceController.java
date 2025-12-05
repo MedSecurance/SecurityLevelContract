@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class ValidatorInterfaceController {
-    @GetMapping({"/{project}/validator/"})
+    @GetMapping({"/{project}/validator/", "/{project}/validator"})
     public String handle(@PathVariable String project, Model model) {
         model.addAttribute("project", project);
         return "validate_contract.html";

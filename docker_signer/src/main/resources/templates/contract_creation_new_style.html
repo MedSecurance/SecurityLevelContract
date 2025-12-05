@@ -303,7 +303,7 @@
                 formData.append("file", file);
 
                 const xhr = new XMLHttpRequest();
-                xhr.open("POST", "/upload/large/"+project+"/"+filename);  // <-- CHANGE TO YOUR ENDPOINT
+                xhr.open("POST", "/"+project+"/upload/"+filename);
 
                 // Progress handler
                 xhr.upload.onprogress = (event) => {

@@ -12,7 +12,6 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import java.io.InputStream;
 
 @RestController
-@RequestMapping("/upload")
 @RequiredArgsConstructor
 public class LargeMinioUploadController {
     private final ProjectsContractStatus projectsContractStatus;
@@ -24,7 +23,7 @@ public class LargeMinioUploadController {
     @Value("${minio.bucket.name}")
     private String bucketName;
 
-    @PostMapping("/{project}/large/{filename}")
+    @PostMapping("/{project}/upload/{filename}")
     public ResponseEntity<String> uploadLargeFile(
             @PathVariable String project,
             @PathVariable String filename,

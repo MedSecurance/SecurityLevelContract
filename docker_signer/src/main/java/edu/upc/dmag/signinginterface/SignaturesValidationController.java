@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 public class SignaturesValidationController {
     private final Signer signer;
 
-    @PostMapping("/upload/")
+    @PostMapping("/upload")
     public String verifyUploadedSignatures(
         @RequestParam("filetoverify") MultipartFile file,
         @PathVariable String project,

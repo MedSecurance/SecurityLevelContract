@@ -51,6 +51,6 @@ __IMPORTANT NOTE__: This tool has been tested on Windows with WSL2, and on linux
 6. Use `Sign contract` to access the form to sign the contract.
 7. Access the consumer point of view by acceding to `signer.consumer` with the credentials `consumer`/`consumer`- Sign the contract received from the provider.
 8. From the provider point of view, use the `verify signatures` button, to register the signatures from the consumer party.
-9. 
+
 ## License
 This project is licensed under the [MIT License](LICENSE).

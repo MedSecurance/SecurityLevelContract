@@ -1,3 +1,4 @@
+# yaml
 version: '3.8'
 
 services:
@@ -45,17 +46,17 @@ services:
     command:
       - start-dev
       - --import-realm
-        #      - --http-port=8086
-        #      - --https-port=8443 
-        #- --http-enabled=true
-        #      - --hostname-strict=false
-        #      - --hostname=signer.authenticator
-        #      - --proxy-headers=xforwarded
     volumes:
       - ./realm:/opt/keycloak/data/import
     depends_on:
       - postgres
     network_mode: "service:localhost"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -f -s http://localhost:8080/health/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 50s
 
   ca_servers:
     build:
@@ -92,7 +93,8 @@ services:
       - ./docker_CA/root_cert:/root_cert/
       - ./docker_CA/debug:/tmp
     depends_on:
-      - keycloak
+      keycloak:
+        condition: service_healthy
     network_mode: "service:localhost"
 
   signer_provider:
@@ -117,7 +119,8 @@ services:
       - ./docker_CA/root_cert:/root_cert/
       - ./docker_CA/debug:/tmp
     depends_on:
-      - keycloak
+      keycloak:
+        condition: service_healthy
     network_mode: "service:localhost"
 
   ontology_client:
@@ -140,5 +143,3 @@ services:
       context: NginxContainer
       dockerfile: Dockerfile
     network_mode: "service:localhost"
-
-

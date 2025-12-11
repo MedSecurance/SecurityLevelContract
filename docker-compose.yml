@@ -48,6 +48,7 @@ services:
         KC_HTTP_ENABLED: true
         KC_HEALTH_ENABLED: true
         KC_METRICS_ENABLED: true
+        KC_HTTP_MANAGEMENT_PORT: 8999
     command:
       - start-dev
       - --import-realm
@@ -57,7 +58,7 @@ services:
       - postgres
     network_mode: "service:localhost"
     healthcheck:
-      test: ["CMD-SHELL", "curl --head -fsS http://localhost:9000/health/live && curl --head -fsS http://localhost:8080/realms/medsecurance_consumer/.well-known/openid-configuration && curl --head -fsS http://localhost:8080/realms/medsecurance_provider/.well-known/openid-configuration"]
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8999 && echo -e \"GET /health/live HTTP/1.1\r\nHost: localhost\r\n\r\n\" >&3 && grep -q \"200\" <&3'"]
       interval: 10s
       timeout: 5s
       retries: 12

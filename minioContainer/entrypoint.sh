@@ -5,6 +5,7 @@ set -e
 echo "Starting MinIO configuration script..."
 minio server /data --console-address ":9001" &
 MINIO_PID=$!
+echo "MinIO server started with PID: $MINIO_PID"
 sleep 30
 echo "MinIO should have been started..."
 
@@ -33,3 +34,4 @@ echo "Policy assigned to $MINIO_ACCESS_NAME"
 
 echo "MinIO configuration completed."
 
+wait $MINIO_PID

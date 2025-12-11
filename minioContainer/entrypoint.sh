@@ -1,19 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 # Abort the script if a command fails
 set -e
 
-# Start the MinIO server in the background using the original entrypoint
-/usr/bin/docker-entrypoint.sh "$@" &
-minio_pid=$!
-echo "Started MinIO server with PID: $minio_pid"
-
-echo "Waiting for MinIO server to start..."
+echo "Starting MinIO configuration script..."
+minio server /data --console-address ":9001" &
+MINIO_PID=$!
 sleep 30
-echo "Wait for MinIO server should be over..."
-# Wait for the MinIO server to be ready
+echo "MinIO should have been started..."
 
 # We use a loop to retry the connection until the server is available
-until mc alias set local http://localhost:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"; do
+until mc alias set local http://127.0.0.1:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"; do
     echo "Retrying in 2 seconds..."
     sleep 2
 done
@@ -36,7 +32,4 @@ mc admin policy attach local readwrite --user "$MINIO_ACCESS_NAME"
 echo "Policy assigned to $MINIO_ACCESS_NAME"
 
 echo "MinIO configuration completed."
-
-# Wait for the MinIO process to finish to keep the container running
-wait $minio_pid
 

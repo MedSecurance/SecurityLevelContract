@@ -57,7 +57,7 @@ services:
       - postgres
     network_mode: "service:localhost"
     healthcheck:
-      test: ["CMD-SHELL", "curl --head -fsS http://localhost:9000/health/ready && curl --head -fsS http://localhost:8080/realms/medsecurance_consumer/.well-known/openid-configuration && curl --head -fsS http://localhost:8080/realms/medsecurance_provider/.well-known/openid-configuration || echo $?"]
+      test: ["CMD-SHELL", "curl --head -fsS http://localhost:9000/health/live && curl --head -fsS http://localhost:8080/realms/medsecurance_consumer/.well-known/openid-configuration && curl --head -fsS http://localhost:8080/realms/medsecurance_provider/.well-known/openid-configuration"]
       interval: 10s
       timeout: 5s
       retries: 12

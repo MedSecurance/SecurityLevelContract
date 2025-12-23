@@ -235,8 +235,9 @@ public class Signer {
             parameters.setSigningCertificate(privateKey.getCertificate());
             parameters.setCertificateChain(privateKey.getCertificateChain());
 
-            CommonCertificateVerifier commonCertificateVerifier = new CommonCertificateVerifier();
+            CommonCertificateVerifier commonCertificateVerifier = getCommonCertificateVerifier();
             ASiCWithXAdESService service = new ASiCWithXAdESService(commonCertificateVerifier);
+            service.setTspSource(getOnlineTSPSource());
 
             ToBeSigned dataToSign = service.getDataToSign(documentsToBeSigned, parameters);
 

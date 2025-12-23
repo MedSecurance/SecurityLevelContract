@@ -47,7 +47,9 @@ public class SignerController {
         }
 
         try {
+            log.debug("extracting files from TAR");
             var providedFiles = extractFromTARFile(file);
+            log.debug("files extracted from TAR: {}", providedFiles.keySet());
 
             log.debug("about to sign document");
             DSSDocument signedContent = signer.sign(project, providedFiles);

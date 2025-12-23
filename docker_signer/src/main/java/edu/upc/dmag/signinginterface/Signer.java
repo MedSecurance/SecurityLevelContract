@@ -198,6 +198,8 @@ public class Signer {
         String pathToKey = "/key/key.p12";
         char[] keyForCertificate = {'k', 'e', 'y'};
 
+        log.debug("Starting signing process for project: {}", project);
+
         Map<KnownDocuments, File> validContent = new HashMap<>();
         for (var el : content.entrySet()) {
 
@@ -205,24 +207,29 @@ public class Signer {
             boolean hashIsValid = dataChildHashIsValid(project, el.getValue(), knownDocument);
             if (hashIsValid) {
                 validContent.put(el.getKey(), el.getValue());
+                log.debug("Document {} passed hash validation and will be included in the signature.", knownDocument.getName());
             }
         }
 
-
+        log.debug("Total documents to be signed after validation: {}", validContent.size());
         List<DSSDocument> documentsToBeSigned = new ArrayList<>();
         for (var entry : content.entrySet()) {
             var documentToSign = new FileDocument(entry.getValue());
             documentToSign.setName(entry.getKey().getName());
             documentsToBeSigned.add(documentToSign);
         }
-
+        log.debug("Prepared {} documents for signing.", documentsToBeSigned.size());
 
         ASiCWithXAdESSignatureParameters parameters = new ASiCWithXAdESSignatureParameters();
         parameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_LTA);
         parameters.aSiC().setContainerType(ASiCContainerType.ASiC_E);
         parameters.setDigestAlgorithm(DigestAlgorithm.SHA256);
 
-
+        log.debug("Signature parameters set: Level - {}, Container Type - {}, Digest Algorithm - {}",
+                parameters.getSignatureLevel(),
+                parameters.aSiC().getContainerType(),
+                parameters.getDigestAlgorithm()
+        );
         try (//SignatureTokenConnection signingToken = getUserPkcs12Token()
              KeyStoreSignatureTokenConnection signingToken = new KeyStoreSignatureTokenConnection(
                      pathToKey,
@@ -230,6 +237,7 @@ public class Signer {
                      new KeyStore.PasswordProtection(keyForCertificate)
              )
         ) {
+            log.debug("Loaded signing token from keystore: {}", pathToKey);
             DSSPrivateKeyEntry privateKey = signingToken.getKeys().get(0);
 
             parameters.setSigningCertificate(privateKey.getCertificate());
@@ -239,10 +247,14 @@ public class Signer {
             ASiCWithXAdESService service = new ASiCWithXAdESService(commonCertificateVerifier);
             service.setTspSource(getOnlineTSPSource());
 
+            log.debug("Starting the signing operation for {} documents.", documentsToBeSigned.size());
             ToBeSigned dataToSign = service.getDataToSign(documentsToBeSigned, parameters);
+            log.debug("Data to sign prepared. Digest Algorithm: {}", parameters.getDigestAlgorithm());
 
             DigestAlgorithm digestAlgorithm = parameters.getDigestAlgorithm();
+            log.debug("Signing the data using the private key.");
             SignatureValue signatureValue = signingToken.sign(dataToSign, digestAlgorithm, privateKey);
+            log.debug("Data signed successfully. Generating the signed document.");
 
             return service.signDocument(documentsToBeSigned, parameters, signatureValue);
         }

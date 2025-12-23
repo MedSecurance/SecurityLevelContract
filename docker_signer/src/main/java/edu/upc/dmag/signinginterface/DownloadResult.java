@@ -1,4 +1,6 @@
 package edu.upc.dmag.signinginterface;
 
-public record DownloadResult(String versionId, String sha256Hash, String base64Data) {
+import java.io.File;
+
+public record DownloadResult(String versionId, String sha256Hash, File file) {
 }

@@ -70,10 +70,10 @@ public class ProjectsContractStatus {
             ResponseBytes<GetObjectResponse> bytes = s3.getObject(req, AsyncResponseTransformer.toBytes()).join();
             byte[] data = bytes.asByteArray();
 
-            log.debug("data: {}",bytes.asString(StandardCharsets.UTF_8));
+            log.debug("file: {}",bytes.asString(StandardCharsets.UTF_8));
             TypeReference<Map<String, ContractStatus>> typeRef = new TypeReference<>() {};
             Map<String, ContractStatus> fromS3 = mapper.readValue(data, typeRef);
-            log.debug("ProjectsContractStatus loaded data: {}",fromS3);
+            log.debug("ProjectsContractStatus loaded file: {}",fromS3);
             for (Map.Entry<String, ContractStatus> entry : fromS3.entrySet()) {
                 log.debug("Project: {} -> {}", entry.getKey(), entry.getValue().toString());
             }

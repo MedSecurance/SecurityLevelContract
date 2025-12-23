@@ -8,8 +8,12 @@ import software.amazon.awssdk.core.async.AsyncResponseTransformer;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.model.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -137,9 +141,15 @@ public class MinioService {
         }
     }
 
+    private String sha256(File file) throws IOException, NoSuchAlgorithmException {
+        return Utils.sha256(file);
+    }
 
-    public DownloadResult downloadAsBase64(String bucket, S3Object obj) throws ExecutionException, InterruptedException {
 
+
+
+
+    public DownloadResult download(String bucket, S3Object obj) throws ExecutionException, InterruptedException, IOException {
         GetObjectRequest req = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(obj.key())
@@ -148,20 +158,23 @@ public class MinioService {
         return getDownloadResult(req);
     }
 
-    private DownloadResult getDownloadResult(GetObjectRequest req) throws InterruptedException, ExecutionException {
-        return s3.getObject(req, AsyncResponseTransformer.toBytes())
-                .thenApply(responseBytes -> {
-                    byte[] data = responseBytes.asByteArray();
-
-                    String base64 = Base64.getEncoder().encodeToString(data);
-                    String hash = sha256(data);
+    private DownloadResult getDownloadResult(GetObjectRequest req) throws InterruptedException, ExecutionException, IOException {
+        File temoraryFile = File.createTempFile("s3object-", ".tmp");
+        return s3.getObject(req, AsyncResponseTransformer.toFile(temoraryFile))
+                .thenApply(objectResponse -> {
+                    String hash = null;
+                    try {
+                        hash = sha256(temoraryFile);
+                    } catch (IOException | NoSuchAlgorithmException e) {
+                        throw new RuntimeException(e);
+                    }
 
                     // Version ID preferred; if not present, fall back to ETag
-                    String version = responseBytes.response().versionId() != null
-                            ? responseBytes.response().versionId()
-                            : responseBytes.response().eTag();
+                    String version = objectResponse.versionId() != null
+                            ?objectResponse.versionId()
+                            : objectResponse.eTag();
 
-                    return new DownloadResult(version, hash, base64);
+                    return new DownloadResult(version, hash, temoraryFile);
                 }).get();
     }
 

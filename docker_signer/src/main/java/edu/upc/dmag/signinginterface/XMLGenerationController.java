@@ -1,18 +1,21 @@
 package edu.upc.dmag.signinginterface;
 
+import java.io.*;
 import java.util.*;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
 
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import  org.apache.commons.io.IOUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.w3c.dom.*;
 
 import software.amazon.awssdk.services.s3.model.S3Object;
@@ -24,7 +27,7 @@ public class XMLGenerationController {
     private final MinioService minioService;
 
     @GetMapping("/{project}/generateUnsignedContract")
-    public ResponseEntity<byte[]> generateXmlWithModel(@PathVariable String project, Model model) throws Exception {
+    public ResponseEntity<StreamingResponseBody> generateXmlWithModel(@PathVariable String project, Model model) throws Exception {
         model.addAttribute("project", project);
         log.debug("about to request files");
         var uploaded_files = minioService.getListOfFiles(project);
@@ -40,55 +43,52 @@ public class XMLGenerationController {
             try {
                 fields.put(
                     KnownDocuments.valueOf(filename_to_search),
-                    minioService.downloadAsBase64(project, s3Object)
+                    minioService.download(project, s3Object)
                 );
             }catch (Exception exception) {
                 log.error("An error occurred while working on {}", filename_to_search, exception);
             }
         }
 
-
-        return fromFieldsToXML(fields);
+        File tmpTarFile = File.createTempFile("contract_", ".tar");
+        return fromFieldsToTar(tmpTarFile, fields);
     }
 
-    static String fromFieldsToXMLBytesToString(
+    private static ResponseEntity<StreamingResponseBody> fromFieldsToTar(
+            File tmpTarFile,
             Map<KnownDocuments,DownloadResult> extraFieldsToImport
     ) throws Exception {
-        DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = documentFactory.newDocumentBuilder();
-        Document document = documentBuilder.newDocument();
-
-        // Root element
-        Element root = document.createElement("root");
-        document.appendChild(root);
-
-
-        for (var extraField: extraFieldsToImport.entrySet()) {
-            if (extraField.getValue() == null){
-                continue;
-            }
-            Element documentElement = document.createElement(extraField.getKey().name());
-            documentElement.appendChild(
-                document.createElement("hash")).setTextContent(extraField.getValue().sha256Hash()
-            );
-            documentElement.appendChild(
-                document.createElement("version")).setTextContent(extraField.getValue().versionId()
-            );
-            documentElement.appendChild(
-                document.createElement("data")).setTextContent(extraField.getValue().base64Data()
-            );
-            root.appendChild(documentElement);
-        }
-
-        // Signatures
-        Element signatures = document.createElement("signatures");
-        root.appendChild(signatures);
-
-        return prettyPrintXML(document);
+        fromFieldsToTarToSign(tmpTarFile, extraFieldsToImport);
+        return Utils.generateAnswer(tmpTarFile, "contract.xml");
     }
 
-    private static ResponseEntity<byte[]> fromFieldsToXML(Map<KnownDocuments,DownloadResult> extraFieldsToImport) throws Exception {
-        return Utils.generateAnswer(fromFieldsToXMLBytesToString(extraFieldsToImport), "contract.xml");
+    private static void fromFieldsToTarToSign(File tarFile, Map<KnownDocuments, DownloadResult> extraFieldsToImport) {
+
+        try (FileOutputStream fos = new FileOutputStream(tarFile);
+             BufferedOutputStream bos = new BufferedOutputStream(fos);
+             TarArchiveOutputStream tarOut = new TarArchiveOutputStream(bos)) {
+
+            // Recommended for POSIX compatibility
+            tarOut.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
+
+            for (Map.Entry<KnownDocuments, DownloadResult> entry : extraFieldsToImport.entrySet()) {
+                KnownDocuments entryName = entry.getKey();
+                File file = entry.getValue().file();
+
+                TarArchiveEntry tarEntry = new TarArchiveEntry(file, entryName.name());
+                tarOut.putArchiveEntry(tarEntry);
+
+                try (FileInputStream fis = new FileInputStream(file)) {
+                    IOUtils.copy(fis, tarOut);
+                }
+
+                tarOut.closeArchiveEntry();
+            }
+
+            tarOut.finish();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @GetMapping("/{project}/generateContract")

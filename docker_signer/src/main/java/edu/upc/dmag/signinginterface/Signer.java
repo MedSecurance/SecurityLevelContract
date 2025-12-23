@@ -1,7 +1,12 @@
 package edu.upc.dmag.signinginterface;
 
+import eu.europa.esig.dss.asic.common.ASiCContent;
+import eu.europa.esig.dss.asic.xades.ASiCWithXAdESContainerExtractor;
+import eu.europa.esig.dss.asic.xades.ASiCWithXAdESSignatureParameters;
+import eu.europa.esig.dss.asic.xades.signature.ASiCWithXAdESService;
 import eu.europa.esig.dss.diagnostic.AbstractTokenProxy;
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
+import eu.europa.esig.dss.enumerations.ASiCContainerType;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SignaturePackaging;
@@ -189,71 +194,57 @@ public class Signer {
         return getOnlineTSPSourceByName(GOOD_TSA);
     }
 
-    protected String sign(String project, String content) throws Exception {
-        List<String> pathToKeys = List.of(new String[]{
-                //"C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\consumer\\consumer.p12",
-                //"C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\provider\\provider.p12",
-                "/key/key.p12"
-        });
-        List<char[]> keysForCertificate = List.of(new char[][]{
-                {'k', 'e', 'y'}
-        });
-        List<String> outputPaths = new ArrayList<>();
+    protected DSSDocument sign(String project, Map<KnownDocuments, File> content) throws Exception {
+        String pathToKey = "/key/key.p12";
+        char[] keyForCertificate = {'k', 'e', 'y'};
 
-        storeBytes(content.getBytes(), "/tmp/original.xml");
-        outputPaths.add("/tmp/original.xml");
+        Map<KnownDocuments, File> validContent = new HashMap<>();
+        for (var el : content.entrySet()) {
 
-        log.debug("removing signatures");
-        var workingDocument = removeSignatures(content);
-        log.debug("signatures removed");
-
-        Set<KnownDocuments> includedDocuments = new HashSet<>();
-        List<Element> children = XmlParserUtils.getRootChildrenExcludingSignatures(content);
-        for (Element el : children) {
-            String name = el.getLocalName() != null ? el.getLocalName() : el.getNodeName();
-            boolean hashIsValid = dataChildHashIsValid(project, el, name);
+            KnownDocuments knownDocument = el.getKey();
+            boolean hashIsValid = dataChildHashIsValid(project, el.getValue(), knownDocument);
             if (hashIsValid) {
-                includedDocuments.add(KnownDocuments.valueOf(name));
+                validContent.put(el.getKey(), el.getValue());
             }
         }
 
-        for (int i=0; i< pathToKeys.size(); i++){
-            DSSDocument toSignDocument = new FileDocument(workingDocument.toFile());
 
-            String pathToKey = pathToKeys.get(i);
-            char[] keyForCertificate = keysForCertificate.get(i);
-            log.debug("signing once");
-            DSSDocument signedDocument = basicSignDocument(
-                    toSignDocument,
-                    pathToKey,
-                    keyForCertificate
-            );
-            log.debug("once signed");
-            toSignDocument = signedDocument;
-
-            log.debug("extending to t");
-            DSSDocument tLevelSignature = extendToT(toSignDocument);
-
-            log.debug("extending to lt");
-            DSSDocument ltLevelDocument = extendToLT(tLevelSignature);
-
-            log.debug("extending to lta");
-            DSSDocument ltaLevelDocument = extendToLTA(ltLevelDocument);
-            log.debug("extended");
-
-
-            String outputPath = "/tmp/signed_"+i+".xml";
-            ltaLevelDocument.save(outputPath);
-            log.debug("saved");
-            outputPaths.add(outputPath);
-
-            registerSignatures(project, pathToKey, keyForCertificate, includedDocuments);
+        List<DSSDocument> documentsToBeSigned = new ArrayList<>();
+        for (var entry : content.entrySet()) {
+            var documentToSign = new FileDocument(entry.getValue());
+            documentToSign.setName(entry.getKey().getName());
+            documentsToBeSigned.add(documentToSign);
         }
 
-        log.debug("merging signatures");
-        var mergedResult = merge_signatures(outputPaths);
-        log.debug("signatures merged");
-        return document_to_string(mergedResult);
+
+        ASiCWithXAdESSignatureParameters parameters = new ASiCWithXAdESSignatureParameters();
+        parameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_LTA);
+        parameters.aSiC().setContainerType(ASiCContainerType.ASiC_E);
+        parameters.setDigestAlgorithm(DigestAlgorithm.SHA256);
+
+
+        try (//SignatureTokenConnection signingToken = getUserPkcs12Token()
+             KeyStoreSignatureTokenConnection signingToken = new KeyStoreSignatureTokenConnection(
+                     pathToKey,
+                     "PKCS12",
+                     new KeyStore.PasswordProtection(keyForCertificate)
+             )
+        ) {
+            DSSPrivateKeyEntry privateKey = signingToken.getKeys().get(0);
+
+            parameters.setSigningCertificate(privateKey.getCertificate());
+            parameters.setCertificateChain(privateKey.getCertificateChain());
+
+            CommonCertificateVerifier commonCertificateVerifier = new CommonCertificateVerifier();
+            ASiCWithXAdESService service = new ASiCWithXAdESService(commonCertificateVerifier);
+
+            ToBeSigned dataToSign = service.getDataToSign(documentsToBeSigned, parameters);
+
+            DigestAlgorithm digestAlgorithm = parameters.getDigestAlgorithm();
+            SignatureValue signatureValue = signingToken.sign(dataToSign, digestAlgorithm, privateKey);
+
+            return service.signDocument(documentsToBeSigned, parameters, signatureValue);
+        }
     }
 
     private void registerSignatures(String project, String pathToKey, char[] keyForCertificate, Set<KnownDocuments> includedDocuments) throws CertificateException, IOException {
@@ -278,52 +269,26 @@ public class Signer {
         }
     }
 
-    private boolean dataChildHashIsValid(String project, Element el, String name) throws NoSuchAlgorithmException {
-        boolean hashIsValid = false;
-        try {
-            NodeList dataNodeList = el.getElementsByTagName("data");
-            if (dataNodeList.getLength() > 0) {
-                Node dataNode = dataNodeList.item(0);
-                String base64Data = dataNode.getTextContent();
-
-                if (isHashValid(project, base64Data, name)){
-                    hashIsValid = true;
-                }
-            }
-
-        } catch (IllegalArgumentException ignore) {
-            log.warn("Unknown document element found in XML: {}", name);
-        }
-        return hashIsValid;
+    private boolean dataChildHashIsValid(String project, File fileToTest, KnownDocuments documentToTest) throws NoSuchAlgorithmException, IOException {
+        String hash = Utils.sha256(fileToTest);
+        return isHashValid(project, hash, documentToTest);
     }
 
-    private boolean isHashValid(String project, String base64Data, String name) throws NoSuchAlgorithmException {
+    private boolean isHashValid(String project, String hash, KnownDocuments document) throws NoSuchAlgorithmException {
         boolean hashIsValid = false;
 
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        try (InputStream is = new ByteArrayInputStream(base64Data.getBytes(StandardCharsets.UTF_8));
-             InputStream base64is = Base64.getDecoder().wrap(is);
-             DigestInputStream dis = new DigestInputStream(base64is, md)) {
-            StreamUtils.copy(dis, new OutputStream() {
-                @Override
-                public void write(int b) {
-                    // discard data
-                }
-            });
-            byte[] digest = md.digest();
-            String sha256 = Hex.encodeHexString(digest);
-
-            if (projectsContractStatus.checkDocumentHash(
-                    project,
-                    KnownDocuments.valueOf(name),
-                    sha256
-            )){
-                hashIsValid = true;
-            } else {
-                log.warn("Document {} not included in signatures because hash mismatch (calculated: {}, expected: {})", name, sha256, projectsContractStatus.getDocumentHash(project, KnownDocuments.valueOf(name)));
-            }
-        } catch (IOException e) {
-            log.error("Error reading base64 data for element: {}", name, e);
+        if (projectsContractStatus.checkDocumentHash(
+                project,
+                document,
+                hash
+        )){
+            hashIsValid = true;
+        } else {
+            log.warn("Document {} not included in signatures because hash mismatch (calculated: {}, expected: {})",
+                    document.getName(),
+                    hash,
+                    projectsContractStatus.getDocumentHash(project, document)
+            );
         }
         return hashIsValid;
     }
@@ -430,7 +395,7 @@ public class Signer {
         certificateVerifier.setCrlSource(new OnlineCRLSource());
         certificateVerifier.setOcspSource(new OnlineOCSPSource());
 
-        // Trust anchors should be defined for revocation data requesting
+        // Trust anchors should be defined for revocation file requesting
         certificateVerifier.setTrustedCertSources(getTrustedCertificateSource());
         return certificateVerifier;
     }
@@ -462,6 +427,10 @@ public class Signer {
         certificateVerifier.setTrustedCertSources(getTrustedCertificateSource());
         validator.setCertificateVerifier(certificateVerifier);
 
+        var asicContainerExtractor = new ASiCWithXAdESContainerExtractor(signedDocument);
+        ASiCContent extractedResult = asicContainerExtractor.extract();
+        extractedResult.getSignedDocuments().forEach(doc -> log.info("Extracted document: {}", doc.getName()));
+
         var signatures = validator.getSignatures();
         if (signatures == null || signatures.isEmpty()) {
             return null;
@@ -472,7 +441,7 @@ public class Signer {
 
         diagnosticData.getSignatures().forEach(sig -> {
             if (!sig.isSignatureValid()) { return; }
-            try {
+            /*try {
                 for(var child: XmlParserUtils.getRootChildrenExcludingSignatures(content)){
                     String name = child.getLocalName() != null ? child.getLocalName() : child.getNodeName();
                     if (dataChildHashIsValid(project, child, name)) {
@@ -491,7 +460,7 @@ public class Signer {
                 };
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            }
+            }*/
             log.info("Signature validity: {}", sig.isSignatureValid());
         });
 

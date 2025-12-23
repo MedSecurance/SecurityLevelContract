@@ -256,7 +256,9 @@ public class Signer {
             SignatureValue signatureValue = signingToken.sign(dataToSign, digestAlgorithm, privateKey);
             log.debug("Data signed successfully. Generating the signed document.");
 
-            return service.signDocument(documentsToBeSigned, parameters, signatureValue);
+            DSSDocument signed = service.signDocument(documentsToBeSigned, parameters, signatureValue);
+            log.debug("Document signed successfully.");
+            return signed;
         }
     }
 

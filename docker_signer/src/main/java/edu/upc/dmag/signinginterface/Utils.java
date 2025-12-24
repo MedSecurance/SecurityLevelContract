@@ -30,7 +30,7 @@ public class Utils {
         StreamingResponseBody stream = dssDocument::writeTo;
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("application/x-tar"));
+        headers.setContentType(MediaType.parseMediaType("application/vnd.etsi.asic-s+zip"));
         headers.setContentDisposition(
                 ContentDisposition.attachment().filename(fileName).build()
         );

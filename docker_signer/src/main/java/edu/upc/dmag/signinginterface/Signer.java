@@ -126,24 +126,29 @@ public class Signer {
         }
 
         getModifiedOnlineTrustedCertificateSource().getCertificates().forEach( certificate -> {
-            log.debug("""
-                    Adding trusted certificate:\s
-                     \
-                    - Subject: {}\s
-                    - Issuer: {}\s
-                    - hash: {}\s
-                    - DSS ID: {}\s
-                    - certificate hash code: {}
-                    - """,
-                    certificate.getSubject(),
-                    certificate.getIssuer(),
-                    certificate.hashCode(),
-                    certificate.getDSSIdAsString(),
-                    certificate.getCertificate().hashCode());
+            logCertificate("Adding trusted certificates: ", certificate);
 
             trustedCertificateSource.addCertificate(certificate);
         });
         return trustedCertificateSource;
+    }
+
+    private static void logCertificate(String introMessage, CertificateToken certificate) {
+        log.debug("""
+                {}:\s
+                 \
+                - Subject: {}\s
+                - Issuer: {}\s
+                - hash: {}\s
+                - DSS ID: {}\s
+                - certificate hash code: {}
+                - """,
+                introMessage,
+                certificate.getSubject().getCanonical(),
+                certificate.getIssuer().getCanonical(),
+                certificate.hashCode(),
+                certificate.getDSSIdAsString(),
+                certificate.getCertificate().hashCode());
     }
 
     protected static byte[] getOnlineKeystoreContent(String keystoreName) {
@@ -259,6 +264,11 @@ public class Signer {
         ) {
             log.debug("Loaded signing token from keystore: {}", pathToKey);
             DSSPrivateKeyEntry privateKey = signingToken.getKeys().get(0);
+
+            logCertificate("certificate to sign", privateKey.getCertificate());
+            for (var certificateInChain: privateKey.getCertificateChain()){
+                logCertificate("certificate in chain", certificateInChain);
+            };
 
             parameters.setSigningCertificate(privateKey.getCertificate());
             parameters.setCertificateChain(privateKey.getCertificateChain());

@@ -125,7 +125,24 @@ public class Signer {
             trustedCertificateSource = new CommonTrustedCertificateSource();
         }
 
-        getModifiedOnlineTrustedCertificateSource().getCertificates().forEach(trustedCertificateSource::addCertificate);
+        getModifiedOnlineTrustedCertificateSource().getCertificates().forEach( certificate -> {
+            log.debug("""
+                    Adding trusted certificate:\s
+                     \
+                    - Subject: {}\s
+                    - Issuer: {}\s
+                    - hash: {}\s
+                    - DSS ID: {}\s
+                    - certificate hash code: {}
+                    - """,
+                    certificate.getSubject(),
+                    certificate.getIssuer(),
+                    certificate.hashCode(),
+                    certificate.getDSSIdAsString(),
+                    certificate.getCertificate().hashCode());
+
+            trustedCertificateSource.addCertificate(certificate);
+        });
         return trustedCertificateSource;
     }
 
@@ -225,7 +242,10 @@ public class Signer {
         parameters.aSiC().setContainerType(ASiCContainerType.ASiC_E);
         parameters.setDigestAlgorithm(DigestAlgorithm.SHA256);
 
-        log.debug("Signature parameters set: Level - {}, Container Type - {}, Digest Algorithm - {}",
+        log.debug("Signature parameters set: \n" +
+                        "Level - {}, \n" +
+                        "Container Type - {}, \n" +
+                        "Digest Algorithm - {}",
                 parameters.getSignatureLevel(),
                 parameters.aSiC().getContainerType(),
                 parameters.getDigestAlgorithm()

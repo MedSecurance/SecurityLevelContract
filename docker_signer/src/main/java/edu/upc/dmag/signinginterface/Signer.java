@@ -71,7 +71,7 @@ public class Signer {
     private static final String PKI_FACTORY_HOST = "http://dss.nowina.lu/pki-factory/";
     private static final String TSA_ROOT_PATH = "/tsa/";
     private static final String DEFAULT_TSA_DATE_FORMAT = "yyyy-MM-dd-HH-mm";
-    protected static final String GOOD_TSA = "good-tsa";
+    protected static final String GOOD_TSA = "cc-good-tsa-trusted";
 
     private static final int TIMEOUT_MS = 10000;
     private static final String PKI_FACTORY_KEYSTORE_PATH = "/keystore/";

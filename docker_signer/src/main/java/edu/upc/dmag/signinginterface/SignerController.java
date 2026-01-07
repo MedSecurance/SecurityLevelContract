@@ -55,8 +55,10 @@ public class SignerController {
             DSSDocument signedContent = signer.sign(project, providedFiles);
             log.debug("document is signed");
 
+            String originalFileName = file.getOriginalFilename();
+            originalFileName= originalFileName.substring(0, originalFileName.lastIndexOf('.'));
             log.info("User '{}' signed document '{}'", retrieveUsernameFromSecurityContext(), file.getOriginalFilename());
-            return Utils.generateAnswer(signedContent, "signed_" + file.getOriginalFilename());
+            return Utils.generateAnswer(signedContent, "signed_" + originalFileName+ ".asics");
 
         } catch (IOException | ParserConfigurationException | SAXException | TransformerException | XMLStreamException |
                  CertificateException e) {

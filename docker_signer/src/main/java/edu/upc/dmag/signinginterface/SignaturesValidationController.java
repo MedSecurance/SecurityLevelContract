@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -25,9 +26,11 @@ public class SignaturesValidationController {
         Model model
     ) throws IOException {
         model.addAttribute("project", project);
-        String content = new String(file.getBytes(), StandardCharsets.UTF_8);
+        var tmpFile = File.createTempFile("upload-", ".tmp");
 
-        Boolean signatureValid = signer.validate(project, content);
+        file.transferTo(tmpFile);
+
+        Boolean signatureValid = signer.validate(project, tmpFile);
         if (signatureValid == null) {
             model.addAttribute("hasSignatures", false);
         } else {

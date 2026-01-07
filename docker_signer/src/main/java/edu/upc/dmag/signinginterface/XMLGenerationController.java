@@ -59,7 +59,7 @@ public class XMLGenerationController {
             Map<KnownDocuments,DownloadResult> extraFieldsToImport
     ) throws Exception {
         fromFieldsToTarToSign(tmpTarFile, extraFieldsToImport);
-        return Utils.generateAnswer(tmpTarFile, "contract.xml");
+        return Utils.generateAnswer(tmpTarFile, "contract.tar");
     }
 
     private static void fromFieldsToTarToSign(File tarFile, Map<KnownDocuments, DownloadResult> extraFieldsToImport) {

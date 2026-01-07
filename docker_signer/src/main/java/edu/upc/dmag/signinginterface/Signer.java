@@ -461,8 +461,8 @@ public class Signer {
     }
 
 
-    public Boolean validate(String project, String content) throws IOException {
-        DSSDocument signedDocument = new InMemoryDocument(content.getBytes());
+    public Boolean validate(String project, File content) throws IOException {
+        DSSDocument signedDocument = new FileDocument(content);
         SignedDocumentValidator validator = getValidator(signedDocument);
 
         CertificateVerifier certificateVerifier = new CommonCertificateVerifier();

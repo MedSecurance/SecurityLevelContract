@@ -29,14 +29,11 @@ public class Utils {
 
         StreamingResponseBody stream = dssDocument::writeTo;
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("application/vnd.etsi.asic-s+zip"));
-        headers.setContentDisposition(
-                ContentDisposition.attachment().filename(fileName).build()
-        );
+        ContentDisposition contentDisposition = ContentDisposition.attachment().filename(fileName).build();
 
         return ResponseEntity.ok()
-                .headers(headers)
+                .header(HttpHeaders.CONTENT_TYPE, "application/vnd.etsi.asic-s+zip")
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
                 .body(stream);
     }
 

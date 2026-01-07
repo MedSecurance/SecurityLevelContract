@@ -36,6 +36,7 @@ import eu.europa.esig.dss.xades.signature.XAdESService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
@@ -78,6 +79,9 @@ public class Signer {
     protected static final String GOOD_USER = "good-user";
 
     private static CommonTrustedCertificateSource trustedCertificateSource;
+
+    @Value("${INSTANCE_ROLE:}")
+    private String instanceRole;
 
     protected static CertificateSource getOnlineTrustedCertificateSource() {
         byte[] trustedStoreContent = getOnlineKeystoreContent("trust-anchors.jks");
@@ -288,6 +292,10 @@ public class Signer {
 
             DSSDocument signed = service.signDocument(documentsToBeSigned, parameters, signatureValue);
             log.debug("Document signed successfully.");
+
+            if (instanceRole.equals("provider")) {
+                registerSignatures(project, pathToKey, keyForCertificate, content.keySet());
+            }
             return signed;
         }
     }
@@ -485,28 +493,25 @@ public class Signer {
         DiagnosticData diagnosticData = reports.getDiagnosticData();
 
         diagnosticData.getSignatures().forEach(sig -> {
-            if (!sig.isSignatureValid()) { return; }
-            /*try {
-                for(var child: XmlParserUtils.getRootChildrenExcludingSignatures(content)){
-                    String name = child.getLocalName() != null ? child.getLocalName() : child.getNodeName();
-                    if (dataChildHashIsValid(project, child, name)) {
-                        try {
-                            KnownDocuments kd = KnownDocuments.valueOf(name);
-                            projectsContractStatus.registerNewSignature(
-                                    project,
-                                    kd,
-                                    sig.getSigningCertificate().getCommonName(),
-                                    sig.getSigningCertificate().getOrganizationName()
-                            );
-                        } catch (IllegalArgumentException ignore) {
-                            log.warn("Unknown document element found in XML: {}", name);
-                        }
+            if (!sig.isSignatureValid()) {
+                return;
+            }
+            try {
+                if (instanceRole.equals("provider")) {
+                    for (DSSDocument dssDocument : extractedResult.getSignedDocuments()) {
+                        log.info("Document in ASiC container: {}", dssDocument.getName());
+                        KnownDocuments kd = KnownDocuments.valueOf(dssDocument.getName());
+                        projectsContractStatus.registerNewSignature(
+                                project,
+                                kd,
+                                sig.getSigningCertificate().getCommonName(),
+                                sig.getSigningCertificate().getOrganizationName()
+                        );
                     }
-                };
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }*/
-            log.info("Signature validity: {}", sig.isSignatureValid());
+                }
+            } catch(Exception e){
+                    throw new RuntimeException(e);
+            }
         });
 
         return diagnosticData.getSignatures().stream().allMatch(AbstractTokenProxy::isSignatureValid);

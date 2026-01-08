@@ -1,6 +1,6 @@
 package edu.upc.dmag.signinginterface;
 
-import eu.europa.esig.dss.asic.common.ASiCContent;
+import eu.europa.esig.dss.asic.common.*;
 import eu.europa.esig.dss.asic.xades.ASiCWithXAdESContainerExtractor;
 import eu.europa.esig.dss.asic.xades.ASiCWithXAdESSignatureParameters;
 import eu.europa.esig.dss.asic.xades.signature.ASiCWithXAdESService;
@@ -62,6 +62,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.*;
+import java.util.zip.ZipEntry;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -166,10 +167,19 @@ public class Signer {
         String pathToKey = "/key/key.p12";
         char[] keyForCertificate = {'k', 'e', 'y'};
 
+        SecureContainerHandlerBuilder secureContainerHandlerBuilder = new SecureContainerHandlerBuilder();
+        secureContainerHandlerBuilder.setThreshold(1000000000L); // 1 GB
+        ZipUtils.getInstance().setZipContainerHandlerBuilder(secureContainerHandlerBuilder);
+
         log.debug("Starting signing process for project: {}", project);
 
         Map<KnownDocuments, File> validContent = new HashMap<>();
         for (var el : content.entrySet()) {
+            log.debug("MISSING_FILE_IN_CONTRACT Provided file {} has size {} bytes for document {}",
+                    el.getValue().getName(),
+                    el.getValue().length(),
+                    el.getKey().name()
+            );
 
             KnownDocuments knownDocument = el.getKey();
             boolean hashIsValid = dataChildHashIsValid(project, el.getValue(), knownDocument);
@@ -182,9 +192,22 @@ public class Signer {
         log.debug("Total documents to be signed after validation: {}", validContent.size());
         List<DSSDocument> documentsToBeSigned = new ArrayList<>();
         for (var entry : content.entrySet()) {
+            log.debug("MISSING_FILE_IN_CONTRACT Adding  file {} has size {} bytes for document {}",
+                    entry.getValue().getName(),
+                    entry.getValue().length(),
+                    entry.getKey().name()
+            );
             var documentToSign = new FileDocument(entry.getValue());
+            documentToSign.setName(entry.getKey().getName());
+            DSSZipEntry dssZipEntry = new DSSZipEntry(entry.getKey().getName());
+            dssZipEntry.setCompressionMethod( ZipEntry.STORED);
+            log.debug("Should be equal: documentToSign.getName() = {} ; dssZipEntry.getName() = {}",
+                    documentToSign.getName(),
+                    dssZipEntry.getName()
+            );
+            DSSZipEntryDocument test = new ContainerEntryDocument(documentToSign, dssZipEntry);
             documentToSign.setName(entry.getKey().name());
-            documentsToBeSigned.add(documentToSign);
+            documentsToBeSigned.add(test);
         }
         log.debug("Prepared {} documents for signing.", documentsToBeSigned.size());
 

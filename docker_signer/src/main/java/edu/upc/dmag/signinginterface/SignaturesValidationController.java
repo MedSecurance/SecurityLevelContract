@@ -1,5 +1,6 @@
 package edu.upc.dmag.signinginterface;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -13,6 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping("/{project}/validator")
@@ -24,11 +28,11 @@ public class SignaturesValidationController {
     public String verifyUploadedSignatures(
         @RequestParam("filetoverify") MultipartFile file,
         @PathVariable String project,
-        Model model
+        Model model,
+        HttpServletRequest request
     ) throws IOException {
         model.addAttribute("project", project);
-        var tmpFile = File.createTempFile("upload-", ".tmp");
-
+        var tmpFile = Utils.createTempFile("upload-", ".tmp", request);
         file.transferTo(tmpFile);
 
         Boolean signatureValid = signer.validate(project, tmpFile);

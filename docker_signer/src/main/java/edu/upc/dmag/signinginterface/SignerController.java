@@ -6,6 +6,7 @@ import eu.europa.esig.dss.asic.common.merge.DefaultContainerMerger;
 import eu.europa.esig.dss.asic.xades.ASiCWithXAdESContainerExtractor;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,7 +46,8 @@ public class SignerController {
     public ResponseEntity<?> uploadFile(
         @PathVariable String project,
         @RequestParam("to_sign") MultipartFile file,
-        Model model
+        Model model,
+        HttpServletRequest request
     ) {
         model.addAttribute("project", project);
         if (file.isEmpty()) {
@@ -53,10 +55,10 @@ public class SignerController {
         }
 
         try {
-            return signInputTarFile(project, file);
+            return signInputTarFile(project, file, request);
         } catch (Exception e) {
             try {
-                return signInputAsicFile(project, file);
+                return signInputAsicFile(project, file, request);
             } catch (Exception ex) {
                 log.error("failed to sign document", e);
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -64,9 +66,9 @@ public class SignerController {
         }
     }
 
-    private ResponseEntity<StreamingResponseBody> signInputTarFile(String project, MultipartFile file) throws Exception {
+    private ResponseEntity<StreamingResponseBody> signInputTarFile(String project, MultipartFile file, HttpServletRequest request) throws Exception {
         log.debug("extracting files from TAR");
-        var providedFiles = extractFromTARFile(file);
+        var providedFiles = extractFromTARFile(file, request);
         log.debug("files extracted from TAR: {}", providedFiles.keySet());
 
         log.debug("about to sign document");
@@ -79,9 +81,9 @@ public class SignerController {
         return Utils.generateAnswer(signedContent, "signed_" + originalFileName + ".asics");
     }
 
-    private ResponseEntity<StreamingResponseBody> signInputAsicFile(String project, MultipartFile file) throws Exception {
+    private ResponseEntity<StreamingResponseBody> signInputAsicFile(String project, MultipartFile file, HttpServletRequest request) throws Exception {
         log.debug("signing ASiC-S document directly");
-        File tmpFile = Files.createTempFile("upload-", ".tmp").toFile();
+        File tmpFile = Utils.createTempFile("upload-", ".tmp",request);
         file.transferTo(tmpFile);
 
 
@@ -91,7 +93,7 @@ public class SignerController {
 
         var content = new HashMap<KnownDocuments, File>();
         for(DSSDocument signedContent: extractedResult.getSignedDocuments()){
-            File tempFile = Files.createTempFile("extracted-", ".tmp").toFile();
+            File tempFile = Utils.createTempFile("extracted-", ".tmp", request);
             signedContent.writeTo(new FileOutputStream(tempFile));
             content.put(KnownDocuments.valueOf(signedContent.getName()), tempFile);
         }
@@ -107,7 +109,10 @@ public class SignerController {
         return Utils.generateAnswer(mergedContainer, "signed_" + originalFileName);
     }
 
-    private static Map<KnownDocuments, File> extractFromTARFile(MultipartFile file) throws IOException {
+    private static Map<KnownDocuments, File> extractFromTARFile(
+            MultipartFile file,
+            HttpServletRequest request
+    ) throws IOException {
         Map<KnownDocuments, File> tempFiles = new HashMap<>();
         try (InputStream is = file.getInputStream();
              TarArchiveInputStream tarInput = new TarArchiveInputStream(is)) {
@@ -116,7 +121,7 @@ public class SignerController {
                 if (currentEntry.isDirectory()) {
                     continue;
                 }
-                File tempFile = Files.createTempFile("upload-", ".tmp").toFile();
+                File tempFile = Utils.createTempFile("upload-", ".tmp", request);
                 try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                     tarInput.transferTo(fos);
                 }

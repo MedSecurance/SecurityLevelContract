@@ -1,5 +1,6 @@
 package edu.upc.dmag.signinginterface;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -149,17 +150,17 @@ public class MinioService {
 
 
 
-    public DownloadResult download(String bucket, S3Object obj) throws ExecutionException, InterruptedException, IOException {
+    public DownloadResult download(String bucket, S3Object obj, HttpServletRequest request) throws ExecutionException, InterruptedException, IOException {
         GetObjectRequest req = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(obj.key())
                 .build();
 
-        return getDownloadResult(req);
+        return getDownloadResult(req, request);
     }
 
-    private DownloadResult getDownloadResult(GetObjectRequest req) throws InterruptedException, ExecutionException, IOException {
-        File temoraryFile = File.createTempFile("s3object-", ".tmp");
+    private DownloadResult getDownloadResult(GetObjectRequest req, HttpServletRequest request) throws InterruptedException, ExecutionException, IOException {
+        File temoraryFile = Utils.createTempFile("s3object-", ".tmp", request);
         return s3.getObject(req, AsyncResponseTransformer.toFile(temoraryFile))
                 .thenApply(objectResponse -> {
                     String hash = null;

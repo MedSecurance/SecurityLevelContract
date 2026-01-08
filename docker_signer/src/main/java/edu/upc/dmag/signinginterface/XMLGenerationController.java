@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -27,7 +28,11 @@ public class XMLGenerationController {
     private final MinioService minioService;
 
     @GetMapping("/{project}/generateUnsignedContract")
-    public ResponseEntity<StreamingResponseBody> generateXmlWithModel(@PathVariable String project, Model model) throws Exception {
+    public ResponseEntity<StreamingResponseBody> generateXmlWithModel(
+            @PathVariable String project,
+            Model model,
+            HttpServletRequest request
+    ) throws Exception {
         model.addAttribute("project", project);
         log.debug("about to request files");
         var uploaded_files = minioService.getListOfFiles(project);
@@ -43,14 +48,14 @@ public class XMLGenerationController {
             try {
                 fields.put(
                     KnownDocuments.valueOf(filename_to_search),
-                    minioService.download(project, s3Object)
+                    minioService.download(project, s3Object, request)
                 );
             }catch (Exception exception) {
                 log.error("An error occurred while working on {}", filename_to_search, exception);
             }
         }
 
-        File tmpTarFile = File.createTempFile("contract_", ".tar");
+        File tmpTarFile = Utils.createTempFile("contract_", ".tar", request);
         return fromFieldsToTar(tmpTarFile, fields);
     }
 

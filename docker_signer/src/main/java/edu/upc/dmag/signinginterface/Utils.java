@@ -1,6 +1,7 @@
 package edu.upc.dmag.signinginterface;
 
 import eu.europa.esig.dss.model.DSSDocument;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -13,8 +14,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class Utils {
@@ -112,5 +116,16 @@ public class Utils {
             hex.append(String.format("%02x", b));
         }
         return hex.toString();
+    }
+
+    static File createTempFile(String prefix, String suffix, HttpServletRequest request) throws IOException {
+        List<Path> tempFiles = (List<Path>) request.getAttribute("TEMP_FILES");
+        if (tempFiles == null) {
+            tempFiles = new ArrayList<>();
+            request.setAttribute("TEMP_FILES", tempFiles);
+        }
+        var tmpFile = File.createTempFile(prefix, suffix);
+        tempFiles.add(tmpFile.toPath());
+        return tmpFile;
     }
 }

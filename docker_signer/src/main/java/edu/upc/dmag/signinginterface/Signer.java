@@ -83,40 +83,6 @@ public class Signer {
     @Value("${INSTANCE_ROLE:}")
     private String instanceRole;
 
-    protected static CertificateSource getOnlineTrustedCertificateSource() {
-        byte[] trustedStoreContent = getOnlineKeystoreContent("trust-anchors.jks");
-        KeyStoreCertificateSource keystore = new KeyStoreCertificateSource(new ByteArrayInputStream(trustedStoreContent), "JKS", PKI_FACTORY_KEYSTORE_PASSWORD);
-        CommonTrustedCertificateSource trustedCertificateSource = new CommonTrustedCertificateSource();
-        trustedCertificateSource.importAsTrusted(keystore);
-        return trustedCertificateSource;
-    }
-
-    protected static Path removeSignatures(String inputXML) throws ParserConfigurationException, IOException, SAXException, TransformerException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        ByteArrayInputStream input = new ByteArrayInputStream(inputXML.getBytes(StandardCharsets.UTF_8));
-        Document document = builder.parse(input);
-
-        NodeList signaturesList = document.getElementsByTagName("signatures");
-        if (signaturesList.getLength() > 0) {
-            Node signaturesNode = signaturesList.item(0);
-            while (signaturesNode.hasChildNodes()) {
-                signaturesNode.removeChild(signaturesNode.getFirstChild());
-            }
-        }
-
-        DOMSource source = new DOMSource(document);
-        Path tempFile = Files.createTempFile("xml-output-", ".xml");
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-
-        try (OutputStream out = Files.newOutputStream(tempFile)) {
-            transformer.transform(source, new StreamResult(out));
-        }
-
-        return tempFile;
-    }
-
     protected static CertificateSource getModifiedOnlineTrustedCertificateSource() throws IOException {
         KeyStoreCertificateSource keystore = new KeyStoreCertificateSource(new File("/trust_anchors/trust-anchors.jks"), "JKS", PKI_FACTORY_KEYSTORE_PASSWORD);
         CommonTrustedCertificateSource trustedCertificateSource = new CommonTrustedCertificateSource();
@@ -155,26 +121,9 @@ public class Signer {
                 certificate.getCertificate().hashCode());
     }
 
-    protected static byte[] getOnlineKeystoreContent(String keystoreName) {
-        DataLoader dataLoader = getFileCacheDataLoader();
-        String keystoreUrl = PKI_FACTORY_HOST + PKI_FACTORY_KEYSTORE_PATH + keystoreName;
-        return dataLoader.get(keystoreUrl);
-    }
 
     protected static ProxyConfig getProxyConfig() {
         return null;
-    }
-
-    protected static DataLoader getFileCacheDataLoader() {
-        FileCacheDataLoader cacheDataLoader = new FileCacheDataLoader();
-        CommonsDataLoader dataLoader = new CommonsDataLoader();
-        dataLoader.setProxyConfig(getProxyConfig());
-        dataLoader.setTimeoutConnection(TIMEOUT_MS);
-        dataLoader.setTimeoutSocket(TIMEOUT_MS);
-        cacheDataLoader.setDataLoader(dataLoader);
-        cacheDataLoader.setFileCacheDirectory(new File("target"));
-        cacheDataLoader.setCacheExpirationTime(3600000L);
-        return cacheDataLoader;
     }
 
     private static OnlineTSPSource getOnlineTSPSourceByUrl(String tsaUrl) {

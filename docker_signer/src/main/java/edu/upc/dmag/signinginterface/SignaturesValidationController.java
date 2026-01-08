@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,12 +31,12 @@ public class SignaturesValidationController {
         @PathVariable String project,
         Model model,
         HttpServletRequest request
-    ) throws IOException {
+    ) throws IOException, NoSuchAlgorithmException {
         model.addAttribute("project", project);
         var tmpFile = Utils.createTempFile("upload-", ".tmp", request);
         file.transferTo(tmpFile);
 
-        Boolean signatureValid = signer.validate(project, tmpFile);
+        Boolean signatureValid = signer.validate(project, tmpFile, request);
         if (signatureValid == null) {
             model.addAttribute("hasSignatures", false);
         } else {

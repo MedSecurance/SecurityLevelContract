@@ -1,6 +1,7 @@
 package edu.upc.dmag.signinginterface;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.InputStream;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class LargeMinioUploadController {
@@ -29,6 +31,8 @@ public class LargeMinioUploadController {
             @PathVariable String filename,
             @RequestParam("file") MultipartFile file,
             Model model) throws Exception {
+        log.debug("Uploading large file: project={}, filename={}", project, filename);
+
         project = project.strip();
         model.addAttribute("project", project);
         filename = filename.strip();
@@ -55,6 +59,8 @@ public class LargeMinioUploadController {
             s3Object,
             sha256
         );
+
+        log.debug("Finished uploading large file: project={}, filename={}", project, filename);
 
         return ResponseEntity.ok(minioUrl+"/"+bucketName+"/"+key);
     }

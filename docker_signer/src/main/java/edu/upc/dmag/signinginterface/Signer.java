@@ -241,7 +241,7 @@ public class Signer {
         List<DSSDocument> documentsToBeSigned = new ArrayList<>();
         for (var entry : content.entrySet()) {
             var documentToSign = new FileDocument(entry.getValue());
-            documentToSign.setName(entry.getKey().getName());
+            documentToSign.setName(entry.getKey().name());
             documentsToBeSigned.add(documentToSign);
         }
         log.debug("Prepared {} documents for signing.", documentsToBeSigned.size());

@@ -41,25 +41,34 @@ public class Utils {
                 .body(stream);
     }
 
-    public static ResponseEntity<StreamingResponseBody> generateAnswer(
+    public static ResponseEntity<StreamingResponseBody> generateTarAnswer(
             File tarFile,
             String fileName
+    ){
+        return generateAnswer( tarFile, fileName, "application/x-tar");
+    }
+
+    public static ResponseEntity<StreamingResponseBody> generateASICAnswer(
+            File asicFile,
+            String fileName
+    ){
+        return generateAnswer( asicFile, fileName, "application/vnd.etsi.asic-s+zip");
+    }
+
+    public static ResponseEntity<StreamingResponseBody> generateAnswer(
+            File file,
+            String fileName,
+            String mediaType
     ) {
 
         StreamingResponseBody stream = outputStream -> {
-            try (InputStream inputStream = new FileInputStream(tarFile)) {
+            try (InputStream inputStream = new FileInputStream(file)) {
                 inputStream.transferTo(outputStream);
-            } finally {
-                if (tarFile != null) {
-                    if(!tarFile.delete()){
-                        LOGGER.warning("Could not delete tarFile " + tarFile.getAbsolutePath());
-                    }
-                }
             }
         };
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("application/x-tar"));
+        headers.setContentType(MediaType.parseMediaType(mediaType));
         headers.setContentDisposition(
                 ContentDisposition.attachment().filename(fileName).build()
         );

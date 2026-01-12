@@ -49,12 +49,14 @@ public class SignerController {
         Model model,
         HttpServletRequest request
     ) {
+        log.debug("received signing request for project '{}'", project);
         model.addAttribute("project", project);
         if (file.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         try {
+            log.debug("attempting to sign as TAR");
             return signInputTarFile(project, file, request);
         } catch (Exception e) {
             try {
@@ -100,14 +102,21 @@ public class SignerController {
         }
 
         DSSDocument newlySigned = signer.sign(project, content);
-        ASiCContainerMerger asicContainerMerger = DefaultContainerMerger.fromDocuments(uploadedDssDocument, newlySigned);
+        var newSignatureFile = Utils.createTempFile("signed-", ".tmp", request);
+        try (FileOutputStream fos = new FileOutputStream(newSignatureFile)) {
+            newlySigned.writeTo(fos);
+        }
+        var mergedFile = Utils.createTempFile("merged-", ".tmp", request);
 
-        DSSDocument mergedContainer = asicContainerMerger.merge();
+        MyMerger.merge(tmpFile, newSignatureFile, mergedFile);
+
+
+
         extractedResult.getSignedDocuments().forEach(doc -> log.info("Extracted document: {}", doc.getName()));
 
         log.info("User '{}' signed document '{}'", retrieveUsernameFromSecurityContext(), file.getOriginalFilename());
         String originalFileName = file.getOriginalFilename();
-        return Utils.generateAnswer(mergedContainer, "signed_" + originalFileName);
+        return Utils.generateASICAnswer(mergedFile, "signed_" + originalFileName);
     }
 
     private static Map<KnownDocuments, File> extractFromTARFile(

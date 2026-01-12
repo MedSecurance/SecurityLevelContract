@@ -198,8 +198,8 @@ public class Signer {
                     entry.getKey().name()
             );
             var documentToSign = new FileDocument(entry.getValue());
-            documentToSign.setName(entry.getKey().getName());
-            DSSZipEntry dssZipEntry = new DSSZipEntry(entry.getKey().getName());
+            documentToSign.setName(entry.getKey().name());
+            DSSZipEntry dssZipEntry = new DSSZipEntry(entry.getKey().name());
             dssZipEntry.setCompressionMethod( ZipEntry.STORED);
             log.debug("Should be equal: documentToSign.getName() = {} ; dssZipEntry.getName() = {}",
                     documentToSign.getName(),

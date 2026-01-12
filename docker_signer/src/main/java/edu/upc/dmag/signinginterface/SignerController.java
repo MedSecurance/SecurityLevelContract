@@ -58,9 +58,10 @@ public class SignerController {
             return signInputTarFile(project, file, request);
         } catch (Exception e) {
             try {
+                log.debug("failed to sign as TAR, trying ASiC-S", e);
                 return signInputAsicFile(project, file, request);
             } catch (Exception ex) {
-                log.error("failed to sign document", e);
+                log.error("failed to sign document", ex);
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }

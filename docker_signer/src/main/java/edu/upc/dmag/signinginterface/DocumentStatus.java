@@ -18,6 +18,9 @@ public class DocumentStatus {
     public String eTag;
     public String hash;
     public List<SignatureStatus> signatures;
+    @Getter
+    @Setter
+    private String originalName;
 
     public DocumentStatus(Instant timestamp, String eTag, String hash, List<SignatureStatus> signatures) {
         this.timestamp = timestamp;
@@ -53,5 +56,4 @@ public class DocumentStatus {
         }
         return null;
     }
-
 }

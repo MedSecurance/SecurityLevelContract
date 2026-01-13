@@ -55,6 +55,7 @@ public class LargeMinioUploadController {
 
         projectsContractStatus.registerNewDocumentVersion(
             project,
+            file.getOriginalFilename(),
             KnownDocuments.valueOf(filename),
             s3Object,
             sha256

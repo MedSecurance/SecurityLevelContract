@@ -175,23 +175,28 @@ public class Signer {
 
         Map<KnownDocuments, File> validContent = new HashMap<>();
         for (var el : content.entrySet()) {
-            log.debug("MISSING_FILE_IN_CONTRACT Provided file {} has size {} bytes for document {}",
+            log.debug("Provided file {} has size {} bytes for document {}",
                     el.getValue().getName(),
                     el.getValue().length(),
                     el.getKey().name()
             );
 
-            KnownDocuments knownDocument = el.getKey();
-            boolean hashIsValid = dataChildHashIsValid(project, el.getValue(), knownDocument);
-            if (hashIsValid) {
+            if (instanceRole.equals("provider")) {
+                KnownDocuments knownDocument = el.getKey();
+                boolean hashIsValid = dataChildHashIsValid(project, el.getValue(), knownDocument);
+                if (hashIsValid) {
+                    validContent.put(el.getKey(), el.getValue());
+                    log.debug("Document {} passed hash validation and will be included in the signature.", knownDocument.getName());
+                }
+            } else {
                 validContent.put(el.getKey(), el.getValue());
-                log.debug("Document {} passed hash validation and will be included in the signature.", knownDocument.getName());
+                log.debug("Instance role is not 'provider'; including document {} without hash validation.", el.getKey().name());
             }
         }
 
         log.debug("Total documents to be signed after validation: {}", validContent.size());
         List<DSSDocument> documentsToBeSigned = new ArrayList<>();
-        for (var entry : content.entrySet()) {
+        for (var entry : validContent.entrySet()) {
             log.debug("MISSING_FILE_IN_CONTRACT Adding  file {} has size {} bytes for document {}",
                     entry.getValue().getName(),
                     entry.getValue().length(),

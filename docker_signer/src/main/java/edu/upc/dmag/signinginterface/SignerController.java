@@ -70,6 +70,7 @@ public class SignerController {
     }
 
     private ResponseEntity<StreamingResponseBody> signInputTarFile(String project, MultipartFile file, HttpServletRequest request) throws Exception {
+        log.debug("signing TAR document");
         log.debug("extracting files from TAR");
         var providedFiles = extractFromTARFile(file, request);
         log.debug("files extracted from TAR: {}", providedFiles.keySet());

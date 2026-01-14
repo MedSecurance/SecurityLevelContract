@@ -18,8 +18,12 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Utils {
     private static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
@@ -136,5 +140,34 @@ public class Utils {
         var tmpFile = File.createTempFile(prefix, suffix);
         tempFiles.add(tmpFile.toPath());
         return tmpFile;
+    }
+
+    public static DownloadResult createOriginalNamesFile(ProjectsContractStatus projectsContractStatus, String project, List<KnownDocuments> uploadedFiles, HttpServletRequest request) throws IOException, NoSuchAlgorithmException {
+        var originalNamesFile = Utils.createTempFile("original_names_", ".txt", request);
+
+        Map<KnownDocuments, String> originalNamesMap = new HashMap<>();
+        for (KnownDocuments doc : uploadedFiles) {
+            if (doc != KnownDocuments.ORIGINAL_NAMES) {
+                var docStatusMap = projectsContractStatus.getDocumentsStatusForProject(project);
+                if (docStatusMap != null && docStatusMap.get(doc) != null) {
+                    originalNamesMap.put(doc, docStatusMap.get(doc).getOriginalName());
+                } else {
+                    originalNamesMap.put(doc, null);
+                }
+            }
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.writeValue(originalNamesFile, originalNamesMap);
+
+        String sha256Checksum = sha256(originalNamesFile);
+
+        DownloadResult result = new DownloadResult(
+            "",
+            sha256Checksum,
+            originalNamesFile
+        );
+
+        return result;
     }
 }

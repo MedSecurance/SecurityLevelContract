@@ -212,7 +212,7 @@ public class ProjectsContractStatus {
     public boolean checkDocumentHash(String project, KnownDocuments knownDocuments, String sha256) {
         if (!"provider".equalsIgnoreCase(instanceRole)) {
             log.info("Skipping ProjectsContractStatus save because instance role is not 'provider' (is '{}')", instanceRole);
-            return false;
+            return true;
         }
         if (!this.projects.containsKey(project)) {
             return false;

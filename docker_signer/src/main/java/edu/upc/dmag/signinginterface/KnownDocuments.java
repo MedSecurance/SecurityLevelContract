@@ -9,6 +9,7 @@ import java.util.Map;
 
 @Getter
 public enum KnownDocuments {
+    ORIGINAL_NAMES(IDs.id_ORIGINAL_NAMES, "original file names","Include original file names?", ""),
     CEA_FILE(IDs.id_CEA_FILE,"CEA model","Include CEA model?", ""),
     CR_MODEL(IDs.id_CR_MODEL, "Communication Recommender's model","Include Communication Recommender's model?", "for new analysis in the future"),
     CR_RESULT(IDs.id_CR_RESULT, "Communication Recommender's result","Include current Communication Recommender's result?", "to compare with future results"),
@@ -27,6 +28,7 @@ public enum KnownDocuments {
     TREND_REPORT(IDs.id_TREND_REPORT, "trend report","Include the trend report?", "to assure compliance with MDCG");
 
     public static class IDs {
+        static final String id_ORIGINAL_NAMES = "original_names";
         static final String id_CEA_FILE = "ceafile";
         static final String id_CR_MODEL = "CR_model";
         static final String id_CR_RESULT = "CR_result";
@@ -88,6 +90,9 @@ public enum KnownDocuments {
     public static List<Map<String, String>> getMap(){
         List<Map<String, String>> result = new ArrayList<>();
         for(KnownDocuments doc : KnownDocuments.values()){
+            if (doc == KnownDocuments.ORIGINAL_NAMES) {
+                continue;
+            }
             Map<String, String> entry = new HashMap<>();
             entry.put("file_entry", doc.name());
             entry.put("dropZone_name", doc.getDropZoneId());

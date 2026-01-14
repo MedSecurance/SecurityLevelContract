@@ -53,10 +53,15 @@ public class LargeMinioUploadController {
             s3Object = uploadService.uploadLargeFile(is, key);
         }
 
+        KnownDocuments fileToUpload = KnownDocuments.valueOf(filename);
+        if (fileToUpload == KnownDocuments.ORIGINAL_NAMES) {
+            return ResponseEntity.badRequest().body("Uploading files with ORIGINAL_NAMES is not allowed.");
+        }
+
         projectsContractStatus.registerNewDocumentVersion(
             project,
             file.getOriginalFilename(),
-            KnownDocuments.valueOf(filename),
+            fileToUpload,
             s3Object,
             sha256
         );

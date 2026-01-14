@@ -183,10 +183,14 @@ public class Signer {
 
             if (instanceRole.equals("provider")) {
                 KnownDocuments knownDocument = el.getKey();
-                boolean hashIsValid = dataChildHashIsValid(project, el.getValue(), knownDocument);
-                if (hashIsValid) {
+                if (knownDocument == KnownDocuments.ORIGINAL_NAMES) {
                     validContent.put(el.getKey(), el.getValue());
-                    log.debug("Document {} passed hash validation and will be included in the signature.", knownDocument.getName());
+                } else {
+                    boolean hashIsValid = dataChildHashIsValid(project, el.getValue(), knownDocument);
+                    if (hashIsValid) {
+                        validContent.put(el.getKey(), el.getValue());
+                        log.debug("Document {} passed hash validation and will be included in the signature.", knownDocument.getName());
+                    }
                 }
             } else {
                 validContent.put(el.getKey(), el.getValue());
@@ -287,6 +291,9 @@ public class Signer {
             log.info("CN={}, O={}", cn, o);
 
             for (var document: includedDocuments) {
+                if (document == KnownDocuments.ORIGINAL_NAMES) {
+                    continue;
+                }
                 projectsContractStatus.registerNewSignature(project, document, cn, o);
             }
         }
@@ -308,7 +315,7 @@ public class Signer {
             hashIsValid = true;
         } else {
             log.warn("Document {} not included in signatures because hash mismatch (calculated: {}, expected: {})",
-                    document.getName(),
+                    document.name(),
                     hash,
                     projectsContractStatus.getDocumentHash(project, document)
             );
@@ -363,6 +370,9 @@ public class Signer {
             log.debug("Validating hash for document in ASiC container: {}", dssDocument.getName());
             File tmpFile = Utils.createTempFile("extracted-", ".tmp", request);
             KnownDocuments kd = KnownDocuments.valueOf(dssDocument.getName());
+            if(kd == KnownDocuments.ORIGINAL_NAMES){
+                continue;
+            }
             dssDocument.save(tmpFile.getPath());
             if(!dataChildHashIsValid(project, tmpFile, kd)){
                 allFilesAreValid = false;
@@ -385,6 +395,9 @@ public class Signer {
                     for (DSSDocument dssDocument : extractedResult.getSignedDocuments()) {
                         log.info("Document in ASiC container: {}", dssDocument.getName());
                         KnownDocuments kd = KnownDocuments.valueOf(dssDocument.getName());
+                        if(kd == KnownDocuments.ORIGINAL_NAMES){
+                            continue;
+                        }
                         projectsContractStatus.registerNewSignature(
                                 project,
                                 kd,

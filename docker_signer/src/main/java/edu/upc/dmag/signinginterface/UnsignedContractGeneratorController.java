@@ -24,11 +24,12 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-public class XMLGenerationController {
+public class UnsignedContractGeneratorController {
     private final MinioService minioService;
+    private final ProjectsContractStatus projectsContractStatus;
 
     @GetMapping("/{project}/generateUnsignedContract")
-    public ResponseEntity<StreamingResponseBody> generateXmlWithModel(
+    public ResponseEntity<StreamingResponseBody> generateUnsignedContract(
             @PathVariable String project,
             Model model,
             HttpServletRequest request
@@ -41,19 +42,32 @@ public class XMLGenerationController {
 
         Map<KnownDocuments, DownloadResult> fields = new HashMap<>();
 
+        List<KnownDocuments> uploadedDocEnums = new ArrayList<>();
+
         for(S3Object s3Object: uploaded_files) {
             log.debug("listed file: {}", s3Object.key());
             String filename_to_search = s3Object.key().replace(project + "/", "");
             log.debug("searching for file: {}", filename_to_search);
             try {
+                KnownDocuments kd = KnownDocuments.valueOf(filename_to_search);
+                uploadedDocEnums.add(kd);
                 fields.put(
-                    KnownDocuments.valueOf(filename_to_search),
+                    kd,
                     minioService.download(project, s3Object, request)
                 );
             }catch (Exception exception) {
                 log.error("An error occurred while working on {}", filename_to_search, exception);
             }
         }
+
+        fields.put(KnownDocuments.ORIGINAL_NAMES,
+                Utils.createOriginalNamesFile(
+                        projectsContractStatus,
+                        project,
+                        uploadedDocEnums,
+                        request
+                )
+        );
 
         File tmpTarFile = Utils.createTempFile("contract_", ".tar", request);
         return fromFieldsToTar(tmpTarFile, fields);
@@ -100,7 +114,9 @@ public class XMLGenerationController {
     public ModelAndView generateContract(@PathVariable String project, Model model) throws Exception {
         model.addAttribute("project", project);
         ModelAndView mav = new ModelAndView("contract_creation_new_style.html");
-        mav.addObject("documents", KnownDocuments.values());
+        List<KnownDocuments> uploadableKnownDocuments = new ArrayList<>(List.of(KnownDocuments.values()));
+        uploadableKnownDocuments.remove(KnownDocuments.ORIGINAL_NAMES);
+        mav.addObject("documents", uploadableKnownDocuments.toArray(KnownDocuments[]::new));
         Map<String, S3Object> s3Objects = new HashMap<>();
         Arrays.stream(KnownDocuments.values()).forEach(d -> {
             s3Objects.put(d.name(), null);

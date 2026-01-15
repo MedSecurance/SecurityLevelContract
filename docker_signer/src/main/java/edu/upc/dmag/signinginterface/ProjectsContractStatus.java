@@ -70,10 +70,10 @@ public class ProjectsContractStatus {
             ResponseBytes<GetObjectResponse> bytes = s3.getObject(req, AsyncResponseTransformer.toBytes()).join();
             byte[] data = bytes.asByteArray();
 
-            log.debug("data: {}",bytes.asString(StandardCharsets.UTF_8));
+            log.debug("file: {}",bytes.asString(StandardCharsets.UTF_8));
             TypeReference<Map<String, ContractStatus>> typeRef = new TypeReference<>() {};
             Map<String, ContractStatus> fromS3 = mapper.readValue(data, typeRef);
-            log.debug("ProjectsContractStatus loaded data: {}",fromS3);
+            log.debug("ProjectsContractStatus loaded file: {}",fromS3);
             for (Map.Entry<String, ContractStatus> entry : fromS3.entrySet()) {
                 log.debug("Project: {} -> {}", entry.getKey(), entry.getValue().toString());
             }
@@ -100,7 +100,13 @@ public class ProjectsContractStatus {
 
 
 
-    public void registerNewDocumentVersion(String project, KnownDocuments knownDocument, S3Object s3Object, String sha256) {
+    public void registerNewDocumentVersion(
+            String project,
+            String originalName,
+            KnownDocuments knownDocument,
+            S3Object s3Object,
+            String sha256
+    ) {
         if (!"provider".equalsIgnoreCase(instanceRole)) {
             log.info("Skipping ProjectsContractStatus save because instance role is not 'provider' (is '{}')", instanceRole);
             return;
@@ -108,6 +114,7 @@ public class ProjectsContractStatus {
         var contractStatus = this.projects.computeIfAbsent(project, k -> new ContractStatus());
         var documentStatus = contractStatus.documents.computeIfAbsent(knownDocument, k -> new DocumentStatus());
         documentStatus.setTimestamp(s3Object.lastModified());
+        documentStatus.setOriginalName(originalName);
         documentStatus.setHash(sha256);
         documentStatus.setETag(s3Object.eTag());
         documentStatus.signatures.clear();
@@ -205,7 +212,7 @@ public class ProjectsContractStatus {
     public boolean checkDocumentHash(String project, KnownDocuments knownDocuments, String sha256) {
         if (!"provider".equalsIgnoreCase(instanceRole)) {
             log.info("Skipping ProjectsContractStatus save because instance role is not 'provider' (is '{}')", instanceRole);
-            return false;
+            return true;
         }
         if (!this.projects.containsKey(project)) {
             return false;

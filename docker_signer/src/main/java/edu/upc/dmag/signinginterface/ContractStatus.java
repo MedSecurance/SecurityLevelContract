@@ -3,10 +3,7 @@ package edu.upc.dmag.signinginterface;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ContractStatus {
@@ -20,7 +17,9 @@ public class ContractStatus {
 
     @JsonProperty("documents")
     public Map<KnownDocuments, DocumentStatus> getDocuments() {
-        return documents;
+        var results = new HashMap<>(this.documents);
+        results.remove(KnownDocuments.ORIGINAL_NAMES);
+        return results;
     }
 
     @JsonProperty("documents")

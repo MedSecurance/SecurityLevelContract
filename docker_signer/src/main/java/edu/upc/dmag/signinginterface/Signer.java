@@ -1,7 +1,12 @@
 package edu.upc.dmag.signinginterface;
 
+import eu.europa.esig.dss.asic.common.*;
+import eu.europa.esig.dss.asic.xades.ASiCWithXAdESContainerExtractor;
+import eu.europa.esig.dss.asic.xades.ASiCWithXAdESSignatureParameters;
+import eu.europa.esig.dss.asic.xades.signature.ASiCWithXAdESService;
 import eu.europa.esig.dss.diagnostic.AbstractTokenProxy;
 import eu.europa.esig.dss.diagnostic.DiagnosticData;
+import eu.europa.esig.dss.enumerations.ASiCContainerType;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
 import eu.europa.esig.dss.enumerations.SignaturePackaging;
@@ -28,9 +33,11 @@ import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.dss.xades.XAdESSignatureParameters;
 import eu.europa.esig.dss.xades.signature.XAdESService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
@@ -55,6 +62,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.*;
+import java.util.zip.ZipEntry;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -66,7 +74,7 @@ public class Signer {
     private static final String PKI_FACTORY_HOST = "http://dss.nowina.lu/pki-factory/";
     private static final String TSA_ROOT_PATH = "/tsa/";
     private static final String DEFAULT_TSA_DATE_FORMAT = "yyyy-MM-dd-HH-mm";
-    protected static final String GOOD_TSA = "good-tsa";
+    protected static final String GOOD_TSA = "cc-good-tsa-trusted";
 
     private static final int TIMEOUT_MS = 10000;
     private static final String PKI_FACTORY_KEYSTORE_PATH = "/keystore/";
@@ -74,39 +82,8 @@ public class Signer {
 
     private static CommonTrustedCertificateSource trustedCertificateSource;
 
-    protected static CertificateSource getOnlineTrustedCertificateSource() {
-        byte[] trustedStoreContent = getOnlineKeystoreContent("trust-anchors.jks");
-        KeyStoreCertificateSource keystore = new KeyStoreCertificateSource(new ByteArrayInputStream(trustedStoreContent), "JKS", PKI_FACTORY_KEYSTORE_PASSWORD);
-        CommonTrustedCertificateSource trustedCertificateSource = new CommonTrustedCertificateSource();
-        trustedCertificateSource.importAsTrusted(keystore);
-        return trustedCertificateSource;
-    }
-
-    protected static Path removeSignatures(String inputXML) throws ParserConfigurationException, IOException, SAXException, TransformerException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        ByteArrayInputStream input = new ByteArrayInputStream(inputXML.getBytes(StandardCharsets.UTF_8));
-        Document document = builder.parse(input);
-
-        NodeList signaturesList = document.getElementsByTagName("signatures");
-        if (signaturesList.getLength() > 0) {
-            Node signaturesNode = signaturesList.item(0);
-            while (signaturesNode.hasChildNodes()) {
-                signaturesNode.removeChild(signaturesNode.getFirstChild());
-            }
-        }
-
-        DOMSource source = new DOMSource(document);
-        Path tempFile = Files.createTempFile("xml-output-", ".xml");
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-
-        try (OutputStream out = Files.newOutputStream(tempFile)) {
-            transformer.transform(source, new StreamResult(out));
-        }
-
-        return tempFile;
-    }
+    @Value("${INSTANCE_ROLE:}")
+    private String instanceRole;
 
     protected static CertificateSource getModifiedOnlineTrustedCertificateSource() throws IOException {
         KeyStoreCertificateSource keystore = new KeyStoreCertificateSource(new File("/trust_anchors/trust-anchors.jks"), "JKS", PKI_FACTORY_KEYSTORE_PASSWORD);
@@ -120,30 +97,35 @@ public class Signer {
             trustedCertificateSource = new CommonTrustedCertificateSource();
         }
 
-        getModifiedOnlineTrustedCertificateSource().getCertificates().forEach(trustedCertificateSource::addCertificate);
+        getModifiedOnlineTrustedCertificateSource().getCertificates().forEach( certificate -> {
+            logCertificate("Adding trusted certificates: ", certificate);
+
+            trustedCertificateSource.addCertificate(certificate);
+        });
         return trustedCertificateSource;
     }
 
-    protected static byte[] getOnlineKeystoreContent(String keystoreName) {
-        DataLoader dataLoader = getFileCacheDataLoader();
-        String keystoreUrl = PKI_FACTORY_HOST + PKI_FACTORY_KEYSTORE_PATH + keystoreName;
-        return dataLoader.get(keystoreUrl);
+    private static void logCertificate(String introMessage, CertificateToken certificate) {
+        log.debug("""
+                {}:\s
+                 \
+                - Subject: {}\s
+                - Issuer: {}\s
+                - hash: {}\s
+                - DSS ID: {}\s
+                - certificate hash code: {}
+                - """,
+                introMessage,
+                certificate.getSubject().getCanonical(),
+                certificate.getIssuer().getCanonical(),
+                certificate.hashCode(),
+                certificate.getDSSIdAsString(),
+                certificate.getCertificate().hashCode());
     }
+
 
     protected static ProxyConfig getProxyConfig() {
         return null;
-    }
-
-    protected static DataLoader getFileCacheDataLoader() {
-        FileCacheDataLoader cacheDataLoader = new FileCacheDataLoader();
-        CommonsDataLoader dataLoader = new CommonsDataLoader();
-        dataLoader.setProxyConfig(getProxyConfig());
-        dataLoader.setTimeoutConnection(TIMEOUT_MS);
-        dataLoader.setTimeoutSocket(TIMEOUT_MS);
-        cacheDataLoader.setDataLoader(dataLoader);
-        cacheDataLoader.setFileCacheDirectory(new File("target"));
-        cacheDataLoader.setCacheExpirationTime(3600000L);
-        return cacheDataLoader;
     }
 
     private static OnlineTSPSource getOnlineTSPSourceByUrl(String tsaUrl) {
@@ -177,83 +159,119 @@ public class Signer {
         return getOnlineTSPSourceByUrl(getTsaUrl(tsaName));
     }
 
-    protected static void storeBytes(final byte[] bytes, final String path) throws IOException {
-        try(OutputStream stream = new FileOutputStream(path)){
-            stream.write(bytes);
-        };
-    }
-
-
-
     protected static TSPSource getOnlineTSPSource() {
         return getOnlineTSPSourceByName(GOOD_TSA);
     }
 
-    protected String sign(String project, String content) throws Exception {
-        List<String> pathToKeys = List.of(new String[]{
-                //"C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\consumer\\consumer.p12",
-                //"C:\\Users\\narow\\IdeaProjects\\SigningInterface\\docker_CA\\signing_keys\\provider\\provider.p12",
-                "/key/key.p12"
-        });
-        List<char[]> keysForCertificate = List.of(new char[][]{
-                {'k', 'e', 'y'}
-        });
-        List<String> outputPaths = new ArrayList<>();
+    protected DSSDocument sign(String project, Map<KnownDocuments, File> content) throws Exception {
+        String pathToKey = "/key/key.p12";
+        char[] keyForCertificate = {'k', 'e', 'y'};
 
-        storeBytes(content.getBytes(), "/tmp/original.xml");
-        outputPaths.add("/tmp/original.xml");
+        SecureContainerHandlerBuilder secureContainerHandlerBuilder = new SecureContainerHandlerBuilder();
+        secureContainerHandlerBuilder.setThreshold(1000000000L); // 1 GB
+        ZipUtils.getInstance().setZipContainerHandlerBuilder(secureContainerHandlerBuilder);
 
-        log.debug("removing signatures");
-        var workingDocument = removeSignatures(content);
-        log.debug("signatures removed");
+        log.debug("Starting signing process for project: {}", project);
 
-        Set<KnownDocuments> includedDocuments = new HashSet<>();
-        List<Element> children = XmlParserUtils.getRootChildrenExcludingSignatures(content);
-        for (Element el : children) {
-            String name = el.getLocalName() != null ? el.getLocalName() : el.getNodeName();
-            boolean hashIsValid = dataChildHashIsValid(project, el, name);
-            if (hashIsValid) {
-                includedDocuments.add(KnownDocuments.valueOf(name));
+        Map<KnownDocuments, File> validContent = new HashMap<>();
+        for (var el : content.entrySet()) {
+            log.debug("Provided file {} has size {} bytes for document {}",
+                    el.getValue().getName(),
+                    el.getValue().length(),
+                    el.getKey().name()
+            );
+
+            if (instanceRole.equals("provider")) {
+                KnownDocuments knownDocument = el.getKey();
+                if (knownDocument == KnownDocuments.ORIGINAL_NAMES) {
+                    validContent.put(el.getKey(), el.getValue());
+                } else {
+                    boolean hashIsValid = dataChildHashIsValid(project, el.getValue(), knownDocument);
+                    if (hashIsValid) {
+                        validContent.put(el.getKey(), el.getValue());
+                        log.debug("Document {} passed hash validation and will be included in the signature.", knownDocument.getName());
+                    }
+                }
+            } else {
+                validContent.put(el.getKey(), el.getValue());
+                log.debug("Instance role is not 'provider'; including document {} without hash validation.", el.getKey().name());
             }
         }
 
-        for (int i=0; i< pathToKeys.size(); i++){
-            DSSDocument toSignDocument = new FileDocument(workingDocument.toFile());
-
-            String pathToKey = pathToKeys.get(i);
-            char[] keyForCertificate = keysForCertificate.get(i);
-            log.debug("signing once");
-            DSSDocument signedDocument = basicSignDocument(
-                    toSignDocument,
-                    pathToKey,
-                    keyForCertificate
+        log.debug("Total documents to be signed after validation: {}", validContent.size());
+        List<DSSDocument> documentsToBeSigned = new ArrayList<>();
+        for (var entry : validContent.entrySet()) {
+            log.debug("MISSING_FILE_IN_CONTRACT Adding  file {} has size {} bytes for document {}",
+                    entry.getValue().getName(),
+                    entry.getValue().length(),
+                    entry.getKey().name()
             );
-            log.debug("once signed");
-            toSignDocument = signedDocument;
-
-            log.debug("extending to t");
-            DSSDocument tLevelSignature = extendToT(toSignDocument);
-
-            log.debug("extending to lt");
-            DSSDocument ltLevelDocument = extendToLT(tLevelSignature);
-
-            log.debug("extending to lta");
-            DSSDocument ltaLevelDocument = extendToLTA(ltLevelDocument);
-            log.debug("extended");
-
-
-            String outputPath = "/tmp/signed_"+i+".xml";
-            ltaLevelDocument.save(outputPath);
-            log.debug("saved");
-            outputPaths.add(outputPath);
-
-            registerSignatures(project, pathToKey, keyForCertificate, includedDocuments);
+            var documentToSign = new FileDocument(entry.getValue());
+            documentToSign.setName(entry.getKey().name());
+            DSSZipEntry dssZipEntry = new DSSZipEntry(entry.getKey().name());
+            dssZipEntry.setCompressionMethod( ZipEntry.STORED);
+            log.debug("Should be equal: documentToSign.getName() = {} ; dssZipEntry.getName() = {}",
+                    documentToSign.getName(),
+                    dssZipEntry.getName()
+            );
+            DSSZipEntryDocument test = new ContainerEntryDocument(documentToSign, dssZipEntry);
+            documentToSign.setName(entry.getKey().name());
+            documentsToBeSigned.add(test);
         }
+        log.debug("Prepared {} documents for signing.", documentsToBeSigned.size());
 
-        log.debug("merging signatures");
-        var mergedResult = merge_signatures(outputPaths);
-        log.debug("signatures merged");
-        return document_to_string(mergedResult);
+        ASiCWithXAdESSignatureParameters parameters = new ASiCWithXAdESSignatureParameters();
+        parameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_LTA);
+        parameters.aSiC().setContainerType(ASiCContainerType.ASiC_E);
+        parameters.setDigestAlgorithm(DigestAlgorithm.SHA256);
+
+        log.debug("Signature parameters set: \n" +
+                        "Level - {}, \n" +
+                        "Container Type - {}, \n" +
+                        "Digest Algorithm - {}",
+                parameters.getSignatureLevel(),
+                parameters.aSiC().getContainerType(),
+                parameters.getDigestAlgorithm()
+        );
+        try (//SignatureTokenConnection signingToken = getUserPkcs12Token()
+             KeyStoreSignatureTokenConnection signingToken = new KeyStoreSignatureTokenConnection(
+                     pathToKey,
+                     "PKCS12",
+                     new KeyStore.PasswordProtection(keyForCertificate)
+             )
+        ) {
+            log.debug("Loaded signing token from keystore: {}", pathToKey);
+            DSSPrivateKeyEntry privateKey = signingToken.getKeys().get(0);
+
+            logCertificate("certificate to sign", privateKey.getCertificate());
+            for (var certificateInChain: privateKey.getCertificateChain()){
+                logCertificate("certificate in chain", certificateInChain);
+            };
+
+            parameters.setSigningCertificate(privateKey.getCertificate());
+            parameters.setCertificateChain(privateKey.getCertificateChain());
+
+            CommonCertificateVerifier commonCertificateVerifier = getCommonCertificateVerifier();
+            ASiCWithXAdESService service = new ASiCWithXAdESService(commonCertificateVerifier);
+            service.setTspSource(getOnlineTSPSource());
+
+            log.debug("Starting the signing operation for {} documents.", documentsToBeSigned.size());
+            ToBeSigned dataToSign = service.getDataToSign(documentsToBeSigned, parameters);
+            log.debug("Data to sign prepared. Digest Algorithm: {}", parameters.getDigestAlgorithm());
+
+            DigestAlgorithm digestAlgorithm = parameters.getDigestAlgorithm();
+            log.debug("Signing the data using the private key.");
+            SignatureValue signatureValue = signingToken.sign(dataToSign, digestAlgorithm, privateKey);
+            log.debug("Data signed successfully. Generating the signed document.");
+
+            DSSDocument signed = service.signDocument(documentsToBeSigned, parameters, signatureValue);
+            log.debug("Document signed successfully.");
+
+            if (instanceRole.equals("provider")) {
+                registerSignatures(project, pathToKey, keyForCertificate, content.keySet());
+            }
+            return signed;
+        }
     }
 
     private void registerSignatures(String project, String pathToKey, char[] keyForCertificate, Set<KnownDocuments> includedDocuments) throws CertificateException, IOException {
@@ -273,154 +291,36 @@ public class Signer {
             log.info("CN={}, O={}", cn, o);
 
             for (var document: includedDocuments) {
+                if (document == KnownDocuments.ORIGINAL_NAMES) {
+                    continue;
+                }
                 projectsContractStatus.registerNewSignature(project, document, cn, o);
             }
         }
     }
 
-    private boolean dataChildHashIsValid(String project, Element el, String name) throws NoSuchAlgorithmException {
-        boolean hashIsValid = false;
-        try {
-            NodeList dataNodeList = el.getElementsByTagName("data");
-            if (dataNodeList.getLength() > 0) {
-                Node dataNode = dataNodeList.item(0);
-                String base64Data = dataNode.getTextContent();
-
-                if (isHashValid(project, base64Data, name)){
-                    hashIsValid = true;
-                }
-            }
-
-        } catch (IllegalArgumentException ignore) {
-            log.warn("Unknown document element found in XML: {}", name);
-        }
-        return hashIsValid;
+    private boolean dataChildHashIsValid(String project, File fileToTest, KnownDocuments documentToTest) throws NoSuchAlgorithmException, IOException {
+        String hash = Utils.sha256(fileToTest);
+        return isHashValid(project, hash, documentToTest);
     }
 
-    private boolean isHashValid(String project, String base64Data, String name) throws NoSuchAlgorithmException {
+    private boolean isHashValid(String project, String hash, KnownDocuments document) throws NoSuchAlgorithmException {
         boolean hashIsValid = false;
 
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        try (InputStream is = new ByteArrayInputStream(base64Data.getBytes(StandardCharsets.UTF_8));
-             InputStream base64is = Base64.getDecoder().wrap(is);
-             DigestInputStream dis = new DigestInputStream(base64is, md)) {
-            StreamUtils.copy(dis, new OutputStream() {
-                @Override
-                public void write(int b) {
-                    // discard data
-                }
-            });
-            byte[] digest = md.digest();
-            String sha256 = Hex.encodeHexString(digest);
-
-            if (projectsContractStatus.checkDocumentHash(
-                    project,
-                    KnownDocuments.valueOf(name),
-                    sha256
-            )){
-                hashIsValid = true;
-            } else {
-                log.warn("Document {} not included in signatures because hash mismatch (calculated: {}, expected: {})", name, sha256, projectsContractStatus.getDocumentHash(project, KnownDocuments.valueOf(name)));
-            }
-        } catch (IOException e) {
-            log.error("Error reading base64 data for element: {}", name, e);
+        if (projectsContractStatus.checkDocumentHash(
+                project,
+                document,
+                hash
+        )){
+            hashIsValid = true;
+        } else {
+            log.warn("Document {} not included in signatures because hash mismatch (calculated: {}, expected: {})",
+                    document.name(),
+                    hash,
+                    projectsContractStatus.getDocumentHash(project, document)
+            );
         }
         return hashIsValid;
-    }
-
-    private static String document_to_string(Document mergedResult) throws IOException, TransformerException {
-        DOMSource source = new DOMSource(mergedResult);
-        StringWriter writer = new StringWriter();
-        StreamResult result = new StreamResult(writer);
-
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.transform(source, result);
-
-        return writer.toString();
-    }
-
-    private static Document merge_signatures(List<String> outputPaths) throws ParserConfigurationException, IOException, SAXException {
-        Document finalDocument = null;
-        for (String outputPath : outputPaths) {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(outputPath);
-
-            if (finalDocument == null) {
-                finalDocument = doc;
-            } else {
-                Node signatureNode = doc.getDocumentElement().getElementsByTagName("signatures").item(0).getFirstChild();
-                finalDocument.getDocumentElement().getElementsByTagName("signatures").item(0).appendChild(
-                        finalDocument.importNode(signatureNode, true)
-                );
-            }
-        }
-        return finalDocument;
-    }
-
-    private static DSSDocument basicSignDocument(
-            DSSDocument toSignDocument,
-            String pathToKey,
-            char[] keyForCertificate
-    ) throws IOException {
-        DSSDocument signedDocument = null;
-        try (//SignatureTokenConnection signingToken = getUserPkcs12Token()
-             KeyStoreSignatureTokenConnection signingToken = new KeyStoreSignatureTokenConnection(
-                     pathToKey,
-                     "PKCS12",
-                     new KeyStore.PasswordProtection(keyForCertificate)
-             )
-        ) {
-
-            DSSPrivateKeyEntry privateKey = signingToken.getKeys().get(0);
-            XAdESSignatureParameters parameters = new XAdESSignatureParameters();
-            parameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_B);
-            parameters.setSignaturePackaging(SignaturePackaging.ENVELOPED);
-            parameters.setDigestAlgorithm(DigestAlgorithm.SHA256);
-            parameters.setSigningCertificate(privateKey.getCertificate());
-            parameters.setCertificateChain(privateKey.getCertificateChain());
-            parameters.setXPathLocationString("/root/signatures");
-
-            XAdESService service = new XAdESService(new CommonCertificateVerifier());
-            ToBeSigned dataToSign = service.getDataToSign(toSignDocument, parameters);
-            SignatureValue signatureValue = signingToken.sign(dataToSign, parameters.getDigestAlgorithm(), privateKey);
-            signedDocument = service.signDocument(toSignDocument, parameters, signatureValue);
-        }
-        return signedDocument;
-    }
-
-    private static DSSDocument extendToLTA(DSSDocument ltLevelDocument) throws IOException {
-        var parameters = new XAdESSignatureParameters();
-        parameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_LTA);
-
-        return performExtension(ltLevelDocument, parameters);
-    }
-
-    private static DSSDocument extendToLT(DSSDocument tLevelSignature) throws IOException {
-        // Create signature parameters with target extension level
-        XAdESSignatureParameters parameters = new XAdESSignatureParameters();
-        parameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_LT);
-
-        return performExtension(tLevelSignature, parameters);
-    }
-
-    private static DSSDocument performExtension(DSSDocument tLevelSignature, XAdESSignatureParameters parameters) throws IOException {
-        // Create a CertificateVerifier with revocation sources for -LT level extension
-        CommonCertificateVerifier certificateVerifier = getCommonCertificateVerifier();
-
-        // Init service for signature augmentation
-        XAdESService xadesService = getXAdESService(certificateVerifier);
-
-        // Extend signature
-        return xadesService.extendDocument(tLevelSignature, parameters);
-    }
-
-    private static XAdESService getXAdESService(CommonCertificateVerifier certificateVerifier) {
-        XAdESService xadesService;
-        xadesService = new XAdESService(certificateVerifier);
-        xadesService.setTspSource(getOnlineTSPSource());
-        return xadesService;
     }
 
     private static CommonCertificateVerifier getCommonCertificateVerifier() throws IOException {
@@ -430,18 +330,9 @@ public class Signer {
         certificateVerifier.setCrlSource(new OnlineCRLSource());
         certificateVerifier.setOcspSource(new OnlineOCSPSource());
 
-        // Trust anchors should be defined for revocation data requesting
+        // Trust anchors should be defined for revocation file requesting
         certificateVerifier.setTrustedCertSources(getTrustedCertificateSource());
         return certificateVerifier;
-    }
-
-    private static DSSDocument extendToT(DSSDocument signedDocument) throws IOException {
-
-        // Create signature parameters with target extension level
-        XAdESSignatureParameters parameters = new XAdESSignatureParameters();
-        parameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_T);
-
-        return performExtension(signedDocument, parameters);
     }
 
     protected static SignedDocumentValidator getValidator(DSSDocument signedDocument) {
@@ -451,8 +342,8 @@ public class Signer {
     }
 
 
-    public Boolean validate(String project, String content) throws IOException {
-        DSSDocument signedDocument = new InMemoryDocument(content.getBytes());
+    public Boolean validate(String project, File content, HttpServletRequest request) throws IOException, NoSuchAlgorithmException {
+        DSSDocument signedDocument = new FileDocument(content);
         SignedDocumentValidator validator = getValidator(signedDocument);
 
         CertificateVerifier certificateVerifier = new CommonCertificateVerifier();
@@ -462,6 +353,10 @@ public class Signer {
         certificateVerifier.setTrustedCertSources(getTrustedCertificateSource());
         validator.setCertificateVerifier(certificateVerifier);
 
+        var asicContainerExtractor = new ASiCWithXAdESContainerExtractor(signedDocument);
+        ASiCContent extractedResult = asicContainerExtractor.extract();
+        extractedResult.getSignedDocuments().forEach(doc -> log.info("Extracted document: {}", doc.getName()));
+
         var signatures = validator.getSignatures();
         if (signatures == null || signatures.isEmpty()) {
             return null;
@@ -470,29 +365,50 @@ public class Signer {
         Reports reports = validator.validateDocument();
         DiagnosticData diagnosticData = reports.getDiagnosticData();
 
-        diagnosticData.getSignatures().forEach(sig -> {
-            if (!sig.isSignatureValid()) { return; }
-            try {
-                for(var child: XmlParserUtils.getRootChildrenExcludingSignatures(content)){
-                    String name = child.getLocalName() != null ? child.getLocalName() : child.getNodeName();
-                    if (dataChildHashIsValid(project, child, name)) {
-                        try {
-                            KnownDocuments kd = KnownDocuments.valueOf(name);
-                            projectsContractStatus.registerNewSignature(
-                                    project,
-                                    kd,
-                                    sig.getSigningCertificate().getCommonName(),
-                                    sig.getSigningCertificate().getOrganizationName()
-                            );
-                        } catch (IllegalArgumentException ignore) {
-                            log.warn("Unknown document element found in XML: {}", name);
-                        }
-                    }
-                };
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+        boolean allFilesAreValid = true;
+        for (DSSDocument dssDocument : extractedResult.getSignedDocuments()) {
+            log.debug("Validating hash for document in ASiC container: {}", dssDocument.getName());
+            File tmpFile = Utils.createTempFile("extracted-", ".tmp", request);
+            KnownDocuments kd = KnownDocuments.valueOf(dssDocument.getName());
+            if(kd == KnownDocuments.ORIGINAL_NAMES){
+                continue;
             }
-            log.info("Signature validity: {}", sig.isSignatureValid());
+            dssDocument.save(tmpFile.getPath());
+            if(!dataChildHashIsValid(project, tmpFile, kd)){
+                allFilesAreValid = false;
+                log.warn("Document {} hash is not valid", kd.name());
+                break;
+            };
+        }
+
+        if(!allFilesAreValid){
+            log.warn("At least one document hash is not valid, overall signature validation failed");
+            return false;
+        }
+
+        diagnosticData.getSignatures().forEach(sig -> {
+            if (!sig.isSignatureValid()) {
+                return;
+            }
+            try {
+                if (instanceRole.equals("provider")) {
+                    for (DSSDocument dssDocument : extractedResult.getSignedDocuments()) {
+                        log.info("Document in ASiC container: {}", dssDocument.getName());
+                        KnownDocuments kd = KnownDocuments.valueOf(dssDocument.getName());
+                        if(kd == KnownDocuments.ORIGINAL_NAMES){
+                            continue;
+                        }
+                        projectsContractStatus.registerNewSignature(
+                                project,
+                                kd,
+                                sig.getSigningCertificate().getCommonName(),
+                                sig.getSigningCertificate().getOrganizationName()
+                        );
+                    }
+                }
+            } catch(Exception e){
+                    throw new RuntimeException(e);
+            }
         });
 
         return diagnosticData.getSignatures().stream().allMatch(AbstractTokenProxy::isSignatureValid);

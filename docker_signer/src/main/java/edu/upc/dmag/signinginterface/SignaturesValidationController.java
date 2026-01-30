@@ -2,22 +2,15 @@ package edu.upc.dmag.signinginterface;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/{project}/validator")
@@ -44,5 +37,23 @@ public class SignaturesValidationController {
             model.addAttribute("signatureValid", signatureValid);
         }
         return "validate_contract.html";
+    }
+
+    @PostMapping("/extractEvidence")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> extractEvidence(
+            @RequestParam("filetoverify") MultipartFile file,
+            @PathVariable String project,
+            Model model,
+            HttpServletRequest request
+    ) throws IOException, NoSuchAlgorithmException {
+        var tmpFile = Utils.createTempFile("upload-", ".tmp", request);
+        file.transferTo(tmpFile);
+        Boolean signatureValid = signer.validate(project, tmpFile, request);
+        if (signatureValid == null) {
+            return ResponseEntity.ok(signer.extractEvidence(tmpFile));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("error", true));
+        }
     }
 }

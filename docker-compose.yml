@@ -22,6 +22,8 @@ services:
   ontology:
     image: danielnaro/ontologyknowledgerepository:2026_01_30
     network_mode: "service:localhost"
+    secrets:
+      - cvedetails_token
     healthcheck:
       test: [ "CMD-SHELL", "curl -f -G http://localhost:3030/ds/sparql --data-urlencode \"query=ASK{}\"|| exit 1'" ]
       interval: 30s
@@ -158,3 +160,7 @@ services:
       context: NginxContainer
       dockerfile: Dockerfile
     network_mode: "service:localhost"
+
+secrets:
+  cvedetails_token:
+    file: ./secrets/cvedetails_token.txt

@@ -20,8 +20,14 @@ services:
       - "9000:9000" #for minio
       - "9001:9001" #for minio
   ontology:
-    image: danielnaro/ontologyknowledgerepository:latest
+    image: danielnaro/ontologyknowledgerepository:2026_01_30
     network_mode: "service:localhost"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f -G http://localhost:3030/ds/sparql --data-urlencode \"query=ASK{}\"|| exit 1'" ]
+      interval: 30s
+      timeout: 300s
+      retries: 12
+      start_period: 300s
 
   postgres:
     image: postgres:15

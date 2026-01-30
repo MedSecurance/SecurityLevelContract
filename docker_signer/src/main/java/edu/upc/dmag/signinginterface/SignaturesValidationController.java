@@ -2,6 +2,7 @@ package edu.upc.dmag.signinginterface;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +16,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/{project}/validator")
 @RequiredArgsConstructor
+@Slf4j
 public class SignaturesValidationController {
     private final Signer signer;
 
@@ -50,8 +52,11 @@ public class SignaturesValidationController {
         var tmpFile = Utils.createTempFile("upload-", ".tmp", request);
         file.transferTo(tmpFile);
         Boolean signatureValid = signer.validate(project, tmpFile, request);
-        if (signatureValid == null) {
-            return ResponseEntity.ok(signer.extractEvidence(tmpFile));
+        log.info("Signature validity: {}", signatureValid);
+        if (signatureValid != null && signatureValid) {
+            var evidences = signer.extractEvidence(tmpFile);
+            log.info("Extracted evidences: {}", evidences);
+            return ResponseEntity.ok(evidences);
         } else {
             return ResponseEntity.badRequest().body(Map.of("error", true));
         }

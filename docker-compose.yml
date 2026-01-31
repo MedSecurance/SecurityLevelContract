@@ -20,7 +20,7 @@ services:
       - "9000:9000" #for minio
       - "9001:9001" #for minio
   ontology:
-    image: danielnaro/ontologyknowledgerepository:2026_01_30
+    image: danielnaro/ontologyknowledgerepository:2026_01_31
     network_mode: "service:localhost"
     volumes:
       - ./cve-caches:/cve-caches

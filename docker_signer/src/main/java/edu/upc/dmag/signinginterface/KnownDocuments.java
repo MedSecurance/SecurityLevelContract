@@ -28,7 +28,8 @@ public enum KnownDocuments {
     TECHNICAL_DESCRIPTION(IDs.id_TECHNICAL_DESCRIPTION, "technical description","Include the technical description?", "to assure compliance with IEC 82304", "http://xmlns.com/foaf/0.1/Documentation_technical+description"),
     HEALTH_SOFTWARE_PRODUCT_IDENTIFIER_DOCUMENT(IDs.HEALTH_SOFTWARE_PRODUCT_IDENTIFIER_DOCUMENT, "health software product identifier document","Include the health software product identifier document?", "to assure compliance with IEC 82304", "http://xmlns.com/foaf/0.1/Documentation_health+software+product+identifier+document"),
     TREND_REPORT(IDs.id_TREND_REPORT, "trend report","Include the trend report?", "to assure compliance with MDCG", "http://xmlns.com/foaf/0.1/Documentation_Trend+Report"),
-    SPECIAL_SKILLS_REQUIRED_FROM_USER(IDs.id_SPECIAL_SKILLS_REQUIRED_FROM_USER, "special skills required from user","Include the special skills required from user document?", "to assure compliance with IEC 82304", "http://xmlns.com/foaf/0.1/Documentation_document+on+special+skills+required+from+user");
+    SPECIAL_SKILLS_REQUIRED_FROM_USER(IDs.id_SPECIAL_SKILLS_REQUIRED_FROM_USER, "special skills required from user","Include the special skills required from user document?", "to assure compliance with IEC 82304", "http://xmlns.com/foaf/0.1/Documentation_document+on+special+skills+required+from+user"),
+    MANUFACTURER_CONTRACT_INFORMATION(IDs.id_MANUFACTURER_CONTRACT_INFORMATION, "manufacturer contract information","Include the manufacturer contract information document?", "to assure compliance with IEC 82304", "http://xmlns.com/foaf/0.1/Documentation_document+on+manufacturer+contract+information");
 
 
     //Specifications  not considered in the current implementation
@@ -65,6 +66,7 @@ public enum KnownDocuments {
         static final String HEALTH_SOFTWARE_PRODUCT_IDENTIFIER_DOCUMENT = "Documentation_healthSoftwareProductIdentifierDocument";
         static final String id_TREND_REPORT = "Documentation_TrendReport";
         static final String id_SPECIAL_SKILLS_REQUIRED_FROM_USER = "Documentation_specialSkillsRequiredFromUser";
+        static final String id_MANUFACTURER_CONTRACT_INFORMATION = "Documentation_manufacturerContractInformation";
 
 
         static final String id_INTERFACE_DOCUMENTATION = "INTERFACE_DOCUMENTATION";

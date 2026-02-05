@@ -161,6 +161,11 @@ services:
     build:
       context: NginxContainer
       dockerfile: Dockerfile
+    depends_on:
+      - ontology
+      - signer_consumer
+      - signer_provider
+      - requirements_selector
     network_mode: "service:localhost"
 
 secrets:

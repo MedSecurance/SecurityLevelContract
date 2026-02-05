@@ -140,7 +140,7 @@ services:
     network_mode: "service:localhost"
 
   ontology_client:
-    image: danielnaro/ontologyclient:v7
+    image: danielnaro/ontologyclient:v8
     network_mode: "service:localhost"
 
   minio:

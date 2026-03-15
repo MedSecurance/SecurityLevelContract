@@ -83,6 +83,8 @@ openssl ca -batch -config openssl-ca.cnf -policy signing_policy  -out localhost.
 #Prepare data for execution
 cd ..
 curl -O http://dss.nowina.lu/pki-factory/keystore/trust-anchors.jks
+curl -O http://dss.nowina.lu/pki-factory/crt/cc-good-tsa-trusted.pem
+curl -O http://dss.nowina.lu/pki-factory/crt/cc-root-ca.pem
 keytool -noprompt -importcert -file ./rootWorkspace/rootcert.pem -keystore trust-anchors.jks -alias myCA -storepass ks-password
 keytool -noprompt -importcert -file ./rootWorkspace/cc-good-tsa-trusted.pem -keystore trust-anchors.jks -alias cc-good-tsa-trusted  -storepass ks-password
 keytool -noprompt -importcert -file ./rootWorkspace/cc-root-ca.pem -keystore trust-anchors.jks -alias cc-root-ca  -storepass ks-password
